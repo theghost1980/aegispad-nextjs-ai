@@ -21,21 +21,21 @@
     "estRemaining": "Est. Tokens Remaining:"
   },
   "ArticleForgePage": {
-    "workflowSelection": {
-      "title": "Choose your workflow:",
-      "directCreationLabel": "Standard Article Creation",
-      "detectAndTranslateLabel": "Create Article & Detect Language (for later translation)"
-    },
-    "createArticleCard": {
-      "title": "Create New Article",
-      "description": "Enter a prompt to generate an article using AI. Be specific for best results.",
-      "promptLabel": "Article Prompt",
-      "promptPlaceholder": "e.g., Write an article about the future of renewable energy, focusing on solar and wind power innovations...",
-      "generateImageLabel": "Generate a main image for the article",
-      "clearAllButton": "Clear All",
-      "createArticleButton": "Create Article",
+    "startArticleCard": {
+      "title": "Start Your Article",
+      "description": "Choose your starting point: let AI craft a draft based on your ideas, or begin writing from scratch yourself.",
+      "workflowTitle": "How would you like to start?",
+      "aiCreateLabel": "Let AI create the content",
+      "userWriteLabel": "I'll write the content myself",
+      "promptLabel": "Your Topic or Prompt for AI",
+      "promptPlaceholder": "e.g., The impact of AI on creative writing...",
+      "generateImageLabel": "Generate a main image (AI creation only)",
+      "aiCreateButtonText": "Let's Ask AI",
+      "userWriteButtonText": "I'll Start Writing",
+      "clearAllButton": "Clear Everything",
       "creatingArticleMessage": "Creating article...",
-      "creatingArticleWithImageMessage": "Creating article and generating image..."
+      "creatingArticleWithImageMessage": "Creating article and generating image...",
+      "startingUserWritingMessage": "Preparing editor..."
     },
     "detectLanguageCard": {
       "detectingLanguageMessage": "Detecting language...",
@@ -43,7 +43,7 @@
     },
     "editArticleCard": {
       "title": "Edit & Refine Article",
-      "description": "Edit the generated Markdown directly or use AI to revise it. The main image (if generated) is at the top.",
+      "description": "Your article content is below. You can edit the Markdown directly or use AI to help revise it.",
       "reviseButton": "Revise Article with AI",
       "revisingArticleMessage": "Revising article..."
     },
@@ -109,9 +109,13 @@
       "translateFailedError": "Failed to translate article. Please try again.",
       "detectLanguageFailedError": "Failed to detect language. Please try again.",
       "copySummaryFailedError": "Failed to copy summary. Please try again or copy manually.",
-      "allClearedMessage": "All fields and session data have been cleared."
+      "allClearedMessage": "All fields and session data have been cleared.",
+      "userWritingStartedMessage": "Editor ready! You can start writing your article."
     },
-    "loadingSpinnerClient": "Loading AegisPad..."
+    "loadingSpinnerClient": "Loading AegisPad...",
+    "userWriting": {
+      "startPlaceholder": "## Your Article Title\n\nStart writing your article here in Markdown format...\n\n### Section 1\n\nContent for section 1.\n\n### Section 2\n\nContent for section 2."
+    }
   },
   "ArticleEditor": {
     "markdownEditorTitle": "Markdown Editor",
@@ -129,3 +133,5 @@
       "noContentToDisplay": "No content to display."
   }
 }
+
+    

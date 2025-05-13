@@ -21,21 +21,21 @@
     "estRemaining": "Tokens Restantes Est.:"
   },
   "ArticleForgePage": {
-    "workflowSelection": {
-      "title": "Elige tu flujo de trabajo:",
-      "directCreationLabel": "Creación de Artículo Estándar",
-      "detectAndTranslateLabel": "Crear Artículo y Detectar Idioma (para traducción posterior)"
-    },
-    "createArticleCard": {
-      "title": "Crear Nuevo Artículo",
-      "description": "Introduce un prompt para generar un artículo usando IA. Sé específico para mejores resultados.",
-      "promptLabel": "Prompt del Artículo",
-      "promptPlaceholder": "Ej: Escribe un artículo sobre el futuro de la energía renovable, enfocándote en innovaciones de energía solar y eólica...",
-      "generateImageLabel": "Generar una imagen principal para el artículo",
+    "startArticleCard": {
+      "title": "Comienza Tu Artículo",
+      "description": "Elige tu punto de partida: deja que la IA elabore un borrador basado en tus ideas, o comienza a escribir desde cero tú mismo.",
+      "workflowTitle": "¿Cómo te gustaría empezar?",
+      "aiCreateLabel": "Dejar que la IA cree el contenido",
+      "userWriteLabel": "Escribiré el contenido yo mismo",
+      "promptLabel": "Tu Tema o Prompt para la IA",
+      "promptPlaceholder": "Ej: El impacto de la IA en la escritura creativa...",
+      "generateImageLabel": "Generar una imagen principal (solo creación con IA)",
+      "aiCreateButtonText": "Preguntar a la IA",
+      "userWriteButtonText": "Empezaré a Escribir",
       "clearAllButton": "Limpiar Todo",
-      "createArticleButton": "Crear Artículo",
       "creatingArticleMessage": "Creando artículo...",
-      "creatingArticleWithImageMessage": "Creando artículo y generando imagen..."
+      "creatingArticleWithImageMessage": "Creando artículo y generando imagen...",
+      "startingUserWritingMessage": "Preparando editor..."
     },
     "detectLanguageCard": {
       "detectingLanguageMessage": "Detectando idioma...",
@@ -43,7 +43,7 @@
     },
     "editArticleCard": {
       "title": "Editar y Refinar Artículo",
-      "description": "Edita el Markdown generado directamente o usa IA para revisarlo. La imagen principal (si se generó) está arriba.",
+      "description": "El contenido de tu artículo está abajo. Puedes editar el Markdown directamente o usar IA para ayudarte a revisarlo.",
       "reviseButton": "Revisar Artículo con IA",
       "revisingArticleMessage": "Revisando artículo..."
     },
@@ -108,10 +108,14 @@
       "reviseFailedError": "Error al revisar el artículo. Por favor, inténtalo de nuevo.",
       "translateFailedError": "Error al traducir el artículo. Por favor, inténtalo de nuevo.",
       "detectLanguageFailedError": "Error al detectar el idioma. Por favor, inténtalo de nuevo.",
-      "copySummaryFailedError": "Error al copiar el resumen. Por favor, inténtalo de nuevo o copia manualmente.",
-      "allClearedMessage": "Todos los campos y datos de la sesión han sido borrados."
+      "copySummaryFailedError": "Error al copiar el resumen. Por favor, inténtalo de nuevo o copia manually.",
+      "allClearedMessage": "Todos los campos y datos de la sesión han sido borrados.",
+      "userWritingStartedMessage": "¡Editor listo! Puedes empezar a escribir tu artículo."
     },
-    "loadingSpinnerClient": "Cargando AegisPad..."
+    "loadingSpinnerClient": "Cargando AegisPad...",
+    "userWriting": {
+      "startPlaceholder": "## Título de Tu Artículo\n\nComienza a escribir tu artículo aquí en formato Markdown...\n\n### Sección 1\n\nContenido para la sección 1.\n\n### Sección 2\n\nContenido para la sección 2."
+    }
   },
   "ArticleEditor": {
     "markdownEditorTitle": "Editor Markdown",
@@ -129,3 +133,5 @@
     "noContentToDisplay": "No hay contenido para mostrar."
   }
 }
+
+    

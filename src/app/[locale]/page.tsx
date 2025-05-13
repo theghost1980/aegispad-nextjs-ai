@@ -19,7 +19,7 @@ import { createArticle, CreateArticleInput, CreateArticleOutput } from '@/ai/flo
 import { reviseArticle, ReviseArticleInput, ReviseArticleOutput } from '@/ai/flows/revise-article';
 import { translateArticle, TranslateArticleInput, TranslateArticleOutput } from '@/ai/flows/translate-article';
 import { detectLanguage, DetectLanguageInput, DetectLanguageOutput } from '@/ai/flows/detect-language-flow';
-import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon, Layers, CheckSquare, FileTerminal, ClipboardCopy, SearchCheck } from 'lucide-react';
+import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon, Layers, CheckSquare, FileTerminal, ClipboardCopy, SearchCheck, PencilLine } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -39,7 +39,7 @@ const availableLanguages = [
 
 const ESTIMATED_INITIAL_SESSION_TOKENS = 100000;
 
-type InitialWorkflow = 'direct' | 'detectAndTranslate';
+type InitialWorkflow = 'aiCreate' | 'userWrite';
 
 export default function ArticleForgePage() {
   const t = useTranslations('ArticleForgePage');
@@ -63,10 +63,10 @@ export default function ArticleForgePage() {
   const [finalCombinedOutput, setFinalCombinedOutput] = useState<string>('');
   const [selectedCombineFormat, setSelectedCombineFormat] = useState<'simple' | 'detailsTag'>('simple');
 
-  const [initialWorkflow, setInitialWorkflow] = useState<InitialWorkflow>('direct');
+  const [initialWorkflow, setInitialWorkflow] = useState<InitialWorkflow>('aiCreate');
   const [detectedLanguage, setDetectedLanguage] = useState<string | null>(null);
 
-  const [isProcessing, startProcessingTransition] = useTransition(); // General purpose transition
+  const [isProcessing, startProcessingTransition] = useTransition(); 
 
   const [clientLoaded, setClientLoaded] = useState(false);
 
@@ -91,9 +91,8 @@ export default function ArticleForgePage() {
         setSessionImageTokensUsed(prev => prev + (details.image || 0));
       }
     } else {
-      // If no details, assume all tokens are for text (e.g. revision, translation, detection)
       setSessionTextTokensUsed(prev => prev + tokensUsed);
-      setDetailedTokenUsage(null); // Or set to {text: tokensUsed} if more explicit
+      setDetailedTokenUsage(null); 
     }
   };
 
@@ -102,7 +101,7 @@ export default function ArticleForgePage() {
       toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.promptEmptyError'), variant: 'destructive' });
       return;
     }
-    setCurrentOperationMessage(generateMainImage ? t('createArticleCard.creatingArticleWithImageMessage') : t('createArticleCard.creatingArticleMessage'));
+    setCurrentOperationMessage(generateMainImage ? t('startArticleCard.creatingArticleWithImageMessage') : t('startArticleCard.creatingArticleMessage'));
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput(''); 
@@ -120,30 +119,14 @@ export default function ArticleForgePage() {
         totalTokensForOperation += result.tokenUsage.totalTokens;
         operationDetails.text += result.tokenUsage.textGenerationTokens || 0;
         operationDetails.image += result.tokenUsage.imageGenerationTokens || 0;
-
-        if (initialWorkflow === 'detectAndTranslate' && result.article.trim()) {
-          setCurrentOperationMessage(t('detectLanguageCard.detectingLanguageMessage'));
-          try {
-            const detectInput: DetectLanguageInput = { text: result.article };
-            const detectResult: DetectLanguageOutput = await detectLanguage(detectInput);
-            setDetectedLanguage(detectResult.language);
-            toast({ title: t('toastMessages.successTitle'), description: t('toastMessages.languageDetectedSuccess', { language: detectResult.language }) });
-            
-            totalTokensForOperation += detectResult.tokenUsage.totalTokens;
-            operationDetails.text += detectResult.tokenUsage.totalTokens;
-
-          } catch (detectionError) {
-            console.error('Error detecting language:', detectionError);
-            toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.detectLanguageFailedError'), variant: 'destructive' });
-          }
-        }
         
         handleTokenUpdate(totalTokensForOperation, operationDetails);
         setTranslatedArticleMarkdown('');
         setOriginalArticleForTranslation('');
         toast({ title: t('toastMessages.successTitle'), description: result.mainImageUrl ? t('toastMessages.articleCreatedWithImageSuccess') : t('toastMessages.articleCreatedSuccess') });
       
-      } catch (error) {
+      } catch (error)
+ {
         console.error('Error creating article:', error);
         toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.createFailedError'), variant: 'destructive' });
       } finally {
@@ -151,6 +134,23 @@ export default function ArticleForgePage() {
       }
     });
   };
+  
+  const handleStartUserWriting = () => {
+    setCurrentOperationMessage(null);
+    setPrompt(''); 
+    setArticleMarkdown(t('userWriting.startPlaceholder')); 
+    setTargetLanguage(availableLanguages[0].value);
+    setTranslatedArticleMarkdown('');
+    setOriginalArticleForTranslation('');
+    setCurrentRequestTokens(null);
+    setDetailedTokenUsage(null);
+    setGenerateMainImage(false); 
+    setFinalCombinedOutput('');
+    setSelectedCombineFormat('simple');
+    setDetectedLanguage(null);
+    toast({ title: t('toastMessages.successTitle'), description: t('toastMessages.userWritingStartedMessage') });
+  };
+
 
   const handleReviseArticle = async () => {
     if (!articleMarkdown.trim()) {
@@ -188,20 +188,42 @@ export default function ArticleForgePage() {
       toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.targetLanguageEmptyError'), variant: 'destructive' });
       return;
     }
-    setCurrentOperationMessage(t('translateArticleCard.translatingArticleMessage'));
+    
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput('');
+
     startProcessingTransition(async () => {
+      let totalTokensForOperation = 0;
+      let operationDetails = { text: 0, image: 0 }; // Image tokens won't be used here but keep structure
+      let currentArticleContent = articleMarkdown;
+      let sourceLanguage = detectedLanguage;
+
       try {
-        setOriginalArticleForTranslation(articleMarkdown);
-        const input: TranslateArticleInput = { article: articleMarkdown, targetLanguage };
+        if (!sourceLanguage && currentArticleContent.trim()) {
+          setCurrentOperationMessage(t('detectLanguageCard.detectingLanguageMessage'));
+          const detectInput: DetectLanguageInput = { text: currentArticleContent };
+          const detectResult: DetectLanguageOutput = await detectLanguage(detectInput);
+          setDetectedLanguage(detectResult.language);
+          sourceLanguage = detectResult.language;
+          totalTokensForOperation += detectResult.tokenUsage.totalTokens;
+          operationDetails.text += detectResult.tokenUsage.totalTokens;
+          toast({ title: t('toastMessages.successTitle'), description: t('toastMessages.languageDetectedSuccess', { language: sourceLanguage }) });
+        }
+        
+        setCurrentOperationMessage(t('translateArticleCard.translatingArticleMessage'));
+        setOriginalArticleForTranslation(currentArticleContent);
+        const input: TranslateArticleInput = { article: currentArticleContent, targetLanguage };
         const result: TranslateArticleOutput = await translateArticle(input);
         setTranslatedArticleMarkdown(result.translatedArticle);
-        handleTokenUpdate(result.tokenUsage.totalTokens, { text: result.tokenUsage.totalTokens });
+        
+        totalTokensForOperation += result.tokenUsage.totalTokens;
+        operationDetails.text += result.tokenUsage.totalTokens;
+        
+        handleTokenUpdate(totalTokensForOperation, operationDetails);
         toast({ title: t('toastMessages.successTitle'), description: t('toastMessages.articleTranslatedSuccess', { targetLanguage }) });
       } catch (error) {
-        console.error('Error translating article:', error);
+        console.error('Error in translation process:', error);
         toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.translateFailedError'), variant: 'destructive' });
       } finally {
         setCurrentOperationMessage(null);
@@ -234,7 +256,7 @@ export default function ArticleForgePage() {
   const generateSummaryTextForCopy = () => {
     let summary = `${t('sessionSummaryCard.title')}\n`;
     summary += "=============================\n\n";
-    summary += `${t('sessionSummaryCard.workflowLabel')} ${initialWorkflow === 'direct' ? t('workflowSelection.directCreationLabel') : t('workflowSelection.detectAndTranslateLabel')}\n`;
+    summary += `${t('sessionSummaryCard.workflowLabel')} ${initialWorkflow === 'aiCreate' ? t('startArticleCard.aiCreateLabel') : t('startArticleCard.userWriteLabel')}\n`;
     if (detectedLanguage) {
       summary += `${t('sessionSummaryCard.detectedLanguageLabel')} ${detectedLanguage}\n`;
     }
@@ -277,6 +299,7 @@ export default function ArticleForgePage() {
   };
 
   const clearAll = () => {
+    setInitialWorkflow('aiCreate');
     setPrompt('');
     setArticleMarkdown('');
     setTargetLanguage(availableLanguages[0].value);
@@ -288,7 +311,6 @@ export default function ArticleForgePage() {
     setGenerateMainImage(false);
     setFinalCombinedOutput('');
     setSelectedCombineFormat('simple');
-    setInitialWorkflow('direct');
     setDetectedLanguage(null);
     setSessionTotalTokens(0);
     setSessionTextTokensUsed(0);
@@ -342,6 +364,25 @@ export default function ArticleForgePage() {
   );
 
 
+  const mainActionButtonText = initialWorkflow === 'aiCreate' 
+    ? t('startArticleCard.aiCreateButtonText') 
+    : t('startArticleCard.userWriteButtonText');
+
+  const mainActionButtonIcon = initialWorkflow === 'aiCreate' 
+    ? <Wand2 className="mr-2" /> 
+    : <PencilLine className="mr-2" />;
+  
+  const isMainButtonDisabled = initialWorkflow === 'aiCreate' 
+    ? (isLoading || !prompt.trim()) 
+    : isLoading;
+
+  const mainActionHandler = initialWorkflow === 'aiCreate' ? handleCreateArticle : handleStartUserWriting;
+  
+  const currentLoadingMessageForButton = initialWorkflow === 'aiCreate' 
+    ? (generateMainImage ? t('startArticleCard.creatingArticleWithImageMessage') : t('startArticleCard.creatingArticleMessage'))
+    : t('startArticleCard.startingUserWritingMessage');
+
+
   return (
     <div className="space-y-8">
       <GlobalLoader isLoading={isLoading} operationMessage={currentOperationMessage} />
@@ -364,67 +405,80 @@ export default function ArticleForgePage() {
 
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center"><Wand2 className="mr-2 h-6 w-6 text-primary" />{t('createArticleCard.title')}</CardTitle>
-          <CardDescription>{t('createArticleCard.description')}</CardDescription>
+          <CardTitle className="flex items-center">
+            {initialWorkflow === 'aiCreate' ? <Wand2 className="mr-2 h-6 w-6 text-primary" /> : <PencilLine className="mr-2 h-6 w-6 text-primary" />}
+            {t('startArticleCard.title')}
+          </CardTitle>
+          <CardDescription>{t('startArticleCard.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <Label className="text-lg font-medium">{t('workflowSelection.title')}</Label>
+            <Label className="text-lg font-medium">{t('startArticleCard.workflowTitle')}</Label>
             <RadioGroup
               value={initialWorkflow}
-              onValueChange={(value: InitialWorkflow) => setInitialWorkflow(value)}
+              onValueChange={(value: InitialWorkflow) => {
+                setInitialWorkflow(value);
+                if (value === 'userWrite') {
+                  setPrompt(''); 
+                  setGenerateMainImage(false);
+                }
+              }}
               className="mt-2 space-y-2"
               disabled={isLoading}
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="direct" id="workflow-direct" />
-                <Label htmlFor="workflow-direct" className="font-normal">{t('workflowSelection.directCreationLabel')}</Label>
+                <RadioGroupItem value="aiCreate" id="workflow-ai-create" />
+                <Label htmlFor="workflow-ai-create" className="font-normal">{t('startArticleCard.aiCreateLabel')}</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="detectAndTranslate" id="workflow-detect" />
-                <Label htmlFor="workflow-detect" className="font-normal">{t('workflowSelection.detectAndTranslateLabel')}</Label>
+                <RadioGroupItem value="userWrite" id="workflow-user-write" />
+                <Label htmlFor="workflow-user-write" className="font-normal">{t('startArticleCard.userWriteLabel')}</Label>
               </div>
             </RadioGroup>
           </div>
 
-          <div>
-            <Label htmlFor="prompt" className="text-lg font-medium">{t('createArticleCard.promptLabel')}</Label>
-            <Textarea
-              id="prompt"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder={t('createArticleCard.promptPlaceholder')}
-              className="min-h-[120px] mt-1 text-base"
-              disabled={isLoading}
-              aria-label={t('createArticleCard.promptLabel')}
-            />
-          </div>
-          <div className="flex items-center space-x-2 pt-2">
-            <Switch
-              id="generateMainImage"
-              checked={generateMainImage}
-              onCheckedChange={setGenerateMainImage}
-              disabled={isLoading}
-              aria-label={t('createArticleCard.generateImageLabel')}
-            />
-            <Label htmlFor="generateMainImage" className="text-base font-normal cursor-pointer">
-              <ImageIcon className="inline-block mr-2 h-5 w-5 align-text-bottom" />
-              {t('createArticleCard.generateImageLabel')}
-            </Label>
-          </div>
+          {initialWorkflow === 'aiCreate' && (
+            <>
+              <div>
+                <Label htmlFor="prompt" className="text-lg font-medium">{t('startArticleCard.promptLabel')}</Label>
+                <Textarea
+                  id="prompt"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder={t('startArticleCard.promptPlaceholder')}
+                  className="min-h-[120px] mt-1 text-base"
+                  disabled={isLoading}
+                  aria-label={t('startArticleCard.promptLabel')}
+                />
+              </div>
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                  id="generateMainImage"
+                  checked={generateMainImage}
+                  onCheckedChange={setGenerateMainImage}
+                  disabled={isLoading}
+                  aria-label={t('startArticleCard.generateImageLabel')}
+                />
+                <Label htmlFor="generateMainImage" className="text-base font-normal cursor-pointer">
+                  <ImageIcon className="inline-block mr-2 h-5 w-5 align-text-bottom" />
+                  {t('startArticleCard.generateImageLabel')}
+                </Label>
+              </div>
+            </>
+          )}
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <Button onClick={clearAll} variant="outline" disabled={isLoading}>
-            <Eraser className="mr-2" /> {t('createArticleCard.clearAllButton')}
+            <Eraser className="mr-2" /> {t('startArticleCard.clearAllButton')}
           </Button>
-          <Button onClick={handleCreateArticle} disabled={isLoading || !prompt.trim()}>
-            {isLoading && currentOperationMessage?.includes(t('createArticleCard.creatingArticleMessage').substring(0,10)) ? <LoadingSpinner className="mr-2" /> : <Wand2 className="mr-2" />}
-            {t('createArticleCard.createArticleButton')}
+          <Button onClick={mainActionHandler} disabled={isMainButtonDisabled}>
+            {isLoading && (currentOperationMessage === currentLoadingMessageForButton || currentOperationMessage?.startsWith(t('startArticleCard.creatingArticleMessage').substring(0,10))) ? <LoadingSpinner className="mr-2" /> : mainActionButtonIcon}
+            {mainActionButtonText}
           </Button>
         </CardFooter>
       </Card>
 
-      {detectedLanguage && (
+      {detectedLanguage && articleMarkdown && (
         <Card className="shadow-lg">
           <CardContent className="p-4">
             <div className="flex items-center text-sm">
@@ -591,12 +645,12 @@ export default function ArticleForgePage() {
                 <p>
                   {t('sessionSummaryCard.workflowLabel')}
                   <span className="font-semibold ml-1">
-                    {initialWorkflow === 'direct' 
-                      ? t('workflowSelection.directCreationLabel') 
-                      : t('workflowSelection.detectAndTranslateLabel')}
+                    {initialWorkflow === 'aiCreate' 
+                      ? t('startArticleCard.aiCreateLabel') 
+                      : t('startArticleCard.userWriteLabel')}
                   </span>
                 </p>
-                {initialWorkflow === 'detectAndTranslate' && detectedLanguage && (
+                {detectedLanguage && (
                   <p className="mt-1">
                     {t('sessionSummaryCard.detectedLanguageLabel')}
                     <span className="font-semibold ml-1">{detectedLanguage}</span>
@@ -653,3 +707,5 @@ export default function ArticleForgePage() {
     </div>
   );
 }
+
+    
