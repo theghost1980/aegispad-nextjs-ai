@@ -21,6 +21,11 @@
     "estRemaining": "Est. Tokens Remaining:"
   },
   "ArticleForgePage": {
+    "workflowSelection": {
+      "title": "Choose your workflow:",
+      "directCreationLabel": "Standard Article Creation",
+      "detectAndTranslateLabel": "Create Article & Detect Language (for later translation)"
+    },
     "createArticleCard": {
       "title": "Create New Article",
       "description": "Enter a prompt to generate an article using AI. Be specific for best results.",
@@ -32,6 +37,10 @@
       "creatingArticleMessage": "Creating article...",
       "creatingArticleWithImageMessage": "Creating article and generating image..."
     },
+    "detectLanguageCard": {
+      "detectingLanguageMessage": "Detecting language...",
+      "detectedLanguageLabel": "Detected Article Language:"
+    },
     "editArticleCard": {
       "title": "Edit & Refine Article",
       "description": "Edit the generated Markdown directly or use AI to revise it. The main image (if generated) is at the top.",
@@ -41,10 +50,11 @@
     "translateArticleCard": {
       "title": "Translate Article",
       "description": "Translate the current article into another language.",
+      "descriptionWithSource": "Translate the current article (detected as {detectedLanguage}) into another language.",
       "targetLanguageLabel": "Target Language",
       "selectLanguagePlaceholder": "Select a language",
       "translateButton": "Translate Article",
-      "translatingArticleMessage": "Traduciendo artículo..."
+      "translatingArticleMessage": "Translating article..."
     },
     "translationResultCard": {
       "title": "Translation Result",
@@ -67,6 +77,9 @@
     "sessionSummaryCard": {
       "title": "Session Summary & Final Output",
       "description": "A breakdown of your current session's activity and the final combined article, if generated.",
+      "workflowTitle": "Workflow Used",
+      "workflowLabel": "Selected Workflow:",
+      "detectedLanguageLabel": "Detected Article Language:",
       "tokenUsageTitle": "Token Usage (This Session)",
       "totalTokensUsedLabel": "Total Tokens Used:",
       "textGenerationTokensLabel": "  └ Text Generation Tokens:",
@@ -88,11 +101,13 @@
       "articleCreatedWithImageSuccess": "Article created successfully! Main image generated.",
       "articleRevisedSuccess": "Article revised successfully!",
       "articleTranslatedSuccess": "Article translated to {targetLanguage} successfully!",
+      "languageDetectedSuccess": "Language detected: {language}",
       "combinedFormatSuccess": "Combined article format generated!",
       "summaryCopiedSuccess": "Session summary copied to clipboard!",
       "createFailedError": "Failed to create article. Please try again.",
       "reviseFailedError": "Failed to revise article. Please try again.",
       "translateFailedError": "Failed to translate article. Please try again.",
+      "detectLanguageFailedError": "Failed to detect language. Please try again.",
       "copySummaryFailedError": "Failed to copy summary. Please try again or copy manually.",
       "allClearedMessage": "All fields and session data have been cleared."
     },

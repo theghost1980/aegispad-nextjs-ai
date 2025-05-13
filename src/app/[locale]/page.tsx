@@ -18,7 +18,8 @@ import { useToast } from '@/hooks/use-toast';
 import { createArticle, CreateArticleInput, CreateArticleOutput } from '@/ai/flows/create-article';
 import { reviseArticle, ReviseArticleInput, ReviseArticleOutput } from '@/ai/flows/revise-article';
 import { translateArticle, TranslateArticleInput, TranslateArticleOutput } from '@/ai/flows/translate-article';
-import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon, Layers, CheckSquare, FileTerminal, ClipboardCopy } from 'lucide-react';
+import { detectLanguage, DetectLanguageInput, DetectLanguageOutput } from '@/ai/flows/detect-language-flow';
+import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon, Layers, CheckSquare, FileTerminal, ClipboardCopy, SearchCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -37,6 +38,8 @@ const availableLanguages = [
 ];
 
 const ESTIMATED_INITIAL_SESSION_TOKENS = 100000;
+
+type InitialWorkflow = 'direct' | 'detectAndTranslate';
 
 export default function ArticleForgePage() {
   const t = useTranslations('ArticleForgePage');
@@ -60,17 +63,16 @@ export default function ArticleForgePage() {
   const [finalCombinedOutput, setFinalCombinedOutput] = useState<string>('');
   const [selectedCombineFormat, setSelectedCombineFormat] = useState<'simple' | 'detailsTag'>('simple');
 
-  const [isCreating, startCreateTransition] = useTransition();
-  const [isRevising, startReviseTransition] = useTransition();
-  const [isTranslating, startTranslateTransition] = useTransition();
-  const [isCombiningFormat, startCombineFormatTransition] = useTransition();
-  const [isCopying, startCopyTransition] = useTransition();
+  const [initialWorkflow, setInitialWorkflow] = useState<InitialWorkflow>('direct');
+  const [detectedLanguage, setDetectedLanguage] = useState<string | null>(null);
+
+  const [isProcessing, startProcessingTransition] = useTransition(); // General purpose transition
 
   const [clientLoaded, setClientLoaded] = useState(false);
 
   const { toast } = useToast();
 
-  const isLoading = isCreating || isRevising || isTranslating || isCombiningFormat || isCopying;
+  const isLoading = isProcessing;
   
   useEffect(() => {
     setClientLoaded(true);
@@ -89,8 +91,9 @@ export default function ArticleForgePage() {
         setSessionImageTokensUsed(prev => prev + (details.image || 0));
       }
     } else {
+      // If no details, assume all tokens are for text (e.g. revision, translation, detection)
       setSessionTextTokensUsed(prev => prev + tokensUsed);
-      setDetailedTokenUsage(null);
+      setDetailedTokenUsage(null); // Or set to {text: tokensUsed} if more explicit
     }
   };
 
@@ -103,18 +106,43 @@ export default function ArticleForgePage() {
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput(''); 
-    startCreateTransition(async () => {
+    setDetectedLanguage(null);
+
+    startProcessingTransition(async () => {
+      let totalTokensForOperation = 0;
+      let operationDetails = { text: 0, image: 0 };
+
       try {
         const input: CreateArticleInput = { prompt, generateMainImage };
         const result: CreateArticleOutput = await createArticle(input);
         setArticleMarkdown(result.article);
-        handleTokenUpdate(result.tokenUsage.totalTokens, {
-          text: result.tokenUsage.textGenerationTokens,
-          image: result.tokenUsage.imageGenerationTokens
-        });
+        
+        totalTokensForOperation += result.tokenUsage.totalTokens;
+        operationDetails.text += result.tokenUsage.textGenerationTokens || 0;
+        operationDetails.image += result.tokenUsage.imageGenerationTokens || 0;
+
+        if (initialWorkflow === 'detectAndTranslate' && result.article.trim()) {
+          setCurrentOperationMessage(t('detectLanguageCard.detectingLanguageMessage'));
+          try {
+            const detectInput: DetectLanguageInput = { text: result.article };
+            const detectResult: DetectLanguageOutput = await detectLanguage(detectInput);
+            setDetectedLanguage(detectResult.language);
+            toast({ title: t('toastMessages.successTitle'), description: t('toastMessages.languageDetectedSuccess', { language: detectResult.language }) });
+            
+            totalTokensForOperation += detectResult.tokenUsage.totalTokens;
+            operationDetails.text += detectResult.tokenUsage.totalTokens;
+
+          } catch (detectionError) {
+            console.error('Error detecting language:', detectionError);
+            toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.detectLanguageFailedError'), variant: 'destructive' });
+          }
+        }
+        
+        handleTokenUpdate(totalTokensForOperation, operationDetails);
         setTranslatedArticleMarkdown('');
         setOriginalArticleForTranslation('');
         toast({ title: t('toastMessages.successTitle'), description: result.mainImageUrl ? t('toastMessages.articleCreatedWithImageSuccess') : t('toastMessages.articleCreatedSuccess') });
+      
       } catch (error) {
         console.error('Error creating article:', error);
         toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.createFailedError'), variant: 'destructive' });
@@ -133,7 +161,7 @@ export default function ArticleForgePage() {
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput(''); 
-    startReviseTransition(async () => {
+    startProcessingTransition(async () => {
       try {
         const input: ReviseArticleInput = { article: articleMarkdown };
         const result: ReviseArticleOutput = await reviseArticle(input);
@@ -164,7 +192,7 @@ export default function ArticleForgePage() {
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput('');
-    startTranslateTransition(async () => {
+    startProcessingTransition(async () => {
       try {
         setOriginalArticleForTranslation(articleMarkdown);
         const input: TranslateArticleInput = { article: articleMarkdown, targetLanguage };
@@ -187,7 +215,7 @@ export default function ArticleForgePage() {
       return;
     }
     setCurrentOperationMessage(t('refineFormatCard.generatingCombinedMessage'));
-    startCombineFormatTransition(() => {
+    startProcessingTransition(() => {
       let combined = '';
       const originalContent = originalArticleForTranslation;
       const translatedContent = translatedArticleMarkdown;
@@ -204,8 +232,13 @@ export default function ArticleForgePage() {
   };
   
   const generateSummaryTextForCopy = () => {
-    let summary = `${t('sessionSummaryCard.title')}\n`; // Using translation
+    let summary = `${t('sessionSummaryCard.title')}\n`;
     summary += "=============================\n\n";
+    summary += `${t('sessionSummaryCard.workflowLabel')} ${initialWorkflow === 'direct' ? t('workflowSelection.directCreationLabel') : t('workflowSelection.detectAndTranslateLabel')}\n`;
+    if (detectedLanguage) {
+      summary += `${t('sessionSummaryCard.detectedLanguageLabel')} ${detectedLanguage}\n`;
+    }
+    summary += "\n";
     summary += `${t('sessionSummaryCard.tokenUsageTitle')}:\n`;
     summary += `-----------------------------\n`;
     summary += `${t('sessionSummaryCard.totalTokensUsedLabel')} ${sessionTotalTokens.toLocaleString()}\n`;
@@ -228,7 +261,7 @@ export default function ArticleForgePage() {
   };
 
   const handleCopySummary = () => {
-    startCopyTransition(async () => {
+    startProcessingTransition(async () => {
       setCurrentOperationMessage(t('sessionSummaryCard.preparingSummaryMessage'));
       const summaryText = generateSummaryTextForCopy();
       try {
@@ -255,6 +288,8 @@ export default function ArticleForgePage() {
     setGenerateMainImage(false);
     setFinalCombinedOutput('');
     setSelectedCombineFormat('simple');
+    setInitialWorkflow('direct');
+    setDetectedLanguage(null);
     setSessionTotalTokens(0);
     setSessionTextTokensUsed(0);
     setSessionImageTokensUsed(0);
@@ -262,7 +297,6 @@ export default function ArticleForgePage() {
   };
   
   if (!clientLoaded) {
-    // Consider translating this if it's shown for long
     return <div className="flex justify-center items-center min-h-screen"><LoadingSpinner size={48} /> <p className="ml-2">{t('loadingSpinnerClient')}</p></div>;
   }
 
@@ -327,13 +361,32 @@ export default function ArticleForgePage() {
           </AccordionItem>
         </Accordion>
       </div>
-      
+
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center"><Wand2 className="mr-2 h-6 w-6 text-primary" />{t('createArticleCard.title')}</CardTitle>
           <CardDescription>{t('createArticleCard.description')}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          <div>
+            <Label className="text-lg font-medium">{t('workflowSelection.title')}</Label>
+            <RadioGroup
+              value={initialWorkflow}
+              onValueChange={(value: InitialWorkflow) => setInitialWorkflow(value)}
+              className="mt-2 space-y-2"
+              disabled={isLoading}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="direct" id="workflow-direct" />
+                <Label htmlFor="workflow-direct" className="font-normal">{t('workflowSelection.directCreationLabel')}</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="detectAndTranslate" id="workflow-detect" />
+                <Label htmlFor="workflow-detect" className="font-normal">{t('workflowSelection.detectAndTranslateLabel')}</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           <div>
             <Label htmlFor="prompt" className="text-lg font-medium">{t('createArticleCard.promptLabel')}</Label>
             <Textarea
@@ -365,12 +418,23 @@ export default function ArticleForgePage() {
             <Eraser className="mr-2" /> {t('createArticleCard.clearAllButton')}
           </Button>
           <Button onClick={handleCreateArticle} disabled={isLoading || !prompt.trim()}>
-            {isCreating ? <LoadingSpinner className="mr-2" /> : <Wand2 className="mr-2" />}
+            {isLoading && currentOperationMessage?.includes(t('createArticleCard.creatingArticleMessage').substring(0,10)) ? <LoadingSpinner className="mr-2" /> : <Wand2 className="mr-2" />}
             {t('createArticleCard.createArticleButton')}
           </Button>
         </CardFooter>
       </Card>
 
+      {detectedLanguage && (
+        <Card className="shadow-lg">
+          <CardContent className="p-4">
+            <div className="flex items-center text-sm">
+              <SearchCheck className="mr-2 h-5 w-5 text-green-600" />
+              <span>{t('detectLanguageCard.detectedLanguageLabel')} <strong>{detectedLanguage}</strong></span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       {articleMarkdown && (
         <Card className="shadow-lg">
           <CardHeader>
@@ -386,7 +450,7 @@ export default function ArticleForgePage() {
           </CardContent>
           <CardFooter>
             <Button onClick={handleReviseArticle} disabled={isLoading || !articleMarkdown.trim()} className="w-full md:w-auto">
-              {isRevising ? <LoadingSpinner className="mr-2" /> : <Edit3 className="mr-2" />}
+              {isLoading && currentOperationMessage === t('editArticleCard.revisingArticleMessage') ? <LoadingSpinner className="mr-2" /> : <Edit3 className="mr-2" />}
               {t('editArticleCard.reviseButton')}
             </Button>
           </CardFooter>
@@ -397,7 +461,11 @@ export default function ArticleForgePage() {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center"><Languages className="mr-2 h-6 w-6 text-primary" />{t('translateArticleCard.title')}</CardTitle>
-            <CardDescription>{t('translateArticleCard.description')}</CardDescription>
+            <CardDescription>
+              {detectedLanguage 
+                ? t('translateArticleCard.descriptionWithSource', { detectedLanguage })
+                : t('translateArticleCard.description')}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -422,7 +490,7 @@ export default function ArticleForgePage() {
           </CardContent>
           <CardFooter>
             <Button onClick={handleTranslateArticle} disabled={isLoading || !articleMarkdown.trim() || !targetLanguage.trim()} className="w-full md:w-auto">
-              {isTranslating ? <LoadingSpinner className="mr-2" /> : <Languages className="mr-2" />}
+              {isLoading && currentOperationMessage === t('translateArticleCard.translatingArticleMessage') ? <LoadingSpinner className="mr-2" /> : <Languages className="mr-2" />}
               {t('translateArticleCard.translateButton')}
             </Button>
           </CardFooter>
@@ -438,7 +506,9 @@ export default function ArticleForgePage() {
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="flex flex-col">
               <CardHeader>
-                <CardTitle className="flex items-center text-xl"><FileText size={20} className="mr-2 text-muted-foreground" /> {t('translationResultCard.originalArticleTitle')}</CardTitle>
+                <CardTitle className="flex items-center text-xl"><FileText size={20} className="mr-2 text-muted-foreground" /> 
+                {detectedLanguage ? `${t('translationResultCard.originalArticleTitle')} (${detectedLanguage})` : t('translationResultCard.originalArticleTitle')}
+                </CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
                  <Textarea
@@ -487,7 +557,7 @@ export default function ArticleForgePage() {
               </RadioGroup>
             </div>
             <Button onClick={handleCombineFormat} disabled={isLoading || !originalArticleForTranslation.trim() || !translatedArticleMarkdown.trim()} className="w-full md:w-auto">
-              {isCombiningFormat ? <LoadingSpinner className="mr-2" /> : <CheckSquare className="mr-2" />}
+              {isLoading && currentOperationMessage === t('refineFormatCard.generatingCombinedMessage') ? <LoadingSpinner className="mr-2" /> : <CheckSquare className="mr-2" />}
               {t('refineFormatCard.generateCombinedButton')}
             </Button>
 
@@ -497,7 +567,7 @@ export default function ArticleForgePage() {
                  <ArticleEditor
                     markdown={finalCombinedOutput}
                     onMarkdownChange={setFinalCombinedOutput}
-                    isLoading={isCombiningFormat} 
+                    isLoading={isLoading && currentOperationMessage === t('refineFormatCard.generatingCombinedMessage')} 
                   />
               </div>
             )}
@@ -515,6 +585,25 @@ export default function ArticleForgePage() {
             <CardDescription>{t('sessionSummaryCard.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+             <div>
+              <h4 className="text-lg font-semibold mb-2">{t('sessionSummaryCard.workflowTitle')}</h4>
+              <div className="p-3 border rounded-md bg-muted/30 text-sm">
+                <p>
+                  {t('sessionSummaryCard.workflowLabel')}
+                  <span className="font-semibold ml-1">
+                    {initialWorkflow === 'direct' 
+                      ? t('workflowSelection.directCreationLabel') 
+                      : t('workflowSelection.detectAndTranslateLabel')}
+                  </span>
+                </p>
+                {initialWorkflow === 'detectAndTranslate' && detectedLanguage && (
+                  <p className="mt-1">
+                    {t('sessionSummaryCard.detectedLanguageLabel')}
+                    <span className="font-semibold ml-1">{detectedLanguage}</span>
+                  </p>
+                )}
+              </div>
+            </div>
             <div>
               <h4 className="text-lg font-semibold mb-2">{t('sessionSummaryCard.tokenUsageTitle')}</h4>
               <div className="space-y-1 text-sm p-3 border rounded-md bg-muted/30">
@@ -555,7 +644,7 @@ export default function ArticleForgePage() {
           </CardContent>
           <CardFooter>
             <Button onClick={handleCopySummary} disabled={isLoading} className="w-full md:w-auto">
-              {isCopying ? <LoadingSpinner className="mr-2" /> : <ClipboardCopy className="mr-2" />}
+              {isLoading && currentOperationMessage === t('sessionSummaryCard.preparingSummaryMessage') ? <LoadingSpinner className="mr-2" /> : <ClipboardCopy className="mr-2" />}
               {t('sessionSummaryCard.copySummaryButton')}
             </Button>
           </CardFooter>

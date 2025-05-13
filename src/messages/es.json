@@ -21,6 +21,11 @@
     "estRemaining": "Tokens Restantes Est.:"
   },
   "ArticleForgePage": {
+    "workflowSelection": {
+      "title": "Elige tu flujo de trabajo:",
+      "directCreationLabel": "Creación de Artículo Estándar",
+      "detectAndTranslateLabel": "Crear Artículo y Detectar Idioma (para traducción posterior)"
+    },
     "createArticleCard": {
       "title": "Crear Nuevo Artículo",
       "description": "Introduce un prompt para generar un artículo usando IA. Sé específico para mejores resultados.",
@@ -32,6 +37,10 @@
       "creatingArticleMessage": "Creando artículo...",
       "creatingArticleWithImageMessage": "Creando artículo y generando imagen..."
     },
+    "detectLanguageCard": {
+      "detectingLanguageMessage": "Detectando idioma...",
+      "detectedLanguageLabel": "Idioma del Artículo Detectado:"
+    },
     "editArticleCard": {
       "title": "Editar y Refinar Artículo",
       "description": "Edita el Markdown generado directamente o usa IA para revisarlo. La imagen principal (si se generó) está arriba.",
@@ -41,6 +50,7 @@
     "translateArticleCard": {
       "title": "Traducir Artículo",
       "description": "Traduce el artículo actual a otro idioma.",
+      "descriptionWithSource": "Traduce el artículo actual (detectado como {detectedLanguage}) a otro idioma.",
       "targetLanguageLabel": "Idioma de Destino",
       "selectLanguagePlaceholder": "Selecciona un idioma",
       "translateButton": "Traducir Artículo",
@@ -67,6 +77,9 @@
     "sessionSummaryCard": {
       "title": "Resumen de Sesión y Salida Final",
       "description": "Un desglose de la actividad de tu sesión actual y el artículo combinado final, si se generó.",
+      "workflowTitle": "Flujo de Trabajo Utilizado",
+      "workflowLabel": "Flujo de Trabajo Seleccionado:",
+      "detectedLanguageLabel": "Idioma del Artículo Detectado:",
       "tokenUsageTitle": "Uso de Tokens (Esta Sesión)",
       "totalTokensUsedLabel": "Tokens Totales Usados:",
       "textGenerationTokensLabel": "  └ Tokens de Generación de Texto:",
@@ -88,11 +101,13 @@
       "articleCreatedWithImageSuccess": "¡Artículo creado con éxito! Imagen principal generada.",
       "articleRevisedSuccess": "¡Artículo revisado con éxito!",
       "articleTranslatedSuccess": "¡Artículo traducido a {targetLanguage} con éxito!",
+      "languageDetectedSuccess": "Idioma detectado: {language}",
       "combinedFormatSuccess": "¡Formato de artículo combinado generado!",
       "summaryCopiedSuccess": "¡Resumen de la sesión copiado al portapapeles!",
       "createFailedError": "Error al crear el artículo. Por favor, inténtalo de nuevo.",
       "reviseFailedError": "Error al revisar el artículo. Por favor, inténtalo de nuevo.",
       "translateFailedError": "Error al traducir el artículo. Por favor, inténtalo de nuevo.",
+      "detectLanguageFailedError": "Error al detectar el idioma. Por favor, inténtalo de nuevo.",
       "copySummaryFailedError": "Error al copiar el resumen. Por favor, inténtalo de nuevo o copia manualmente.",
       "allClearedMessage": "Todos los campos y datos de la sesión han sido borrados."
     },
