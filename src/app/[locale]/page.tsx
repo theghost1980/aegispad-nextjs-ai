@@ -1,7 +1,8 @@
-// src/app/page.tsx
+// src/app/[locale]/page.tsx
 "use client";
 
 import { useState, useTransition, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -38,6 +39,9 @@ const availableLanguages = [
 const ESTIMATED_INITIAL_SESSION_TOKENS = 100000;
 
 export default function ArticleForgePage() {
+  const t = useTranslations('ArticleForgePage');
+  const tTokenUsage = useTranslations('TokenUsage');
+
   const [prompt, setPrompt] = useState<string>('');
   const [articleMarkdown, setArticleMarkdown] = useState<string>('');
   const [targetLanguage, setTargetLanguage] = useState<string>(availableLanguages[0].value);
@@ -52,7 +56,6 @@ export default function ArticleForgePage() {
   const [detailedTokenUsage, setDetailedTokenUsage] = useState<{text?: number, image?:number} | null>(null);
   const [sessionTextTokensUsed, setSessionTextTokensUsed] = useState<number>(0);
   const [sessionImageTokensUsed, setSessionImageTokensUsed] = useState<number>(0);
-
 
   const [finalCombinedOutput, setFinalCombinedOutput] = useState<string>('');
   const [selectedCombineFormat, setSelectedCombineFormat] = useState<'simple' | 'detailsTag'>('simple');
@@ -86,7 +89,6 @@ export default function ArticleForgePage() {
         setSessionImageTokensUsed(prev => prev + (details.image || 0));
       }
     } else {
-      // If no details, assume all tokens are for text (e.g. for revise/translate)
       setSessionTextTokensUsed(prev => prev + tokensUsed);
       setDetailedTokenUsage(null);
     }
@@ -94,10 +96,10 @@ export default function ArticleForgePage() {
 
   const handleCreateArticle = async () => {
     if (!prompt.trim()) {
-      toast({ title: 'Error', description: 'Prompt cannot be empty.', variant: 'destructive' });
+      toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.promptEmptyError'), variant: 'destructive' });
       return;
     }
-    setCurrentOperationMessage(generateMainImage ? 'Creating article and generating image...' : 'Creating article...');
+    setCurrentOperationMessage(generateMainImage ? t('createArticleCard.creatingArticleWithImageMessage') : t('createArticleCard.creatingArticleMessage'));
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput(''); 
@@ -112,10 +114,10 @@ export default function ArticleForgePage() {
         });
         setTranslatedArticleMarkdown('');
         setOriginalArticleForTranslation('');
-        toast({ title: 'Success', description: 'Article created successfully!' + (result.mainImageUrl ? ' Main image generated.' : '') });
+        toast({ title: t('toastMessages.successTitle'), description: result.mainImageUrl ? t('toastMessages.articleCreatedWithImageSuccess') : t('toastMessages.articleCreatedSuccess') });
       } catch (error) {
         console.error('Error creating article:', error);
-        toast({ title: 'Error', description: 'Failed to create article. Please try again.', variant: 'destructive' });
+        toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.createFailedError'), variant: 'destructive' });
       } finally {
         setCurrentOperationMessage(null);
       }
@@ -124,10 +126,10 @@ export default function ArticleForgePage() {
 
   const handleReviseArticle = async () => {
     if (!articleMarkdown.trim()) {
-      toast({ title: 'Error', description: 'Article content cannot be empty.', variant: 'destructive' });
+      toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.articleEmptyError'), variant: 'destructive' });
       return;
     }
-    setCurrentOperationMessage('Revising article...');
+    setCurrentOperationMessage(t('editArticleCard.revisingArticleMessage'));
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput(''); 
@@ -139,10 +141,10 @@ export default function ArticleForgePage() {
         handleTokenUpdate(result.tokenUsage.totalTokens, { text: result.tokenUsage.totalTokens });
         setTranslatedArticleMarkdown('');
         setOriginalArticleForTranslation('');
-        toast({ title: 'Success', description: 'Article revised successfully!' });
+        toast({ title: t('toastMessages.successTitle'), description: t('toastMessages.articleRevisedSuccess') });
       } catch (error) {
         console.error('Error revising article:', error);
-        toast({ title: 'Error', description: 'Failed to revise article. Please try again.', variant: 'destructive' });
+        toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.reviseFailedError'), variant: 'destructive' });
       } finally {
         setCurrentOperationMessage(null);
       }
@@ -151,14 +153,14 @@ export default function ArticleForgePage() {
 
   const handleTranslateArticle = async () => {
     if (!articleMarkdown.trim()) {
-      toast({ title: 'Error', description: 'Article content cannot be empty.', variant: 'destructive' });
+      toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.articleEmptyError'), variant: 'destructive' });
       return;
     }
     if (!targetLanguage.trim()) {
-      toast({ title: 'Error', description: 'Target language cannot be empty.', variant: 'destructive' });
+      toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.targetLanguageEmptyError'), variant: 'destructive' });
       return;
     }
-    setCurrentOperationMessage('Translating article...');
+    setCurrentOperationMessage(t('translateArticleCard.translatingArticleMessage'));
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput('');
@@ -169,10 +171,10 @@ export default function ArticleForgePage() {
         const result: TranslateArticleOutput = await translateArticle(input);
         setTranslatedArticleMarkdown(result.translatedArticle);
         handleTokenUpdate(result.tokenUsage.totalTokens, { text: result.tokenUsage.totalTokens });
-        toast({ title: 'Success', description: `Article translated to ${targetLanguage} successfully!` });
+        toast({ title: t('toastMessages.successTitle'), description: t('toastMessages.articleTranslatedSuccess', { targetLanguage }) });
       } catch (error) {
         console.error('Error translating article:', error);
-        toast({ title: 'Error', description: 'Failed to translate article. Please try again.', variant: 'destructive' });
+        toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.translateFailedError'), variant: 'destructive' });
       } finally {
         setCurrentOperationMessage(null);
       }
@@ -181,10 +183,10 @@ export default function ArticleForgePage() {
 
   const handleCombineFormat = () => {
     if (!originalArticleForTranslation.trim() || !translatedArticleMarkdown.trim()) {
-      toast({ title: 'Error', description: 'Original and translated articles must exist to combine.', variant: 'destructive' });
+      toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.combineEmptyError'), variant: 'destructive' });
       return;
     }
-    setCurrentOperationMessage('Generating combined article format...');
+    setCurrentOperationMessage(t('refineFormatCard.generatingCombinedMessage'));
     startCombineFormatTransition(() => {
       let combined = '';
       const originalContent = originalArticleForTranslation;
@@ -192,55 +194,54 @@ export default function ArticleForgePage() {
 
       if (selectedCombineFormat === 'simple') {
         combined = `${originalContent}\n\n<hr />\n\n## Translation (${targetLanguage})\n\n${translatedContent}`;
-      } else { // detailsTag
+      } else { 
         combined = `${originalContent}\n\n<details>\n  <summary>Translation (${targetLanguage})</summary>\n\n${translatedContent}\n</details>`;
       }
       setFinalCombinedOutput(combined);
       setCurrentOperationMessage(null);
-      toast({ title: 'Success', description: 'Combined article format generated!' });
+      toast({ title: t('toastMessages.successTitle'), description: t('toastMessages.combinedFormatSuccess') });
     });
   };
   
   const generateSummaryTextForCopy = () => {
-    let summary = "Session Summary & Output\n";
+    let summary = `${t('sessionSummaryCard.title')}\n`; // Using translation
     summary += "=============================\n\n";
-    summary += "Token Usage (Session):\n";
+    summary += `${t('sessionSummaryCard.tokenUsageTitle')}:\n`;
     summary += `-----------------------------\n`;
-    summary += `Total Tokens Used: ${sessionTotalTokens.toLocaleString()}\n`;
+    summary += `${t('sessionSummaryCard.totalTokensUsedLabel')} ${sessionTotalTokens.toLocaleString()}\n`;
     if (sessionTextTokensUsed > 0) {
-      summary += `  - Text Generation Tokens: ${sessionTextTokensUsed.toLocaleString()}\n`;
+      summary += `  ${t('sessionSummaryCard.textGenerationTokensLabel')} ${sessionTextTokensUsed.toLocaleString()}\n`;
     }
     if (sessionImageTokensUsed > 0) {
-      summary += `  - Image Generation Tokens: ${sessionImageTokensUsed.toLocaleString()}\n`;
+      summary += `  ${t('sessionSummaryCard.imageGenerationTokensLabel')} ${sessionImageTokensUsed.toLocaleString()}\n`;
     }
     summary += "-----------------------------\n\n";
   
     if (finalCombinedOutput.trim()) {
-      summary += "Final Combined Article Output:\n";
+      summary += `${t('refineFormatCard.combinedOutputTitle')}\n`;
       summary += "-----------------------------\n";
       summary += finalCombinedOutput;
     } else {
-      summary += "No final article was generated in this session.\n";
+      summary += `${t('sessionSummaryCard.noFinalCombinedArticleMessage')}\n`;
     }
     return summary;
   };
 
   const handleCopySummary = () => {
     startCopyTransition(async () => {
-      setCurrentOperationMessage('Preparing summary for copy...');
+      setCurrentOperationMessage(t('sessionSummaryCard.preparingSummaryMessage'));
       const summaryText = generateSummaryTextForCopy();
       try {
         await navigator.clipboard.writeText(summaryText);
-        toast({ title: 'Success', description: 'Session summary copied to clipboard!' });
+        toast({ title: t('toastMessages.successTitle'), description: t('toastMessages.summaryCopiedSuccess') });
       } catch (err) {
         console.error('Failed to copy summary: ', err);
-        toast({ title: 'Error', description: 'Failed to copy summary. Please try again or copy manually.', variant: 'destructive' });
+        toast({ title: t('toastMessages.errorTitle'), description: t('toastMessages.copySummaryFailedError'), variant: 'destructive' });
       } finally {
         setCurrentOperationMessage(null);
       }
     });
   };
-
 
   const clearAll = () => {
     setPrompt('');
@@ -254,15 +255,15 @@ export default function ArticleForgePage() {
     setGenerateMainImage(false);
     setFinalCombinedOutput('');
     setSelectedCombineFormat('simple');
-    // Reset session token counters
     setSessionTotalTokens(0);
     setSessionTextTokensUsed(0);
     setSessionImageTokensUsed(0);
-    toast({ title: 'Cleared', description: 'All fields and session data have been cleared.' });
+    toast({ title: t('toastMessages.clearedTitle'), description: t('toastMessages.allClearedMessage') });
   };
   
   if (!clientLoaded) {
-    return <div className="flex justify-center items-center min-h-screen"><LoadingSpinner size={48} /></div>;
+    // Consider translating this if it's shown for long
+    return <div className="flex justify-center items-center min-h-screen"><LoadingSpinner size={48} /> <p className="ml-2">{t('loadingSpinnerClient')}</p></div>;
   }
 
   const tokensLeftInSession = Math.max(0, ESTIMATED_INITIAL_SESSION_TOKENS - sessionTotalTokens);
@@ -270,35 +271,35 @@ export default function ArticleForgePage() {
   const renderTokenUsageDetails = () => (
     <div className="space-y-2 text-sm">
       <div className="flex justify-between">
-        <span className="text-muted-foreground">Tokens Used (Last Op):</span>
+        <span className="text-muted-foreground">{tTokenUsage('lastOp')}</span>
         <span className="font-semibold">{currentRequestTokens?.toLocaleString() ?? 'N/A'}</span>
       </div>
       {(detailedTokenUsage?.text || detailedTokenUsage?.image) && (
           <div className="pl-2 text-xs">
             {detailedTokenUsage.text !== undefined && (
                 <div className="flex justify-between">
-                    <span className="text-muted-foreground">└ Text:</span>
+                    <span className="text-muted-foreground">{tTokenUsage('textTokens')}</span>
                     <span className="font-semibold">{detailedTokenUsage.text.toLocaleString()}</span>
                 </div>
             )}
             {detailedTokenUsage.image !== undefined && (
                 <div className="flex justify-between">
-                    <span className="text-muted-foreground">└ Image:</span>
+                    <span className="text-muted-foreground">{tTokenUsage('imageTokens')}</span>
                     <span className="font-semibold">{detailedTokenUsage.image.toLocaleString()}</span>
                 </div>
             )}
         </div>
       )}
       <div className="flex justify-between">
-        <span className="text-muted-foreground">Total Tokens (Session):</span>
+        <span className="text-muted-foreground">{tTokenUsage('sessionTotal')}</span>
         <span className="font-semibold">{sessionTotalTokens.toLocaleString()}</span>
       </div>
        <div className="flex justify-between">
-        <span className="text-muted-foreground">Assumed Session Quota:</span>
+        <span className="text-muted-foreground">{tTokenUsage('sessionQuota')}</span>
         <span className="font-semibold">{ESTIMATED_INITIAL_SESSION_TOKENS.toLocaleString()}</span>
       </div>
       <div className="flex justify-between">
-        <span className="text-muted-foreground">Est. Tokens Remaining:</span>
+        <span className="text-muted-foreground">{tTokenUsage('estRemaining')}</span>
         <span className={`font-semibold ${tokensLeftInSession <= 0 ? 'text-destructive' : 'text-foreground'}`}>
           {tokensLeftInSession.toLocaleString()}
         </span>
@@ -317,7 +318,7 @@ export default function ArticleForgePage() {
             <AccordionTrigger className="flex w-full items-center justify-between rounded-t-lg p-4 text-left hover:no-underline data-[state=open]:rounded-b-none data-[state=open]:border-b">
               <div className="flex items-center text-lg font-semibold">
                 <Coins className="mr-2 h-5 w-5 text-primary" />
-                Token Usage
+                {tTokenUsage('title')}
               </div>
             </AccordionTrigger>
             <AccordionContent className="p-4 data-[state=closed]:p-0">
@@ -329,20 +330,20 @@ export default function ArticleForgePage() {
       
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center"><Wand2 className="mr-2 h-6 w-6 text-primary" />Create New Article</CardTitle>
-          <CardDescription>Enter a prompt to generate an article using AI. Be specific for best results.</CardDescription>
+          <CardTitle className="flex items-center"><Wand2 className="mr-2 h-6 w-6 text-primary" />{t('createArticleCard.title')}</CardTitle>
+          <CardDescription>{t('createArticleCard.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="prompt" className="text-lg font-medium">Article Prompt</Label>
+            <Label htmlFor="prompt" className="text-lg font-medium">{t('createArticleCard.promptLabel')}</Label>
             <Textarea
               id="prompt"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g., Write an article about the future of renewable energy, focusing on solar and wind power innovations..."
+              placeholder={t('createArticleCard.promptPlaceholder')}
               className="min-h-[120px] mt-1 text-base"
               disabled={isLoading}
-              aria-label="Article prompt input"
+              aria-label={t('createArticleCard.promptLabel')}
             />
           </div>
           <div className="flex items-center space-x-2 pt-2">
@@ -351,21 +352,21 @@ export default function ArticleForgePage() {
               checked={generateMainImage}
               onCheckedChange={setGenerateMainImage}
               disabled={isLoading}
-              aria-label="Toggle main image generation for the article"
+              aria-label={t('createArticleCard.generateImageLabel')}
             />
             <Label htmlFor="generateMainImage" className="text-base font-normal cursor-pointer">
               <ImageIcon className="inline-block mr-2 h-5 w-5 align-text-bottom" />
-              Generate a main image for the article
+              {t('createArticleCard.generateImageLabel')}
             </Label>
           </div>
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <Button onClick={clearAll} variant="outline" disabled={isLoading}>
-            <Eraser className="mr-2" /> Clear All
+            <Eraser className="mr-2" /> {t('createArticleCard.clearAllButton')}
           </Button>
           <Button onClick={handleCreateArticle} disabled={isLoading || !prompt.trim()}>
             {isCreating ? <LoadingSpinner className="mr-2" /> : <Wand2 className="mr-2" />}
-            Create Article
+            {t('createArticleCard.createArticleButton')}
           </Button>
         </CardFooter>
       </Card>
@@ -373,8 +374,8 @@ export default function ArticleForgePage() {
       {articleMarkdown && (
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center"><Edit3 className="mr-2 h-6 w-6 text-primary" />Edit & Refine Article</CardTitle>
-            <CardDescription>Edit the generated Markdown directly or use AI to revise it. The main image (if generated) is at the top.</CardDescription>
+            <CardTitle className="flex items-center"><Edit3 className="mr-2 h-6 w-6 text-primary" />{t('editArticleCard.title')}</CardTitle>
+            <CardDescription>{t('editArticleCard.description')}</CardDescription>
           </CardHeader>
           <CardContent>
             <ArticleEditor
@@ -386,7 +387,7 @@ export default function ArticleForgePage() {
           <CardFooter>
             <Button onClick={handleReviseArticle} disabled={isLoading || !articleMarkdown.trim()} className="w-full md:w-auto">
               {isRevising ? <LoadingSpinner className="mr-2" /> : <Edit3 className="mr-2" />}
-              Revise Article with AI
+              {t('editArticleCard.reviseButton')}
             </Button>
           </CardFooter>
         </Card>
@@ -395,19 +396,19 @@ export default function ArticleForgePage() {
       {articleMarkdown && (
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center"><Languages className="mr-2 h-6 w-6 text-primary" />Translate Article</CardTitle>
-            <CardDescription>Translate the current article into another language.</CardDescription>
+            <CardTitle className="flex items-center"><Languages className="mr-2 h-6 w-6 text-primary" />{t('translateArticleCard.title')}</CardTitle>
+            <CardDescription>{t('translateArticleCard.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="targetLanguage" className="text-lg font-medium">Target Language</Label>
+              <Label htmlFor="targetLanguage" className="text-lg font-medium">{t('translateArticleCard.targetLanguageLabel')}</Label>
               <Select 
                 value={targetLanguage} 
                 onValueChange={setTargetLanguage}
                 disabled={isLoading}
               >
-                <SelectTrigger id="targetLanguage" className="mt-1 text-base" aria-label="Select target language for translation">
-                  <SelectValue placeholder="Select a language" />
+                <SelectTrigger id="targetLanguage" className="mt-1 text-base" aria-label={t('translateArticleCard.targetLanguageLabel')}>
+                  <SelectValue placeholder={t('translateArticleCard.selectLanguagePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {availableLanguages.map(lang => (
@@ -422,7 +423,7 @@ export default function ArticleForgePage() {
           <CardFooter>
             <Button onClick={handleTranslateArticle} disabled={isLoading || !articleMarkdown.trim() || !targetLanguage.trim()} className="w-full md:w-auto">
               {isTranslating ? <LoadingSpinner className="mr-2" /> : <Languages className="mr-2" />}
-              Translate Article
+              {t('translateArticleCard.translateButton')}
             </Button>
           </CardFooter>
         </Card>
@@ -431,29 +432,29 @@ export default function ArticleForgePage() {
       {translatedArticleMarkdown && originalArticleForTranslation && (
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center"><Globe className="mr-2 h-6 w-6 text-primary" />Translation Result</CardTitle>
-            <CardDescription>Showing original article and its translation to {targetLanguage}.</CardDescription>
+            <CardTitle className="flex items-center"><Globe className="mr-2 h-6 w-6 text-primary" />{t('translationResultCard.title')}</CardTitle>
+            <CardDescription>{t('translationResultCard.description', { targetLanguage })}</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="flex flex-col">
               <CardHeader>
-                <CardTitle className="flex items-center text-xl"><FileText size={20} className="mr-2 text-muted-foreground" /> Original Article</CardTitle>
+                <CardTitle className="flex items-center text-xl"><FileText size={20} className="mr-2 text-muted-foreground" /> {t('translationResultCard.originalArticleTitle')}</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
                  <Textarea
                     value={originalArticleForTranslation}
                     readOnly 
                     className="min-h-[300px] text-sm resize-y bg-muted/20 h-full"
-                    aria-label="Original article content before translation (Markdown)"
+                    aria-label={t('translationResultCard.originalArticleAriaLabel')}
                   />
               </CardContent>
             </Card>
             <Card className="flex flex-col">
               <CardHeader>
-                <CardTitle className="flex items-center text-xl"><Languages size={20} className="mr-2 text-muted-foreground" /> Translated to {targetLanguage}</CardTitle>
+                <CardTitle className="flex items-center text-xl"><Languages size={20} className="mr-2 text-muted-foreground" /> {t('translationResultCard.translatedArticleTitle', {targetLanguage})}</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
-                <MarkdownPreview markdown={translatedArticleMarkdown} minHeight="300px" className="h-full" ariaLabel={`Article translated to ${targetLanguage}`}/>
+                <MarkdownPreview markdown={translatedArticleMarkdown} minHeight="300px" className="h-full" ariaLabel={t('translationResultCard.translatedPreviewAriaLabel', {targetLanguage})}/>
               </CardContent>
             </Card>
           </CardContent>
@@ -463,12 +464,12 @@ export default function ArticleForgePage() {
       {originalArticleForTranslation && translatedArticleMarkdown && (
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center"><Layers className="mr-2 h-6 w-6 text-primary" />Refine Final Format</CardTitle>
-            <CardDescription>Combine the original and translated article into a single output. Choose your preferred format.</CardDescription>
+            <CardTitle className="flex items-center"><Layers className="mr-2 h-6 w-6 text-primary" />{t('refineFormatCard.title')}</CardTitle>
+            <CardDescription>{t('refineFormatCard.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <Label className="text-lg font-medium">Combination Format</Label>
+              <Label className="text-lg font-medium">{t('refineFormatCard.combinationFormatLabel')}</Label>
               <RadioGroup
                 value={selectedCombineFormat}
                 onValueChange={(value: 'simple' | 'detailsTag') => setSelectedCombineFormat(value)}
@@ -477,22 +478,22 @@ export default function ArticleForgePage() {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="simple" id="format-simple" />
-                  <Label htmlFor="format-simple" className="font-normal">Simple (Original then Translation with separator)</Label>
+                  <Label htmlFor="format-simple" className="font-normal">{t('refineFormatCard.formatSimpleLabel')}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="detailsTag" id="format-details" />
-                  <Label htmlFor="format-details" className="font-normal">Details Tag (Translation expandable under original)</Label>
+                  <Label htmlFor="format-details" className="font-normal">{t('refineFormatCard.formatDetailsLabel')}</Label>
                 </div>
               </RadioGroup>
             </div>
             <Button onClick={handleCombineFormat} disabled={isLoading || !originalArticleForTranslation.trim() || !translatedArticleMarkdown.trim()} className="w-full md:w-auto">
               {isCombiningFormat ? <LoadingSpinner className="mr-2" /> : <CheckSquare className="mr-2" />}
-              Generate Combined Output
+              {t('refineFormatCard.generateCombinedButton')}
             </Button>
 
             {finalCombinedOutput && (
               <div className="mt-6">
-                <h3 className="text-xl font-semibold mb-2">Combined Article Output:</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('refineFormatCard.combinedOutputTitle')}</h3>
                  <ArticleEditor
                     markdown={finalCombinedOutput}
                     onMarkdownChange={setFinalCombinedOutput}
@@ -509,27 +510,27 @@ export default function ArticleForgePage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <FileTerminal className="mr-2 h-6 w-6 text-primary" />
-              Session Summary & Final Output
+              {t('sessionSummaryCard.title')}
             </CardTitle>
-            <CardDescription>A breakdown of your current session's activity and the final combined article, if generated.</CardDescription>
+            <CardDescription>{t('sessionSummaryCard.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <h4 className="text-lg font-semibold mb-2">Token Usage (This Session)</h4>
+              <h4 className="text-lg font-semibold mb-2">{t('sessionSummaryCard.tokenUsageTitle')}</h4>
               <div className="space-y-1 text-sm p-3 border rounded-md bg-muted/30">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Tokens Used:</span>
+                  <span className="text-muted-foreground">{t('sessionSummaryCard.totalTokensUsedLabel')}</span>
                   <span className="font-semibold">{sessionTotalTokens.toLocaleString()}</span>
                 </div>
                 {sessionTextTokensUsed > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">  └ Text Generation Tokens:</span>
+                    <span className="text-muted-foreground">{t('sessionSummaryCard.textGenerationTokensLabel')}</span>
                     <span className="font-semibold">{sessionTextTokensUsed.toLocaleString()}</span>
                   </div>
                 )}
                 {sessionImageTokensUsed > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">  └ Image Generation Tokens:</span>
+                    <span className="text-muted-foreground">{t('sessionSummaryCard.imageGenerationTokensLabel')}</span>
                     <span className="font-semibold">{sessionImageTokensUsed.toLocaleString()}</span>
                   </div>
                 )}
@@ -538,24 +539,24 @@ export default function ArticleForgePage() {
 
             {finalCombinedOutput.trim() && (
               <div>
-                <Label htmlFor="finalOutputReadOnly" className="text-lg font-medium">Final Combined Article (Read-only)</Label>
+                <Label htmlFor="finalOutputReadOnly" className="text-lg font-medium">{t('sessionSummaryCard.finalCombinedArticleLabel')}</Label>
                 <Textarea
                   id="finalOutputReadOnly"
                   value={finalCombinedOutput}
                   readOnly
                   className="min-h-[200px] mt-1 text-base bg-muted/30"
-                  aria-label="Final combined article output (read-only)"
+                  aria-label={t('sessionSummaryCard.finalCombinedArticleLabel')}
                 />
               </div>
             )}
             {!finalCombinedOutput.trim() && (
-              <p className="text-muted-foreground italic">No final combined article was generated in this session.</p>
+              <p className="text-muted-foreground italic">{t('sessionSummaryCard.noFinalCombinedArticleMessage')}</p>
             )}
           </CardContent>
           <CardFooter>
             <Button onClick={handleCopySummary} disabled={isLoading} className="w-full md:w-auto">
               {isCopying ? <LoadingSpinner className="mr-2" /> : <ClipboardCopy className="mr-2" />}
-              Copy Full Summary & Output
+              {t('sessionSummaryCard.copySummaryButton')}
             </Button>
           </CardFooter>
         </Card>
@@ -563,4 +564,3 @@ export default function ArticleForgePage() {
     </div>
   );
 }
-

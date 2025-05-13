@@ -1,0 +1,115 @@
+{
+  "Layout": {
+    "footerCopyright": "© {year} ArticleForge AI. Todos los derechos reservados."
+  },
+  "Header": {
+    "appName": "ArticleForge IA"
+  },
+  "LanguageSwitcher": {
+    "selectLanguage": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español"
+  },
+  "TokenUsage": {
+    "title": "Uso de Tokens",
+    "lastOp": "Tokens Usados (Últ. Op):",
+    "textTokens": "└ Texto:",
+    "imageTokens": "└ Imagen:",
+    "sessionTotal": "Tokens Totales (Sesión):",
+    "sessionQuota": "Cuota de Sesión Asumida:",
+    "estRemaining": "Tokens Restantes Est.:"
+  },
+  "ArticleForgePage": {
+    "createArticleCard": {
+      "title": "Crear Nuevo Artículo",
+      "description": "Introduce un prompt para generar un artículo usando IA. Sé específico para mejores resultados.",
+      "promptLabel": "Prompt del Artículo",
+      "promptPlaceholder": "Ej: Escribe un artículo sobre el futuro de la energía renovable, enfocándote en innovaciones de energía solar y eólica...",
+      "generateImageLabel": "Generar una imagen principal para el artículo",
+      "clearAllButton": "Limpiar Todo",
+      "createArticleButton": "Crear Artículo",
+      "creatingArticleMessage": "Creando artículo...",
+      "creatingArticleWithImageMessage": "Creando artículo y generando imagen..."
+    },
+    "editArticleCard": {
+      "title": "Editar y Refinar Artículo",
+      "description": "Edita el Markdown generado directamente o usa IA para revisarlo. La imagen principal (si se generó) está arriba.",
+      "reviseButton": "Revisar Artículo con IA",
+      "revisingArticleMessage": "Revisando artículo..."
+    },
+    "translateArticleCard": {
+      "title": "Traducir Artículo",
+      "description": "Traduce el artículo actual a otro idioma.",
+      "targetLanguageLabel": "Idioma de Destino",
+      "selectLanguagePlaceholder": "Selecciona un idioma",
+      "translateButton": "Traducir Artículo",
+      "translatingArticleMessage": "Traduciendo artículo..."
+    },
+    "translationResultCard": {
+      "title": "Resultado de la Traducción",
+      "description": "Mostrando artículo original y su traducción a {targetLanguage}.",
+      "originalArticleTitle": "Artículo Original",
+      "translatedArticleTitle": "Traducido a {targetLanguage}",
+      "originalArticleAriaLabel": "Contenido del artículo original antes de la traducción (Markdown)",
+      "translatedPreviewAriaLabel": "Artículo traducido a {targetLanguage}"
+    },
+    "refineFormatCard": {
+      "title": "Refinar Formato Final",
+      "description": "Combina el artículo original y el traducido en una única salida. Elige tu formato preferido.",
+      "combinationFormatLabel": "Formato de Combinación",
+      "formatSimpleLabel": "Simple (Original y luego Traducción con separador)",
+      "formatDetailsLabel": "Etiqueta Details (Traducción expandible bajo el original)",
+      "generateCombinedButton": "Generar Salida Combinada",
+      "generatingCombinedMessage": "Generando formato de artículo combinado...",
+      "combinedOutputTitle": "Salida del Artículo Combinado:"
+    },
+    "sessionSummaryCard": {
+      "title": "Resumen de Sesión y Salida Final",
+      "description": "Un desglose de la actividad de tu sesión actual y el artículo combinado final, si se generó.",
+      "tokenUsageTitle": "Uso de Tokens (Esta Sesión)",
+      "totalTokensUsedLabel": "Tokens Totales Usados:",
+      "textGenerationTokensLabel": "  └ Tokens de Generación de Texto:",
+      "imageGenerationTokensLabel": "  └ Tokens de Generación de Imagen:",
+      "finalCombinedArticleLabel": "Artículo Combinado Final (Solo lectura)",
+      "noFinalCombinedArticleMessage": "No se generó ningún artículo combinado final en esta sesión.",
+      "copySummaryButton": "Copiar Resumen Completo y Salida",
+      "preparingSummaryMessage": "Preparando resumen para copiar..."
+    },
+    "toastMessages": {
+      "errorTitle": "Error",
+      "successTitle": "Éxito",
+      "clearedTitle": "Limpiado",
+      "promptEmptyError": "El prompt no puede estar vacío.",
+      "articleEmptyError": "El contenido del artículo no puede estar vacío.",
+      "targetLanguageEmptyError": "El idioma de destino no puede estar vacío.",
+      "combineEmptyError": "Los artículos original y traducido deben existir para combinar.",
+      "articleCreatedSuccess": "¡Artículo creado con éxito!",
+      "articleCreatedWithImageSuccess": "¡Artículo creado con éxito! Imagen principal generada.",
+      "articleRevisedSuccess": "¡Artículo revisado con éxito!",
+      "articleTranslatedSuccess": "¡Artículo traducido a {targetLanguage} con éxito!",
+      "combinedFormatSuccess": "¡Formato de artículo combinado generado!",
+      "summaryCopiedSuccess": "¡Resumen de la sesión copiado al portapapeles!",
+      "createFailedError": "Error al crear el artículo. Por favor, inténtalo de nuevo.",
+      "reviseFailedError": "Error al revisar el artículo. Por favor, inténtalo de nuevo.",
+      "translateFailedError": "Error al traducir el artículo. Por favor, inténtalo de nuevo.",
+      "copySummaryFailedError": "Error al copiar el resumen. Por favor, inténtalo de nuevo o copia manualmente.",
+      "allClearedMessage": "Todos los campos y datos de la sesión han sido borrados."
+    },
+    "loadingSpinnerClient": "Cargando ArticleForge IA..."
+  },
+  "ArticleEditor": {
+    "markdownEditorTitle": "Editor Markdown",
+    "previewTitle": "Vista Previa",
+    "markdownPlaceholder": "Tu artículo en formato Markdown aparecerá aquí...",
+    "ariaLabelEditor": "Editor Markdown para el contenido del artículo",
+    "ariaLabelPreview": "Vista previa del artículo",
+    "noContentToDisplay": "No hay contenido para mostrar."
+  },
+  "GlobalLoader": {
+    "defaultLoadingMessage": "Procesando..."
+  },
+  "MarkdownPreview": {
+    "defaultAriaLabel": "Vista previa del contenido Markdown",
+    "noContentToDisplay": "No hay contenido para mostrar."
+  }
+}

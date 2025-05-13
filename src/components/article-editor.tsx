@@ -2,6 +2,7 @@
 "use client";
 
 import type { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import MarkdownPreview from '@/components/markdown-preview';
@@ -13,29 +14,36 @@ interface ArticleEditorProps {
 }
 
 const ArticleEditor: FC<ArticleEditorProps> = ({ markdown, onMarkdownChange, isLoading = false }) => {
+  const t = useTranslations('ArticleEditor');
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card className="flex flex-col">
         <CardHeader>
-          <CardTitle>Markdown Editor</CardTitle>
+          <CardTitle>{t('markdownEditorTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="flex-grow">
           <Textarea
             value={markdown}
             onChange={(e) => onMarkdownChange(e.target.value)}
-            placeholder="Your article in Markdown format will appear here..."
+            placeholder={t('markdownPlaceholder')}
             className="min-h-[400px] text-sm resize-y h-full"
             disabled={isLoading}
-            aria-label="Markdown editor for article content"
+            aria-label={t('ariaLabelEditor')}
           />
         </CardContent>
       </Card>
       <Card className="flex flex-col">
         <CardHeader>
-          <CardTitle>Preview</CardTitle>
+          <CardTitle>{t('previewTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="flex-grow">
-          <MarkdownPreview markdown={markdown} ariaLabel="Article preview" className="h-full" minHeight="400px" />
+          <MarkdownPreview 
+            markdown={markdown} 
+            ariaLabel={t('ariaLabelPreview')} 
+            className="h-full" 
+            minHeight="400px" 
+          />
         </CardContent>
       </Card>
     </div>

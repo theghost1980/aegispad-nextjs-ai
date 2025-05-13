@@ -2,32 +2,36 @@
 "use client";
 
 import type { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw'; // Import rehype-raw
+import rehypeRaw from 'rehype-raw'; 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 interface MarkdownPreviewProps {
   markdown: string;
   className?: string;
-  minHeight?: string; // e.g., "400px"
+  minHeight?: string; 
   ariaLabel?: string;
 }
 
-const MarkdownPreview: FC<MarkdownPreviewProps> = ({ markdown, className, minHeight = '400px', ariaLabel = "Markdown content preview" }) => {
-  // Determine if className already includes height-related classes to avoid style conflicts
+const MarkdownPreview: FC<MarkdownPreviewProps> = ({ markdown, className, minHeight = '400px', ariaLabel }) => {
+  const t = useTranslations('MarkdownPreview');
+  const finalAriaLabel = ariaLabel || t('defaultAriaLabel');
+  const noContentMessage = t('noContentToDisplay');
+
   const hasHeightClass = className?.includes('h-') || className?.includes('min-h-');
   
   return (
     <ScrollArea 
       className={cn("p-4 border rounded-md bg-muted/30", className)} 
-      style={!hasHeightClass && minHeight ? { minHeight } : {}} // Apply minHeight style only if not overridden by className
-      aria-label={ariaLabel}
+      style={!hasHeightClass && minHeight ? { minHeight } : {}}
+      aria-label={finalAriaLabel}
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]} // Add rehypeRaw here
+        rehypePlugins={[rehypeRaw]} 
         className="prose prose-sm dark:prose-invert max-w-none"
         components={{
           h1: ({node, ...props}) => <h1 className="text-2xl font-bold my-2" {...props} />,
@@ -49,11 +53,10 @@ const MarkdownPreview: FC<MarkdownPreviewProps> = ({ markdown, className, minHei
           details: ({node, ...props}) => <details className="my-2 p-2 border rounded-md" {...props} />,
           summary: ({node, ...props}) => <summary className="font-semibold cursor-pointer" {...props} />,
           hr: ({node, ...props}) => <hr className="my-4 border-border" {...props} />,
-          // Ensure img tags are handled for images included in markdown
           img: ({node, ...props}) => <img className="max-w-full h-auto rounded-md my-2" {...props} />,
         }}
       >
-        {markdown || "No content to display."}
+        {markdown || noContentMessage}
       </ReactMarkdown>
     </ScrollArea>
   );
