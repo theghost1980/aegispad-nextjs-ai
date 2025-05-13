@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { createArticle, CreateArticleInput, CreateArticleOutput } from '@/ai/flows/create-article';
 import { reviseArticle, ReviseArticleInput, ReviseArticleOutput } from '@/ai/flows/revise-article';
 import { translateArticle, TranslateArticleInput, TranslateArticleOutput } from '@/ai/flows/translate-article';
-import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon, Layers, CheckSquare } from 'lucide-react';
+import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon, Layers, CheckSquare, FileTerminal, ClipboardCopy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -35,9 +35,7 @@ const availableLanguages = [
   { value: 'English', label: 'English' },
 ];
 
-const ESTIMATED_INITIAL_SESSION_TOKENS = 100000; 
-// const HEADER_HEIGHT_OFFSET = "3.5rem"; // No longer needed for token section stickiness
-// const SCROLL_THRESHOLD = 50; // No longer needed
+const ESTIMATED_INITIAL_SESSION_TOKENS = 100000;
 
 export default function ArticleForgePage() {
   const [prompt, setPrompt] = useState<string>('');
@@ -52,6 +50,9 @@ export default function ArticleForgePage() {
   const [currentRequestTokens, setCurrentRequestTokens] = useState<number | null>(null);
   const [sessionTotalTokens, setSessionTotalTokens] = useState<number>(0);
   const [detailedTokenUsage, setDetailedTokenUsage] = useState<{text?: number, image?:number} | null>(null);
+  const [sessionTextTokensUsed, setSessionTextTokensUsed] = useState<number>(0);
+  const [sessionImageTokensUsed, setSessionImageTokensUsed] = useState<number>(0);
+
 
   const [finalCombinedOutput, setFinalCombinedOutput] = useState<string>('');
   const [selectedCombineFormat, setSelectedCombineFormat] = useState<'simple' | 'detailsTag'>('simple');
@@ -60,32 +61,33 @@ export default function ArticleForgePage() {
   const [isRevising, startReviseTransition] = useTransition();
   const [isTranslating, startTranslateTransition] = useTransition();
   const [isCombiningFormat, startCombineFormatTransition] = useTransition();
+  const [isCopying, startCopyTransition] = useTransition();
 
-  // const [isScrolledDown, setIsScrolledDown] = useState(false); // Removed scroll state
   const [clientLoaded, setClientLoaded] = useState(false);
 
   const { toast } = useToast();
 
-  const isLoading = isCreating || isRevising || isTranslating || isCombiningFormat;
+  const isLoading = isCreating || isRevising || isTranslating || isCombiningFormat || isCopying;
   
   useEffect(() => {
     setClientLoaded(true);
   }, []);
 
-  // Removed useEffect for scroll handling:
-  // useEffect(() => {
-  //   const handleScroll = () => { ... };
-  //   window.addEventListener('scroll', handleScroll, { passive: true });
-  //   return () => { window.removeEventListener('scroll', handleScroll); };
-  // }, [isScrolledDown]);
-
-
   const handleTokenUpdate = (tokensUsed: number, details?: {text?: number, image?:number}) => {
     setCurrentRequestTokens(tokensUsed);
     setSessionTotalTokens(prevTotal => prevTotal + tokensUsed);
+    
     if (details) {
       setDetailedTokenUsage(details);
+      if (details.text) {
+        setSessionTextTokensUsed(prev => prev + (details.text || 0));
+      }
+      if (details.image) {
+        setSessionImageTokensUsed(prev => prev + (details.image || 0));
+      }
     } else {
+      // If no details, assume all tokens are for text (e.g. for revise/translate)
+      setSessionTextTokensUsed(prev => prev + tokensUsed);
       setDetailedTokenUsage(null);
     }
   };
@@ -134,7 +136,7 @@ export default function ArticleForgePage() {
         const input: ReviseArticleInput = { article: articleMarkdown };
         const result: ReviseArticleOutput = await reviseArticle(input);
         setArticleMarkdown(result.revisedArticle);
-        handleTokenUpdate(result.tokenUsage.totalTokens);
+        handleTokenUpdate(result.tokenUsage.totalTokens, { text: result.tokenUsage.totalTokens });
         setTranslatedArticleMarkdown('');
         setOriginalArticleForTranslation('');
         toast({ title: 'Success', description: 'Article revised successfully!' });
@@ -166,7 +168,7 @@ export default function ArticleForgePage() {
         const input: TranslateArticleInput = { article: articleMarkdown, targetLanguage };
         const result: TranslateArticleOutput = await translateArticle(input);
         setTranslatedArticleMarkdown(result.translatedArticle);
-        handleTokenUpdate(result.tokenUsage.totalTokens);
+        handleTokenUpdate(result.tokenUsage.totalTokens, { text: result.tokenUsage.totalTokens });
         toast({ title: 'Success', description: `Article translated to ${targetLanguage} successfully!` });
       } catch (error) {
         console.error('Error translating article:', error);
@@ -198,6 +200,46 @@ export default function ArticleForgePage() {
       toast({ title: 'Success', description: 'Combined article format generated!' });
     });
   };
+  
+  const generateSummaryTextForCopy = () => {
+    let summary = "Session Summary & Output\n";
+    summary += "=============================\n\n";
+    summary += "Token Usage (Session):\n";
+    summary += `-----------------------------\n`;
+    summary += `Total Tokens Used: ${sessionTotalTokens.toLocaleString()}\n`;
+    if (sessionTextTokensUsed > 0) {
+      summary += `  - Text Generation Tokens: ${sessionTextTokensUsed.toLocaleString()}\n`;
+    }
+    if (sessionImageTokensUsed > 0) {
+      summary += `  - Image Generation Tokens: ${sessionImageTokensUsed.toLocaleString()}\n`;
+    }
+    summary += "-----------------------------\n\n";
+  
+    if (finalCombinedOutput.trim()) {
+      summary += "Final Combined Article Output:\n";
+      summary += "-----------------------------\n";
+      summary += finalCombinedOutput;
+    } else {
+      summary += "No final article was generated in this session.\n";
+    }
+    return summary;
+  };
+
+  const handleCopySummary = () => {
+    startCopyTransition(async () => {
+      setCurrentOperationMessage('Preparing summary for copy...');
+      const summaryText = generateSummaryTextForCopy();
+      try {
+        await navigator.clipboard.writeText(summaryText);
+        toast({ title: 'Success', description: 'Session summary copied to clipboard!' });
+      } catch (err) {
+        console.error('Failed to copy summary: ', err);
+        toast({ title: 'Error', description: 'Failed to copy summary. Please try again or copy manually.', variant: 'destructive' });
+      } finally {
+        setCurrentOperationMessage(null);
+      }
+    });
+  };
 
 
   const clearAll = () => {
@@ -212,7 +254,11 @@ export default function ArticleForgePage() {
     setGenerateMainImage(false);
     setFinalCombinedOutput('');
     setSelectedCombineFormat('simple');
-    toast({ title: 'Cleared', description: 'All fields have been cleared.' });
+    // Reset session token counters
+    setSessionTotalTokens(0);
+    setSessionTextTokensUsed(0);
+    setSessionImageTokensUsed(0);
+    toast({ title: 'Cleared', description: 'All fields and session data have been cleared.' });
   };
   
   if (!clientLoaded) {
@@ -221,11 +267,10 @@ export default function ArticleForgePage() {
 
   const tokensLeftInSession = Math.max(0, ESTIMATED_INITIAL_SESSION_TOKENS - sessionTotalTokens);
 
-  // Simplified function to render only the details for the accordion content
   const renderTokenUsageDetails = () => (
     <div className="space-y-2 text-sm">
       <div className="flex justify-between">
-        <span className="text-muted-foreground">Tokens Used (Last Operation):</span>
+        <span className="text-muted-foreground">Tokens Used (Last Op):</span>
         <span className="font-semibold">{currentRequestTokens?.toLocaleString() ?? 'N/A'}</span>
       </div>
       {(detailedTokenUsage?.text || detailedTokenUsage?.image) && (
@@ -245,7 +290,7 @@ export default function ArticleForgePage() {
         </div>
       )}
       <div className="flex justify-between">
-        <span className="text-muted-foreground">Total Tokens Used (Session):</span>
+        <span className="text-muted-foreground">Total Tokens (Session):</span>
         <span className="font-semibold">{sessionTotalTokens.toLocaleString()}</span>
       </div>
        <div className="flex justify-between">
@@ -253,7 +298,7 @@ export default function ArticleForgePage() {
         <span className="font-semibold">{ESTIMATED_INITIAL_SESSION_TOKENS.toLocaleString()}</span>
       </div>
       <div className="flex justify-between">
-        <span className="text-muted-foreground">Tokens Remaining (this Session):</span>
+        <span className="text-muted-foreground">Est. Tokens Remaining:</span>
         <span className={`font-semibold ${tokensLeftInSession <= 0 ? 'text-destructive' : 'text-foreground'}`}>
           {tokensLeftInSession.toLocaleString()}
         </span>
@@ -266,7 +311,6 @@ export default function ArticleForgePage() {
     <div className="space-y-8">
       <GlobalLoader isLoading={isLoading} operationMessage={currentOperationMessage} />
       
-      {/* Floating, collapsible token usage section */}
       <div className="fixed top-[calc(3.5rem+1rem)] md:top-[calc(3.5rem+1.5rem)] right-4 md:right-6 z-50 w-[calc(100%-2rem)] md:w-auto max-w-xs md:max-w-sm">
         <Accordion type="single" collapsible className="w-full bg-card text-card-foreground shadow-xl rounded-lg border" defaultValue="token-stats">
           <AccordionItem value="token-stats" className="border-b-0 rounded-lg">
@@ -459,6 +503,64 @@ export default function ArticleForgePage() {
           </CardContent>
         </Card>
       )}
+
+      {sessionTotalTokens > 0 && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <FileTerminal className="mr-2 h-6 w-6 text-primary" />
+              Session Summary & Final Output
+            </CardTitle>
+            <CardDescription>A breakdown of your current session's activity and the final combined article, if generated.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <h4 className="text-lg font-semibold mb-2">Token Usage (This Session)</h4>
+              <div className="space-y-1 text-sm p-3 border rounded-md bg-muted/30">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Tokens Used:</span>
+                  <span className="font-semibold">{sessionTotalTokens.toLocaleString()}</span>
+                </div>
+                {sessionTextTokensUsed > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">  └ Text Generation Tokens:</span>
+                    <span className="font-semibold">{sessionTextTokensUsed.toLocaleString()}</span>
+                  </div>
+                )}
+                {sessionImageTokensUsed > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">  └ Image Generation Tokens:</span>
+                    <span className="font-semibold">{sessionImageTokensUsed.toLocaleString()}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {finalCombinedOutput.trim() && (
+              <div>
+                <Label htmlFor="finalOutputReadOnly" className="text-lg font-medium">Final Combined Article (Read-only)</Label>
+                <Textarea
+                  id="finalOutputReadOnly"
+                  value={finalCombinedOutput}
+                  readOnly
+                  className="min-h-[200px] mt-1 text-base bg-muted/30"
+                  aria-label="Final combined article output (read-only)"
+                />
+              </div>
+            )}
+            {!finalCombinedOutput.trim() && (
+              <p className="text-muted-foreground italic">No final combined article was generated in this session.</p>
+            )}
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleCopySummary} disabled={isLoading} className="w-full md:w-auto">
+              {isCopying ? <LoadingSpinner className="mr-2" /> : <ClipboardCopy className="mr-2" />}
+              Copy Full Summary & Output
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
     </div>
   );
 }
+
