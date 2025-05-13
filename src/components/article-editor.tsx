@@ -15,27 +15,27 @@ interface ArticleEditorProps {
 const ArticleEditor: FC<ArticleEditorProps> = ({ markdown, onMarkdownChange, isLoading = false }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card>
+      <Card className="flex flex-col">
         <CardHeader>
           <CardTitle>Markdown Editor</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-grow">
           <Textarea
             value={markdown}
             onChange={(e) => onMarkdownChange(e.target.value)}
             placeholder="Your article in Markdown format will appear here..."
-            className="min-h-[400px] text-sm resize-y"
+            className="min-h-[400px] text-sm resize-y h-full"
             disabled={isLoading}
             aria-label="Markdown editor for article content"
           />
         </CardContent>
       </Card>
-      <Card>
+      <Card className="flex flex-col">
         <CardHeader>
           <CardTitle>Preview</CardTitle>
         </CardHeader>
-        <CardContent>
-          <MarkdownPreview markdown={markdown} ariaLabel="Article preview" />
+        <CardContent className="flex-grow">
+          <MarkdownPreview markdown={markdown} ariaLabel="Article preview" className="h-full" minHeight="400px" />
         </CardContent>
       </Card>
     </div>

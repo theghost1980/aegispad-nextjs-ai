@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch'; // Added Switch import
+import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import ArticleEditor from '@/components/article-editor';
 import GlobalLoader from '@/components/global-loader';
 import LoadingSpinner from '@/components/loading-spinner';
@@ -16,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { createArticle, CreateArticleInput, CreateArticleOutput } from '@/ai/flows/create-article';
 import { reviseArticle, ReviseArticleInput, ReviseArticleOutput } from '@/ai/flows/revise-article';
 import { translateArticle, TranslateArticleInput, TranslateArticleOutput } from '@/ai/flows/translate-article';
-import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon } from 'lucide-react';
+import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon, Layers, CheckSquare } from 'lucide-react';
 
 const availableLanguages = [
   { value: 'Spanish', label: 'Spanish' },
@@ -38,7 +39,7 @@ export default function ArticleForgePage() {
   const [prompt, setPrompt] = useState<string>('');
   const [articleMarkdown, setArticleMarkdown] = useState<string>('');
   const [targetLanguage, setTargetLanguage] = useState<string>(availableLanguages[0].value);
-  const [generateMainImage, setGenerateMainImage] = useState<boolean>(false); // State for image generation toggle
+  const [generateMainImage, setGenerateMainImage] = useState<boolean>(false);
   
   const [currentOperationMessage, setCurrentOperationMessage] = useState<string | null>(null);
   const [translatedArticleMarkdown, setTranslatedArticleMarkdown] = useState<string>('');
@@ -46,17 +47,20 @@ export default function ArticleForgePage() {
 
   const [currentRequestTokens, setCurrentRequestTokens] = useState<number | null>(null);
   const [sessionTotalTokens, setSessionTotalTokens] = useState<number>(0);
-  // State for detailed token usage (optional, for more granular display if needed)
   const [detailedTokenUsage, setDetailedTokenUsage] = useState<{text?: number, image?:number} | null>(null);
 
+  const [finalCombinedOutput, setFinalCombinedOutput] = useState<string>('');
+  const [selectedCombineFormat, setSelectedCombineFormat] = useState<'simple' | 'detailsTag'>('simple');
 
   const [isCreating, startCreateTransition] = useTransition();
   const [isRevising, startReviseTransition] = useTransition();
   const [isTranslating, startTranslateTransition] = useTransition();
+  const [isCombiningFormat, startCombineFormatTransition] = useTransition();
+
 
   const { toast } = useToast();
 
-  const isLoading = isCreating || isRevising || isTranslating;
+  const isLoading = isCreating || isRevising || isTranslating || isCombiningFormat;
   
   const [clientLoaded, setClientLoaded] = useState(false);
   useEffect(() => {
@@ -81,11 +85,12 @@ export default function ArticleForgePage() {
     setCurrentOperationMessage(generateMainImage ? 'Creating article and generating image...' : 'Creating article...');
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
+    setFinalCombinedOutput(''); 
     startCreateTransition(async () => {
       try {
         const input: CreateArticleInput = { prompt, generateMainImage };
         const result: CreateArticleOutput = await createArticle(input);
-        setArticleMarkdown(result.article); // result.article now contains prepended image if generated
+        setArticleMarkdown(result.article);
         handleTokenUpdate(result.tokenUsage.totalTokens, {
           text: result.tokenUsage.textGenerationTokens,
           image: result.tokenUsage.imageGenerationTokens
@@ -110,10 +115,9 @@ export default function ArticleForgePage() {
     setCurrentOperationMessage('Revising article...');
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
+    setFinalCombinedOutput(''); 
     startReviseTransition(async () => {
       try {
-        // Note: If articleMarkdown contains a large base64 image, revision might be slow or hit limits.
-        // This is a known consideration for the current implementation.
         const input: ReviseArticleInput = { article: articleMarkdown };
         const result: ReviseArticleOutput = await reviseArticle(input);
         setArticleMarkdown(result.revisedArticle);
@@ -142,10 +146,9 @@ export default function ArticleForgePage() {
     setCurrentOperationMessage('Translating article...');
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
+    setFinalCombinedOutput('');
     startTranslateTransition(async () => {
       try {
-        // For translation, we might want to translate the text content without the potentially large image data URI.
-        // For now, it translates the whole markdown.
         setOriginalArticleForTranslation(articleMarkdown);
         const input: TranslateArticleInput = { article: articleMarkdown, targetLanguage };
         const result: TranslateArticleOutput = await translateArticle(input);
@@ -161,6 +164,29 @@ export default function ArticleForgePage() {
     });
   };
 
+  const handleCombineFormat = () => {
+    if (!originalArticleForTranslation.trim() || !translatedArticleMarkdown.trim()) {
+      toast({ title: 'Error', description: 'Original and translated articles must exist to combine.', variant: 'destructive' });
+      return;
+    }
+    setCurrentOperationMessage('Generating combined article format...');
+    startCombineFormatTransition(() => {
+      let combined = '';
+      const originalContent = originalArticleForTranslation;
+      const translatedContent = translatedArticleMarkdown;
+
+      if (selectedCombineFormat === 'simple') {
+        combined = `${originalContent}\n\n<hr />\n\n## Translation (${targetLanguage})\n\n${translatedContent}`;
+      } else { // detailsTag
+        combined = `${originalContent}\n\n<details>\n  <summary>Translation (${targetLanguage})</summary>\n\n${translatedContent}\n</details>`;
+      }
+      setFinalCombinedOutput(combined);
+      setCurrentOperationMessage(null);
+      toast({ title: 'Success', description: 'Combined article format generated!' });
+    });
+  };
+
+
   const clearAll = () => {
     setPrompt('');
     setArticleMarkdown('');
@@ -171,6 +197,8 @@ export default function ArticleForgePage() {
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setGenerateMainImage(false);
+    setFinalCombinedOutput('');
+    setSelectedCombineFormat('simple');
     toast({ title: 'Cleared', description: 'All fields have been cleared.' });
   };
   
@@ -331,27 +359,71 @@ export default function ArticleForgePage() {
             <CardDescription>Showing original article and its translation to {targetLanguage}.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center text-xl"><FileText size={20} className="mr-2 text-muted-foreground" /> Original Article</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-grow">
                  <Textarea
                     value={originalArticleForTranslation}
                     readOnly 
-                    className="min-h-[300px] text-sm resize-y bg-muted/20"
+                    className="min-h-[300px] text-sm resize-y bg-muted/20 h-full"
                     aria-label="Original article content before translation (Markdown)"
                   />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center text-xl"><Languages size={20} className="mr-2 text-muted-foreground" /> Translated to {targetLanguage}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <MarkdownPreview markdown={translatedArticleMarkdown} minHeight="300px" ariaLabel={`Article translated to ${targetLanguage}`}/>
+              <CardContent className="flex-grow">
+                <MarkdownPreview markdown={translatedArticleMarkdown} minHeight="300px" className="h-full" ariaLabel={`Article translated to ${targetLanguage}`}/>
               </CardContent>
             </Card>
+          </CardContent>
+        </Card>
+      )}
+
+      {originalArticleForTranslation && translatedArticleMarkdown && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center"><Layers className="mr-2 h-6 w-6 text-primary" />Refine Final Format</CardTitle>
+            <CardDescription>Combine the original and translated article into a single output. Choose your preferred format.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <Label className="text-lg font-medium">Combination Format</Label>
+              <RadioGroup
+                value={selectedCombineFormat}
+                onValueChange={(value: 'simple' | 'detailsTag') => setSelectedCombineFormat(value)}
+                className="mt-2 space-y-2"
+                disabled={isLoading}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="simple" id="format-simple" />
+                  <Label htmlFor="format-simple" className="font-normal">Simple (Original then Translation with separator)</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="detailsTag" id="format-details" />
+                  <Label htmlFor="format-details" className="font-normal">Details Tag (Translation expandable under original)</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            <Button onClick={handleCombineFormat} disabled={isLoading || !originalArticleForTranslation.trim() || !translatedArticleMarkdown.trim()} className="w-full md:w-auto">
+              {isCombiningFormat ? <LoadingSpinner className="mr-2" /> : <CheckSquare className="mr-2" />}
+              Generate Combined Output
+            </Button>
+
+            {finalCombinedOutput && (
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold mb-2">Combined Article Output:</h3>
+                 <ArticleEditor
+                    markdown={finalCombinedOutput}
+                    onMarkdownChange={setFinalCombinedOutput}
+                    isLoading={isCombiningFormat} 
+                  />
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

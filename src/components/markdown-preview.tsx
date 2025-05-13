@@ -10,13 +10,20 @@ import { cn } from '@/lib/utils';
 interface MarkdownPreviewProps {
   markdown: string;
   className?: string;
-  minHeight?: string;
+  minHeight?: string; // e.g., "400px"
   ariaLabel?: string;
 }
 
 const MarkdownPreview: FC<MarkdownPreviewProps> = ({ markdown, className, minHeight = '400px', ariaLabel = "Markdown content preview" }) => {
+  // Determine if className already includes height-related classes to avoid style conflicts
+  const hasHeightClass = className?.includes('h-') || className?.includes('min-h-');
+  
   return (
-    <ScrollArea className={cn("p-4 border rounded-md bg-muted/30", className)} style={{ minHeight }} aria-label={ariaLabel}>
+    <ScrollArea 
+      className={cn("p-4 border rounded-md bg-muted/30", className)} 
+      style={!hasHeightClass && minHeight ? { minHeight } : {}} // Apply minHeight style only if not overridden by className
+      aria-label={ariaLabel}
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         className="prose prose-sm dark:prose-invert max-w-none"
@@ -36,7 +43,10 @@ const MarkdownPreview: FC<MarkdownPreviewProps> = ({ markdown, className, minHei
             ) : (
               <code className="bg-muted px-1 py-0.5 rounded-sm" {...props}>{children}</code>
             );
-          }
+          },
+          details: ({node, ...props}) => <details className="my-2 p-2 border rounded-md" {...props} />,
+          summary: ({node, ...props}) => <summary className="font-semibold cursor-pointer" {...props} />,
+          hr: ({node, ...props}) => <hr className="my-4 border-border" {...props} />,
         }}
       >
         {markdown || "No content to display."}
