@@ -31,6 +31,8 @@ const availableLanguages = [
   { value: 'English', label: 'English' },
 ];
 
+const ESTIMATED_INITIAL_SESSION_TOKENS = 100000; // Arbitrary value for session token tracking
+
 export default function ArticleForgePage() {
   const [prompt, setPrompt] = useState<string>('');
   const [articleMarkdown, setArticleMarkdown] = useState<string>('');
@@ -147,13 +149,16 @@ export default function ArticleForgePage() {
     setOriginalArticleForTranslation('');
     setCurrentOperationMessage(null);
     setCurrentRequestTokens(null);
-    // sessionTotalTokens is intentionally not reset by clearAll
+    // sessionTotalTokens and by extension tokensLeftInSession are intentionally not reset by clearAll
+    // to persist session-wide token tracking.
     toast({ title: 'Cleared', description: 'All fields have been cleared.' });
   };
   
   if (!clientLoaded) {
     return <div className="flex justify-center items-center min-h-screen"><LoadingSpinner size={48} /></div>;
   }
+
+  const tokensLeftInSession = Math.max(0, ESTIMATED_INITIAL_SESSION_TOKENS - sessionTotalTokens);
 
   return (
     <div className="space-y-8">
@@ -167,11 +172,21 @@ export default function ArticleForgePage() {
         <CardContent className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Tokens Used (Last Operation):</span>
-            <span className="font-semibold">{currentRequestTokens ?? 'N/A'}</span>
+            <span className="font-semibold">{currentRequestTokens?.toLocaleString() ?? 'N/A'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Total Tokens Used (Session):</span>
-            <span className="font-semibold">{sessionTotalTokens}</span>
+            <span className="font-semibold">{sessionTotalTokens.toLocaleString()}</span>
+          </div>
+           <div className="flex justify-between">
+            <span className="text-muted-foreground">Assumed Session Quota:</span>
+            <span className="font-semibold">{ESTIMATED_INITIAL_SESSION_TOKENS.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Tokens Remaining (this Session):</span>
+            <span className={`font-semibold ${tokensLeftInSession <= 0 ? 'text-destructive' : ''}`}>
+              {tokensLeftInSession.toLocaleString()}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -276,10 +291,9 @@ export default function ArticleForgePage() {
                 <CardTitle className="flex items-center text-xl"><FileText size={20} className="mr-2 text-muted-foreground" /> Original Article</CardTitle>
               </CardHeader>
               <CardContent>
-                {/* Displaying original article in Markdown format for editing (as per previous implementation pattern) */}
                  <Textarea
                     value={originalArticleForTranslation}
-                    readOnly // Assuming it's not meant to be editable here, just displayed as raw markdown
+                    readOnly 
                     className="min-h-[300px] text-sm resize-y bg-muted/20"
                     aria-label="Original article content before translation (Markdown)"
                   />
