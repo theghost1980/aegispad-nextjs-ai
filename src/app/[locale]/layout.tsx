@@ -5,7 +5,7 @@ import '../globals.css'; // Adjusted path
 import Header from '@/components/header';
 import { Toaster } from "@/components/ui/toaster";
 import {NextIntlClientProvider} from 'next-intl';
-import {getMessages, getTranslations} from 'next-intl/server';
+import {getMessages, getTranslations, getLocale} from 'next-intl/server';
 import LanguageSwitcher from '@/components/language-switcher';
 
 const inter = Inter({ 
@@ -20,14 +20,10 @@ const robotoMono = Roboto_Mono({
 });
 
 export async function generateMetadata({params: {locale}}: {params: {locale: string}}): Promise<Metadata> {
-  // Assuming you have a 'Layout.title' and 'Layout.description' in your message files
-  // For simplicity, using fixed values now, but you can fetch them:
-  // const t = await getTranslations({locale, namespace: 'Layout'});
-  // title: t('title'),
-  // description: t('description')
+  // const t = await getTranslations({locale, namespace: 'Layout'}); // Assuming you have a 'Layout.title'
   return {
-    title: 'ArticleForge AI',
-    description: 'Create, revise, and translate articles with AI.',
+    title: 'AegisPad', // Updated app name
+    description: 'Create, revise, and translate articles with AI.', // Description can remain
   };
 }
 
@@ -39,6 +35,7 @@ export default async function RootLayout({
   params: {locale: string};
 }>) {
   const messages = await getMessages();
+  // const currentLocale = await getLocale(); // No need to call getLocale() again if you have params.locale
   const t = await getTranslations({locale, namespace: 'Layout'});
   const tHeader = await getTranslations({locale, namespace: 'Header'});
 

@@ -1,9 +1,10 @@
+
 {
   "Layout": {
-    "footerCopyright": "© {year} ArticleForge AI. All rights reserved."
+    "footerCopyright": "© {year} AegisPad. All rights reserved."
   },
   "Header": {
-    "appName": "ArticleForge AI"
+    "appName": "AegisPad"
   },
   "LanguageSwitcher": {
     "selectLanguage": "Language",
@@ -43,7 +44,7 @@
       "targetLanguageLabel": "Target Language",
       "selectLanguagePlaceholder": "Select a language",
       "translateButton": "Translate Article",
-      "translatingArticleMessage": "Translating article..."
+      "translatingArticleMessage": "Traduciendo artículo..."
     },
     "translationResultCard": {
       "title": "Translation Result",
@@ -95,7 +96,7 @@
       "copySummaryFailedError": "Failed to copy summary. Please try again or copy manually.",
       "allClearedMessage": "All fields and session data have been cleared."
     },
-    "loadingSpinnerClient": "Loading ArticleForge AI..."
+    "loadingSpinnerClient": "Loading AegisPad..."
   },
   "ArticleEditor": {
     "markdownEditorTitle": "Markdown Editor",

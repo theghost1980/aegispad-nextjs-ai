@@ -1,9 +1,10 @@
+
 {
   "Layout": {
-    "footerCopyright": "© {year} ArticleForge AI. Todos los derechos reservados."
+    "footerCopyright": "© {year} AegisPad. Todos los derechos reservados."
   },
   "Header": {
-    "appName": "ArticleForge IA"
+    "appName": "AegisPad"
   },
   "LanguageSwitcher": {
     "selectLanguage": "Idioma",
@@ -95,7 +96,7 @@
       "copySummaryFailedError": "Error al copiar el resumen. Por favor, inténtalo de nuevo o copia manualmente.",
       "allClearedMessage": "Todos los campos y datos de la sesión han sido borrados."
     },
-    "loadingSpinnerClient": "Cargando ArticleForge IA..."
+    "loadingSpinnerClient": "Cargando AegisPad..."
   },
   "ArticleEditor": {
     "markdownEditorTitle": "Editor Markdown",
