@@ -1,7 +1,7 @@
 // src/app/page.tsx
 "use client";
 
-import { useState, useTransition, useEffect, useCallback } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -19,6 +19,7 @@ import { reviseArticle, ReviseArticleInput, ReviseArticleOutput } from '@/ai/flo
 import { translateArticle, TranslateArticleInput, TranslateArticleOutput } from '@/ai/flows/translate-article';
 import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon, Layers, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const availableLanguages = [
   { value: 'Spanish', label: 'Spanish' },
@@ -35,8 +36,8 @@ const availableLanguages = [
 ];
 
 const ESTIMATED_INITIAL_SESSION_TOKENS = 100000; 
-const HEADER_HEIGHT_OFFSET = "3.5rem"; // Corresponds to 'top-14' Tailwind class (h-header = 3.5rem)
-const SCROLL_THRESHOLD = 50; // Pixels to scroll before compacting header
+// const HEADER_HEIGHT_OFFSET = "3.5rem"; // No longer needed for token section stickiness
+// const SCROLL_THRESHOLD = 50; // No longer needed
 
 export default function ArticleForgePage() {
   const [prompt, setPrompt] = useState<string>('');
@@ -60,7 +61,7 @@ export default function ArticleForgePage() {
   const [isTranslating, startTranslateTransition] = useTransition();
   const [isCombiningFormat, startCombineFormatTransition] = useTransition();
 
-  const [isScrolledDown, setIsScrolledDown] = useState(false);
+  // const [isScrolledDown, setIsScrolledDown] = useState(false); // Removed scroll state
   const [clientLoaded, setClientLoaded] = useState(false);
 
   const { toast } = useToast();
@@ -71,22 +72,12 @@ export default function ArticleForgePage() {
     setClientLoaded(true);
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const newScrolledDownState = window.scrollY > SCROLL_THRESHOLD;
-      if (newScrolledDownState !== isScrolledDown) {
-        setIsScrolledDown(newScrolledDownState);
-      }
-    };
-  
-    // Call once on mount to set initial state correctly
-    handleScroll();
-  
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [isScrolledDown]); // Dependency: isScrolledDown ensures handleScroll has the latest state
+  // Removed useEffect for scroll handling:
+  // useEffect(() => {
+  //   const handleScroll = () => { ... };
+  //   window.addEventListener('scroll', handleScroll, { passive: true });
+  //   return () => { window.removeEventListener('scroll', handleScroll); };
+  // }, [isScrolledDown]);
 
 
   const handleTokenUpdate = (tokensUsed: number, details?: {text?: number, image?:number}) => {
@@ -230,113 +221,66 @@ export default function ArticleForgePage() {
 
   const tokensLeftInSession = Math.max(0, ESTIMATED_INITIAL_SESSION_TOKENS - sessionTotalTokens);
 
-  const renderTokenUsageContent = () => {
-    if (isScrolledDown) {
-      return (
-        <>
-          <CardHeader className="py-2 px-4 border-b">
-            <CardTitle className="flex items-center text-base font-semibold">
-              <Coins className="mr-2 h-4 w-4 text-primary" />Token Usage
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3">
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs">
-              <div className="flex items-center">
-                <span className="text-muted-foreground mr-1">Last Op:</span>
-                <span className="font-semibold">{currentRequestTokens?.toLocaleString() ?? 'N/A'}</span>
-                {(detailedTokenUsage?.text || detailedTokenUsage?.image) && (
-                  <span className="ml-1 text-muted-foreground">
-                    (
-                    {detailedTokenUsage.text !== undefined && `Txt: ${detailedTokenUsage.text.toLocaleString()}`}
-                    {detailedTokenUsage.text !== undefined && detailedTokenUsage.image !== undefined && ', '}
-                    {detailedTokenUsage.image !== undefined && `Img: ${detailedTokenUsage.image.toLocaleString()}`}
-                    )
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center">
-                <span className="text-muted-foreground mr-1">Session:</span>
-                <span className="font-semibold">{sessionTotalTokens.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-muted-foreground mr-1">Quota:</span>
-                <span className="font-semibold">{ESTIMATED_INITIAL_SESSION_TOKENS.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-muted-foreground mr-1">Rem:</span>
-                <span className={`font-semibold ${tokensLeftInSession <= 0 ? 'text-destructive' : 'text-foreground'}`}>
-                  {tokensLeftInSession.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </>
-      );
-    }
-
-    // Normal view
-    return (
-      <>
-        <CardHeader>
-          <CardTitle className="flex items-center"><Coins className="mr-2 h-6 w-6 text-primary" />Token Usage</CardTitle>
-          <CardDescription>Overview of your token consumption for AI operations.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Tokens Used (Last Operation):</span>
-            <span className="font-semibold">{currentRequestTokens?.toLocaleString() ?? 'N/A'}</span>
-          </div>
-          {detailedTokenUsage?.text && (
-            <div className="flex justify-between pl-4">
-              <span className="text-muted-foreground text-xs">└ Text Generation:</span>
-              <span className="font-semibold text-xs">{detailedTokenUsage.text.toLocaleString()}</span>
-            </div>
-          )}
-          {detailedTokenUsage?.image && (
-            <div className="flex justify-between pl-4">
-              <span className="text-muted-foreground text-xs">└ Image Generation:</span>
-              <span className="font-semibold text-xs">{detailedTokenUsage.image.toLocaleString()}</span>
-            </div>
-          )}
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Total Tokens Used (Session):</span>
-            <span className="font-semibold">{sessionTotalTokens.toLocaleString()}</span>
-          </div>
-           <div className="flex justify-between">
-            <span className="text-muted-foreground">Assumed Session Quota:</span>
-            <span className="font-semibold">{ESTIMATED_INITIAL_SESSION_TOKENS.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Tokens Remaining (this Session):</span>
-            <span className={`font-semibold ${tokensLeftInSession <= 0 ? 'text-destructive' : ''}`}>
-              {tokensLeftInSession.toLocaleString()}
-            </span>
-          </div>
-        </CardContent>
-      </>
-    );
-  };
+  // Simplified function to render only the details for the accordion content
+  const renderTokenUsageDetails = () => (
+    <div className="space-y-2 text-sm">
+      <div className="flex justify-between">
+        <span className="text-muted-foreground">Tokens Used (Last Operation):</span>
+        <span className="font-semibold">{currentRequestTokens?.toLocaleString() ?? 'N/A'}</span>
+      </div>
+      {(detailedTokenUsage?.text || detailedTokenUsage?.image) && (
+          <div className="pl-2 text-xs">
+            {detailedTokenUsage.text !== undefined && (
+                <div className="flex justify-between">
+                    <span className="text-muted-foreground">└ Text:</span>
+                    <span className="font-semibold">{detailedTokenUsage.text.toLocaleString()}</span>
+                </div>
+            )}
+            {detailedTokenUsage.image !== undefined && (
+                <div className="flex justify-between">
+                    <span className="text-muted-foreground">└ Image:</span>
+                    <span className="font-semibold">{detailedTokenUsage.image.toLocaleString()}</span>
+                </div>
+            )}
+        </div>
+      )}
+      <div className="flex justify-between">
+        <span className="text-muted-foreground">Total Tokens Used (Session):</span>
+        <span className="font-semibold">{sessionTotalTokens.toLocaleString()}</span>
+      </div>
+       <div className="flex justify-between">
+        <span className="text-muted-foreground">Assumed Session Quota:</span>
+        <span className="font-semibold">{ESTIMATED_INITIAL_SESSION_TOKENS.toLocaleString()}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-muted-foreground">Tokens Remaining (this Session):</span>
+        <span className={`font-semibold ${tokensLeftInSession <= 0 ? 'text-destructive' : 'text-foreground'}`}>
+          {tokensLeftInSession.toLocaleString()}
+        </span>
+      </div>
+    </div>
+  );
 
 
   return (
     <div className="space-y-8">
       <GlobalLoader isLoading={isLoading} operationMessage={currentOperationMessage} />
       
-      <div 
-        className={cn(
-          "sticky z-40 transition-all duration-300 ease-in-out",
-          isScrolledDown ? "bg-background shadow-md py-2" : "bg-transparent shadow-none pt-0" 
-        )}
-        style={{ top: HEADER_HEIGHT_OFFSET }}
-      >
-        <div className="container mx-auto px-0 md:px-4"> {/* Match header container padding, but allow full width on mobile for the card */}
-          <Card className={cn(
-            "w-full transition-all duration-300 ease-in-out",
-            isScrolledDown ? "shadow-none border-0 rounded-none md:rounded-lg" : "shadow-lg" 
-          )}>
-            {renderTokenUsageContent()}
-          </Card>
-        </div>
+      {/* Floating, collapsible token usage section */}
+      <div className="fixed top-[calc(3.5rem+1rem)] md:top-[calc(3.5rem+1.5rem)] right-4 md:right-6 z-50 w-[calc(100%-2rem)] md:w-auto max-w-xs md:max-w-sm">
+        <Accordion type="single" collapsible className="w-full bg-card text-card-foreground shadow-xl rounded-lg border" defaultValue="token-stats">
+          <AccordionItem value="token-stats" className="border-b-0 rounded-lg">
+            <AccordionTrigger className="flex w-full items-center justify-between rounded-t-lg p-4 text-left hover:no-underline data-[state=open]:rounded-b-none data-[state=open]:border-b">
+              <div className="flex items-center text-lg font-semibold">
+                <Coins className="mr-2 h-5 w-5 text-primary" />
+                Token Usage
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="p-4 data-[state=closed]:p-0">
+              {renderTokenUsageDetails()}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
       
       <Card className="shadow-lg">
