@@ -14,18 +14,16 @@ export default getRequestConfig(async ({locale}) => {
  
   let messages;
   try {
-    // The path `./messages/${locale}.json` is relative to `src/i18n.ts`
-    // and should correctly resolve to `src/messages/${locale}.json`.
-    // The `.default` is used as per next-intl documentation for JSON files.
+    // Using relative path from src/i18n.ts to src/messages/
     messages = (await import(`./messages/${locale}.json`)).default;
   } catch (error) {
-    console.error(`Could not load messages for locale "${locale}":`, error);
+    console.error(`Could not load messages for locale "${locale}" from "./messages/${locale}.json":`, error);
     notFound();
   }
 
   if (!messages) {
-    // This case handles if the import succeeded but messages ended up undefined (e.g. malformed JSON or incorrect .default usage if bundler behaves differently)
-    console.error(`Messages for locale "${locale}" resolved to undefined, null, or empty after import.`);
+    // This case handles if the import succeeded but messages ended up undefined
+    console.error(`Messages for locale "${locale}" (loaded from "./messages/${locale}.json") resolved to undefined, null, or empty after import.`);
     notFound();
   }
  
@@ -33,4 +31,5 @@ export default getRequestConfig(async ({locale}) => {
     messages
   };
 });
+
 
