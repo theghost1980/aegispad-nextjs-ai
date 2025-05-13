@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Globe } from 'lucide-react';
-import {locales} from '@/i18n';
+import {locales} from '../../i18n';
 
 export default function LanguageSwitcher() {
   const t = useTranslations('LanguageSwitcher');
