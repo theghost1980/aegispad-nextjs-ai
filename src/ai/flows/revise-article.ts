@@ -16,8 +16,17 @@ const ReviseArticleInputSchema = z.object({
 });
 export type ReviseArticleInput = z.infer<typeof ReviseArticleInputSchema>;
 
+// Schema for the direct output from the LLM model
+const RevisedArticleContentSchema = z.object({
+  revisedArticle: z.string().describe('The revised article text in Markdown format.'),
+});
+
+// Schema for the flow's output, including token usage
 const ReviseArticleOutputSchema = z.object({
   revisedArticle: z.string().describe('The revised article text in Markdown format.'),
+  tokenUsage: z.object({
+    totalTokens: z.number().describe('Total tokens used for this revision.'),
+  }).describe('Token usage statistics for the revision.'),
 });
 export type ReviseArticleOutput = z.infer<typeof ReviseArticleOutputSchema>;
 
@@ -25,10 +34,10 @@ export async function reviseArticle(input: ReviseArticleInput): Promise<ReviseAr
   return reviseArticleFlow(input);
 }
 
-const prompt = ai.definePrompt({
+const revisionPrompt = ai.definePrompt({
   name: 'reviseArticlePrompt',
   input: {schema: ReviseArticleInputSchema},
-  output: {schema: ReviseArticleOutputSchema},
+  output: {schema: RevisedArticleContentSchema}, // LLM directly outputs this
   prompt: `You are an expert editor. Please review the following article and improve its grammar, spelling, style, clarity, and flow. Return the entire revised article in Markdown format.
 
 Article:
@@ -39,10 +48,21 @@ const reviseArticleFlow = ai.defineFlow(
   {
     name: 'reviseArticleFlow',
     inputSchema: ReviseArticleInputSchema,
-    outputSchema: ReviseArticleOutputSchema,
+    outputSchema: ReviseArticleOutputSchema, // Flow outputs this extended schema
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input) => {
+    const result = await revisionPrompt(input);
+
+    if (!result.output) {
+      throw new Error('Article revision failed: No output from LLM.');
+    }
+
+    return {
+      revisedArticle: result.output.revisedArticle,
+      tokenUsage: {
+        totalTokens: result.usage?.totalTokens ?? 0,
+      },
+    };
   }
 );
+

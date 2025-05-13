@@ -9,7 +9,7 @@
  * - TranslateArticleOutput - The return type for the translateArticle function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai}from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TranslateArticleInputSchema = z.object({
@@ -19,8 +19,17 @@ const TranslateArticleInputSchema = z.object({
 
 export type TranslateArticleInput = z.infer<typeof TranslateArticleInputSchema>;
 
+// Schema for the direct output from the LLM model
+const TranslatedArticleContentSchema = z.object({
+  translatedArticle: z.string().describe('The translated article text.'),
+});
+
+// Schema for the flow's output, including token usage
 const TranslateArticleOutputSchema = z.object({
   translatedArticle: z.string().describe('The translated article text.'),
+  tokenUsage: z.object({
+    totalTokens: z.number().describe('Total tokens used for this translation.'),
+  }).describe('Token usage statistics for the translation.'),
 });
 
 export type TranslateArticleOutput = z.infer<typeof TranslateArticleOutputSchema>;
@@ -29,10 +38,10 @@ export async function translateArticle(input: TranslateArticleInput): Promise<Tr
   return translateArticleFlow(input);
 }
 
-const translateArticlePrompt = ai.definePrompt({
+const translationPrompt = ai.definePrompt({
   name: 'translateArticlePrompt',
   input: {schema: TranslateArticleInputSchema},
-  output: {schema: TranslateArticleOutputSchema},
+  output: {schema: TranslatedArticleContentSchema}, // LLM directly outputs this
   prompt: `Translate the following article into {{targetLanguage}}:
 
 {{{article}}}`,
@@ -42,10 +51,21 @@ const translateArticleFlow = ai.defineFlow(
   {
     name: 'translateArticleFlow',
     inputSchema: TranslateArticleInputSchema,
-    outputSchema: TranslateArticleOutputSchema,
+    outputSchema: TranslateArticleOutputSchema, // Flow outputs this extended schema
   },
-  async input => {
-    const {output} = await translateArticlePrompt(input);
-    return output!;
+  async (input) => {
+    const result = await translationPrompt(input);
+
+    if (!result.output) {
+      throw new Error('Article translation failed: No output from LLM.');
+    }
+
+    return {
+      translatedArticle: result.output.translatedArticle,
+      tokenUsage: {
+        totalTokens: result.usage?.totalTokens ?? 0,
+      },
+    };
   }
 );
+

@@ -16,8 +16,17 @@ const CreateArticleInputSchema = z.object({
 });
 export type CreateArticleInput = z.infer<typeof CreateArticleInputSchema>;
 
+// Schema for the direct output from the LLM model
+const ArticleContentSchema = z.object({
+  article: z.string().describe('The generated article in Markdown format.'),
+});
+
+// Schema for the flow's output, including token usage
 const CreateArticleOutputSchema = z.object({
   article: z.string().describe('The generated article in Markdown format.'),
+  tokenUsage: z.object({
+    totalTokens: z.number().describe('Total tokens used for this generation.'),
+  }).describe('Token usage statistics for the generation.'),
 });
 export type CreateArticleOutput = z.infer<typeof CreateArticleOutputSchema>;
 
@@ -25,10 +34,10 @@ export async function createArticle(input: CreateArticleInput): Promise<CreateAr
   return createArticleFlow(input);
 }
 
-const prompt = ai.definePrompt({
+const articlePrompt = ai.definePrompt({
   name: 'createArticlePrompt',
   input: {schema: CreateArticleInputSchema},
-  output: {schema: CreateArticleOutputSchema},
+  output: {schema: ArticleContentSchema}, // LLM directly outputs this
   prompt: `You are an expert article writer. Write an article of approximately 1000 words in Markdown format based on the following prompt:\n\nPrompt: {{{prompt}}}`,
 });
 
@@ -36,10 +45,21 @@ const createArticleFlow = ai.defineFlow(
   {
     name: 'createArticleFlow',
     inputSchema: CreateArticleInputSchema,
-    outputSchema: CreateArticleOutputSchema,
+    outputSchema: CreateArticleOutputSchema, // Flow outputs this extended schema
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input) => {
+    const result = await articlePrompt(input);
+    
+    if (!result.output) {
+      throw new Error('Article generation failed: No output from LLM.');
+    }
+
+    return {
+      article: result.output.article,
+      tokenUsage: {
+        totalTokens: result.usage?.totalTokens ?? 0,
+      },
+    };
   }
 );
+

@@ -12,10 +12,10 @@ import GlobalLoader from '@/components/global-loader';
 import LoadingSpinner from '@/components/loading-spinner';
 import MarkdownPreview from '@/components/markdown-preview';
 import { useToast } from '@/hooks/use-toast';
-import { createArticle, CreateArticleInput } from '@/ai/flows/create-article';
-import { reviseArticle, ReviseArticleInput } from '@/ai/flows/revise-article';
-import { translateArticle, TranslateArticleInput } from '@/ai/flows/translate-article';
-import { Wand2, Edit3, Languages, Eraser, FileText, Globe } from 'lucide-react';
+import { createArticle, CreateArticleInput, CreateArticleOutput } from '@/ai/flows/create-article';
+import { reviseArticle, ReviseArticleInput, ReviseArticleOutput } from '@/ai/flows/revise-article';
+import { translateArticle, TranslateArticleInput, TranslateArticleOutput } from '@/ai/flows/translate-article';
+import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins } from 'lucide-react';
 
 const availableLanguages = [
   { value: 'Spanish', label: 'Spanish' },
@@ -40,6 +40,9 @@ export default function ArticleForgePage() {
   const [translatedArticleMarkdown, setTranslatedArticleMarkdown] = useState<string>('');
   const [originalArticleForTranslation, setOriginalArticleForTranslation] = useState<string>('');
 
+  const [currentRequestTokens, setCurrentRequestTokens] = useState<number | null>(null);
+  const [sessionTotalTokens, setSessionTotalTokens] = useState<number>(0);
+
   const [isCreating, startCreateTransition] = useTransition();
   const [isRevising, startReviseTransition] = useTransition();
   const [isTranslating, startTranslateTransition] = useTransition();
@@ -48,12 +51,15 @@ export default function ArticleForgePage() {
 
   const isLoading = isCreating || isRevising || isTranslating;
   
-  // To prevent hydration errors with new Date() or Math.random()
   const [clientLoaded, setClientLoaded] = useState(false);
   useEffect(() => {
     setClientLoaded(true);
   }, []);
 
+  const handleTokenUpdate = (tokensUsed: number) => {
+    setCurrentRequestTokens(tokensUsed);
+    setSessionTotalTokens(prevTotal => prevTotal + tokensUsed);
+  };
 
   const handleCreateArticle = async () => {
     if (!prompt.trim()) {
@@ -61,11 +67,13 @@ export default function ArticleForgePage() {
       return;
     }
     setCurrentOperationMessage('Creating article...');
+    setCurrentRequestTokens(null);
     startCreateTransition(async () => {
       try {
         const input: CreateArticleInput = { prompt };
-        const result = await createArticle(input);
+        const result: CreateArticleOutput = await createArticle(input);
         setArticleMarkdown(result.article);
+        handleTokenUpdate(result.tokenUsage.totalTokens);
         setTranslatedArticleMarkdown('');
         setOriginalArticleForTranslation('');
         toast({ title: 'Success', description: 'Article created successfully!' });
@@ -84,11 +92,13 @@ export default function ArticleForgePage() {
       return;
     }
     setCurrentOperationMessage('Revising article...');
+    setCurrentRequestTokens(null);
     startReviseTransition(async () => {
       try {
         const input: ReviseArticleInput = { article: articleMarkdown };
-        const result = await reviseArticle(input);
+        const result: ReviseArticleOutput = await reviseArticle(input);
         setArticleMarkdown(result.revisedArticle);
+        handleTokenUpdate(result.tokenUsage.totalTokens);
         setTranslatedArticleMarkdown('');
         setOriginalArticleForTranslation('');
         toast({ title: 'Success', description: 'Article revised successfully!' });
@@ -111,12 +121,14 @@ export default function ArticleForgePage() {
       return;
     }
     setCurrentOperationMessage('Translating article...');
+    setCurrentRequestTokens(null);
     startTranslateTransition(async () => {
       try {
         setOriginalArticleForTranslation(articleMarkdown);
         const input: TranslateArticleInput = { article: articleMarkdown, targetLanguage };
-        const result = await translateArticle(input);
+        const result: TranslateArticleOutput = await translateArticle(input);
         setTranslatedArticleMarkdown(result.translatedArticle);
+        handleTokenUpdate(result.tokenUsage.totalTokens);
         toast({ title: 'Success', description: `Article translated to ${targetLanguage} successfully!` });
       } catch (error) {
         console.error('Error translating article:', error);
@@ -134,6 +146,8 @@ export default function ArticleForgePage() {
     setTranslatedArticleMarkdown('');
     setOriginalArticleForTranslation('');
     setCurrentOperationMessage(null);
+    setCurrentRequestTokens(null);
+    // sessionTotalTokens is intentionally not reset by clearAll
     toast({ title: 'Cleared', description: 'All fields have been cleared.' });
   };
   
@@ -144,6 +158,23 @@ export default function ArticleForgePage() {
   return (
     <div className="space-y-8">
       <GlobalLoader isLoading={isLoading} operationMessage={currentOperationMessage} />
+
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center"><Coins className="mr-2 h-6 w-6 text-primary" />Token Usage</CardTitle>
+          <CardDescription>Overview of your token consumption for AI operations.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Tokens Used (Last Operation):</span>
+            <span className="font-semibold">{currentRequestTokens ?? 'N/A'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Total Tokens Used (Session):</span>
+            <span className="font-semibold">{sessionTotalTokens}</span>
+          </div>
+        </CardContent>
+      </Card>
       
       <Card className="shadow-lg">
         <CardHeader>
@@ -245,7 +276,13 @@ export default function ArticleForgePage() {
                 <CardTitle className="flex items-center text-xl"><FileText size={20} className="mr-2 text-muted-foreground" /> Original Article</CardTitle>
               </CardHeader>
               <CardContent>
-                <MarkdownPreview markdown={originalArticleForTranslation} minHeight="300px" ariaLabel="Original article content before translation"/>
+                {/* Displaying original article in Markdown format for editing (as per previous implementation pattern) */}
+                 <Textarea
+                    value={originalArticleForTranslation}
+                    readOnly // Assuming it's not meant to be editable here, just displayed as raw markdown
+                    className="min-h-[300px] text-sm resize-y bg-muted/20"
+                    aria-label="Original article content before translation (Markdown)"
+                  />
               </CardContent>
             </Card>
             <Card>
@@ -262,3 +299,4 @@ export default function ArticleForgePage() {
     </div>
   );
 }
+
