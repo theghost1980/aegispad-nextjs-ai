@@ -1,5 +1,6 @@
+
 import type { Metadata } from 'next';
-import { Geist_Sans, Geist_Mono } from 'next/font/google'; // Corrected import
+import { Inter, Roboto_Mono } from 'next/font/google'; // Changed to actual Google Fonts
 import '../globals.css'; // Adjusted path
 import Header from '@/components/header';
 import { Toaster } from "@/components/ui/toaster";
@@ -7,14 +8,15 @@ import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
 import LanguageSwitcher from '@/components/language-switcher';
 
-const geistSans = Geist_Sans({ // Corrected usage
-  variable: '--font-geist-sans',
+const inter = Inter({ 
+  variable: '--font-inter', // Updated variable name
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({ // Corrected usage
-  variable: '--font-geist-mono',
+const robotoMono = Roboto_Mono({ 
+  variable: '--font-roboto-mono', // Updated variable name
   subsets: ['latin'],
+  weight: ['400', '700'] // Common weights for Roboto Mono
 });
 
 export async function generateMetadata({params: {locale}}: {params: {locale: string}}): Promise<Metadata> {
@@ -42,7 +44,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}>
+      <body className={`${inter.variable} ${robotoMono.variable} antialiased flex flex-col min-h-screen`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header title={tHeader('appName')} />
           <main className="flex-grow container mx-auto px-4 py-8">
