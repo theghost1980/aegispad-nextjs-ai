@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch'; // Added Switch import
 import ArticleEditor from '@/components/article-editor';
 import GlobalLoader from '@/components/global-loader';
 import LoadingSpinner from '@/components/loading-spinner';
@@ -15,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { createArticle, CreateArticleInput, CreateArticleOutput } from '@/ai/flows/create-article';
 import { reviseArticle, ReviseArticleInput, ReviseArticleOutput } from '@/ai/flows/revise-article';
 import { translateArticle, TranslateArticleInput, TranslateArticleOutput } from '@/ai/flows/translate-article';
-import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins } from 'lucide-react';
+import { Wand2, Edit3, Languages, Eraser, FileText, Globe, Coins, Image as ImageIcon } from 'lucide-react';
 
 const availableLanguages = [
   { value: 'Spanish', label: 'Spanish' },
@@ -31,12 +32,13 @@ const availableLanguages = [
   { value: 'English', label: 'English' },
 ];
 
-const ESTIMATED_INITIAL_SESSION_TOKENS = 100000; // Arbitrary value for session token tracking
+const ESTIMATED_INITIAL_SESSION_TOKENS = 100000; 
 
 export default function ArticleForgePage() {
   const [prompt, setPrompt] = useState<string>('');
   const [articleMarkdown, setArticleMarkdown] = useState<string>('');
   const [targetLanguage, setTargetLanguage] = useState<string>(availableLanguages[0].value);
+  const [generateMainImage, setGenerateMainImage] = useState<boolean>(false); // State for image generation toggle
   
   const [currentOperationMessage, setCurrentOperationMessage] = useState<string | null>(null);
   const [translatedArticleMarkdown, setTranslatedArticleMarkdown] = useState<string>('');
@@ -44,6 +46,9 @@ export default function ArticleForgePage() {
 
   const [currentRequestTokens, setCurrentRequestTokens] = useState<number | null>(null);
   const [sessionTotalTokens, setSessionTotalTokens] = useState<number>(0);
+  // State for detailed token usage (optional, for more granular display if needed)
+  const [detailedTokenUsage, setDetailedTokenUsage] = useState<{text?: number, image?:number} | null>(null);
+
 
   const [isCreating, startCreateTransition] = useTransition();
   const [isRevising, startReviseTransition] = useTransition();
@@ -58,9 +63,14 @@ export default function ArticleForgePage() {
     setClientLoaded(true);
   }, []);
 
-  const handleTokenUpdate = (tokensUsed: number) => {
+  const handleTokenUpdate = (tokensUsed: number, details?: {text?: number, image?:number}) => {
     setCurrentRequestTokens(tokensUsed);
     setSessionTotalTokens(prevTotal => prevTotal + tokensUsed);
+    if (details) {
+      setDetailedTokenUsage(details);
+    } else {
+      setDetailedTokenUsage(null);
+    }
   };
 
   const handleCreateArticle = async () => {
@@ -68,17 +78,21 @@ export default function ArticleForgePage() {
       toast({ title: 'Error', description: 'Prompt cannot be empty.', variant: 'destructive' });
       return;
     }
-    setCurrentOperationMessage('Creating article...');
+    setCurrentOperationMessage(generateMainImage ? 'Creating article and generating image...' : 'Creating article...');
     setCurrentRequestTokens(null);
+    setDetailedTokenUsage(null);
     startCreateTransition(async () => {
       try {
-        const input: CreateArticleInput = { prompt };
+        const input: CreateArticleInput = { prompt, generateMainImage };
         const result: CreateArticleOutput = await createArticle(input);
-        setArticleMarkdown(result.article);
-        handleTokenUpdate(result.tokenUsage.totalTokens);
+        setArticleMarkdown(result.article); // result.article now contains prepended image if generated
+        handleTokenUpdate(result.tokenUsage.totalTokens, {
+          text: result.tokenUsage.textGenerationTokens,
+          image: result.tokenUsage.imageGenerationTokens
+        });
         setTranslatedArticleMarkdown('');
         setOriginalArticleForTranslation('');
-        toast({ title: 'Success', description: 'Article created successfully!' });
+        toast({ title: 'Success', description: 'Article created successfully!' + (result.mainImageUrl ? ' Main image generated.' : '') });
       } catch (error) {
         console.error('Error creating article:', error);
         toast({ title: 'Error', description: 'Failed to create article. Please try again.', variant: 'destructive' });
@@ -95,8 +109,11 @@ export default function ArticleForgePage() {
     }
     setCurrentOperationMessage('Revising article...');
     setCurrentRequestTokens(null);
+    setDetailedTokenUsage(null);
     startReviseTransition(async () => {
       try {
+        // Note: If articleMarkdown contains a large base64 image, revision might be slow or hit limits.
+        // This is a known consideration for the current implementation.
         const input: ReviseArticleInput = { article: articleMarkdown };
         const result: ReviseArticleOutput = await reviseArticle(input);
         setArticleMarkdown(result.revisedArticle);
@@ -124,8 +141,11 @@ export default function ArticleForgePage() {
     }
     setCurrentOperationMessage('Translating article...');
     setCurrentRequestTokens(null);
+    setDetailedTokenUsage(null);
     startTranslateTransition(async () => {
       try {
+        // For translation, we might want to translate the text content without the potentially large image data URI.
+        // For now, it translates the whole markdown.
         setOriginalArticleForTranslation(articleMarkdown);
         const input: TranslateArticleInput = { article: articleMarkdown, targetLanguage };
         const result: TranslateArticleOutput = await translateArticle(input);
@@ -149,8 +169,8 @@ export default function ArticleForgePage() {
     setOriginalArticleForTranslation('');
     setCurrentOperationMessage(null);
     setCurrentRequestTokens(null);
-    // sessionTotalTokens and by extension tokensLeftInSession are intentionally not reset by clearAll
-    // to persist session-wide token tracking.
+    setDetailedTokenUsage(null);
+    setGenerateMainImage(false);
     toast({ title: 'Cleared', description: 'All fields have been cleared.' });
   };
   
@@ -174,6 +194,18 @@ export default function ArticleForgePage() {
             <span className="text-muted-foreground">Tokens Used (Last Operation):</span>
             <span className="font-semibold">{currentRequestTokens?.toLocaleString() ?? 'N/A'}</span>
           </div>
+          {detailedTokenUsage?.text && (
+            <div className="flex justify-between pl-4">
+              <span className="text-muted-foreground text-xs">└ Text Generation:</span>
+              <span className="font-semibold text-xs">{detailedTokenUsage.text.toLocaleString()}</span>
+            </div>
+          )}
+          {detailedTokenUsage?.image && (
+            <div className="flex justify-between pl-4">
+              <span className="text-muted-foreground text-xs">└ Image Generation:</span>
+              <span className="font-semibold text-xs">{detailedTokenUsage.image.toLocaleString()}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-muted-foreground">Total Tokens Used (Session):</span>
             <span className="font-semibold">{sessionTotalTokens.toLocaleString()}</span>
@@ -209,6 +241,19 @@ export default function ArticleForgePage() {
               aria-label="Article prompt input"
             />
           </div>
+          <div className="flex items-center space-x-2 pt-2">
+            <Switch
+              id="generateMainImage"
+              checked={generateMainImage}
+              onCheckedChange={setGenerateMainImage}
+              disabled={isLoading}
+              aria-label="Toggle main image generation for the article"
+            />
+            <Label htmlFor="generateMainImage" className="text-base font-normal cursor-pointer">
+              <ImageIcon className="inline-block mr-2 h-5 w-5 align-text-bottom" />
+              Generate a main image for the article
+            </Label>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <Button onClick={clearAll} variant="outline" disabled={isLoading}>
@@ -225,7 +270,7 @@ export default function ArticleForgePage() {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center"><Edit3 className="mr-2 h-6 w-6 text-primary" />Edit & Refine Article</CardTitle>
-            <CardDescription>Edit the generated Markdown directly or use AI to revise it.</CardDescription>
+            <CardDescription>Edit the generated Markdown directly or use AI to revise it. The main image (if generated) is at the top.</CardDescription>
           </CardHeader>
           <CardContent>
             <ArticleEditor
@@ -313,4 +358,3 @@ export default function ArticleForgePage() {
     </div>
   );
 }
-
