@@ -73,19 +73,20 @@ export default function ArticleForgePage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > SCROLL_THRESHOLD) {
-        setIsScrolledDown(true);
-      } else {
-        setIsScrolledDown(false);
+      const newScrolledDownState = window.scrollY > SCROLL_THRESHOLD;
+      if (newScrolledDownState !== isScrolledDown) {
+        setIsScrolledDown(newScrolledDownState);
       }
     };
-
-    window.addEventListener('scroll', handleScroll);
-    // Call handler once on mount to set initial state
-    handleScroll(); 
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  
+    // Call once on mount to set initial state correctly
+    handleScroll();
+  
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isScrolledDown]); // Dependency: isScrolledDown ensures handleScroll has the latest state
 
 
   const handleTokenUpdate = (tokensUsed: number, details?: {text?: number, image?:number}) => {
