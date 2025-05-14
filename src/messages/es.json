@@ -1,4 +1,3 @@
-
 {
   "Layout": {
     "footerCopyright": "© {year} AegisPad. Todos los derechos reservados."
@@ -133,12 +132,32 @@
     "noContentToDisplay": "No hay contenido para mostrar."
   },
   "HomePage": {
-    "title": "Bienvenido a AegisPad AI",
-    "subtitle": "Tu Asistente Inteligente para la Creación de Artículos",
-    "description": "Descubre cómo nuestra IA puede ayudarte a generar, revisar y traducir contenido de manera eficiente. ¡Empieza a crear artículos impactantes hoy mismo!",
-    "goToEditorButton": "Ir al Editor",
-    "additionalInfo": "Haz clic en el botón para comenzar a usar el editor de artículos."
+    "heroTitle": "AegisPad: Tu Forja Inteligente de Artículos",
+    "heroSubtitle": "Crea, refina y traduce contenido con el poder de la IA de Gemini. Desata tu creatividad sin límites y lleva tus ideas al siguiente nivel.",
+    "heroCtaButton": "Empezar Ahora",
+    "featuresTitle": "Todo lo que Necesitas para Crear Contenido Impactante",
+    "feature1Title": "Creación Asistida por IA",
+    "feature1Description": "Transforma tus ideas en artículos completos. Simplemente proporciona un tema y deja que nuestra IA genere un borrador inicial, ¡incluso con una imagen principal!",
+    "feature2Title": "Revisión Inteligente",
+    "feature2Description": "Perfecciona tus textos. Nuestra IA puede revisar y mejorar tus artículos existentes, sugiriendo mejoras y puliendo tu mensaje.",
+    "feature3Title": "Traducción Global",
+    "feature3Description": "Rompe las barreras del idioma. Traduce tus artículos a múltiples idiomas de forma rápida y precisa, expandiendo tu alcance.",
+    "geminiApiTitle": "Potenciado por Gemini: Acceso Gratuito y Fácil",
+    "geminiApiIntro": "AegisPad utiliza la potente API de Gemini de Google para sus funciones de inteligencia artificial, ofreciéndote resultados de vanguardia.",
+    "geminiApiGetFree": "Para comenzar, necesitarás tu propia API Key de Gemini. Puedes obtenerla gratuitamente desde <link>Google AI Studio</link>.",
+    "geminiApiFreeTier": "¡Buenas noticias! Con el nivel gratuito de Gemini, obtienes aproximadamente 1 millón de tokens al mes sin costo alguno, ¡suficiente para una gran cantidad de creación de contenido!",
+    "tokenEstimationTitle": "Estimación de Uso de Tokens",
+    "tokenEstimationIntro": "Entender el consumo de tokens te ayuda a gestionar tu cuota gratuita y planificar tu trabajo de manera eficiente.",
+    "tokenEstimationCreateTitle": "Creación de Artículo (500 palabras)",
+    "tokenEstimationCreateDesc": "~2,000 - 5,000 tokens",
+    "tokenEstimationReviseTitle": "Revisión de Artículo (500 palabras)",
+    "tokenEstimationReviseDesc": "~1,500 - 4,000 tokens",
+    "tokenEstimationTranslateTitle": "Traducción de Artículo (500 palabras)",
+    "tokenEstimationTranslateDesc": "~1,000 - 3,000 tokens",
+    "tokenEstimationImageTitle": "Generación de Imagen",
+    "tokenEstimationImageDesc": "~250 - 1,000 tokens (varía según la complejidad)",
+    "tokenEstimationMonthly": "Con 1 millón de tokens gratuitos al mes, podrías, por ejemplo, crear más de 200 artículos cortos o realizar cientos de revisiones y traducciones.",
+    "tokenEstimationNote": "Nota: Estas son estimaciones. El uso real puede variar según la complejidad, longitud del contenido y el modelo específico de Gemini utilizado.",
+    "secondaryCtaButton": "Probar el Editor Ahora"
   }
 }
-
-    

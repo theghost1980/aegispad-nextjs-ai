@@ -1,4 +1,3 @@
-
 {
   "Layout": {
     "footerCopyright": "© {year} AegisPad. All rights reserved."
@@ -129,16 +128,36 @@
     "defaultLoadingMessage": "Processing..."
   },
   "MarkdownPreview": {
-      "defaultAriaLabel": "Markdown content preview",
-      "noContentToDisplay": "No content to display."
+    "defaultAriaLabel": "Markdown content preview",
+    "noContentToDisplay": "No content to display."
   },
-   "HomePage": {
-    "title": "Welcome to AegisPad AI",
-    "subtitle": "Your Smart Assistant for Article Creation",
-    "description": "Discover how our AI can help you generate, review, and translate content efficiently. Start creating impactful articles today!",
-    "goToEditorButton": "Go to Editor",
-    "additionalInfo": "Click the button to start using the article editor."
+  "HomePage": {
+    "heroTitle": "AegisPad: Your Intelligent Article Forge",
+    "heroSubtitle": "Create, refine, and translate content with the power of Gemini AI. Unleash your creativity without limits and take your ideas to the next level.",
+    "heroCtaButton": "Get Started Now",
+    "featuresTitle": "Everything You Need to Create Impactful Content",
+    "feature1Title": "AI-Assisted Creation",
+    "feature1Description": "Transform your ideas into complete articles. Just provide a topic and let our AI generate an initial draft, even with a main image!",
+    "feature2Title": "Smart Revision",
+    "feature2Description": "Perfect your texts. Our AI can review and enhance your existing articles, suggesting improvements and polishing your message.",
+    "feature3Title": "Global Translation",
+    "feature3Description": "Break language barriers. Translate your articles into multiple languages quickly and accurately, expanding your reach.",
+    "geminiApiTitle": "Powered by Gemini: Free and Easy Access",
+    "geminiApiIntro": "AegisPad utilizes Google's powerful Gemini API for its artificial intelligence features, offering you cutting-edge results.",
+    "geminiApiGetFree": "To get started, you'll need your own Gemini API Key. You can get one for free from <link>Google AI Studio</link>.",
+    "geminiApiFreeTier": "Great news! With Gemini's free tier, you get approximately 1 million tokens per month at no cost, enough for a vast amount of content creation!",
+    "tokenEstimationTitle": "Token Usage Estimation",
+    "tokenEstimationIntro": "Understanding token consumption helps you manage your free quota and plan your work efficiently.",
+    "tokenEstimationCreateTitle": "Article Creation (500 words)",
+    "tokenEstimationCreateDesc": "~2,000 - 5,000 tokens",
+    "tokenEstimationReviseTitle": "Article Revision (500 words)",
+    "tokenEstimationReviseDesc": "~1,500 - 4,000 tokens",
+    "tokenEstimationTranslateTitle": "Article Translation (500 words)",
+    "tokenEstimationTranslateDesc": "~1,000 - 3,000 tokens",
+    "tokenEstimationImageTitle": "Image Generation",
+    "tokenEstimationImageDesc": "~250 - 1,000 tokens (varies by complexity)",
+    "tokenEstimationMonthly": "With 1 million free tokens per month, you could, for example, create over 200 short articles or perform hundreds of revisions and translations.",
+    "tokenEstimationNote": "Note: These are estimates. Actual usage may vary based on content complexity, length, and the specific Gemini model used.",
+    "secondaryCtaButton": "Probar el Editor Ahora"
   }
 }
-
-    

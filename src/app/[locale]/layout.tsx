@@ -1,5 +1,4 @@
 import Header from "@/components/header";
-import LanguageSwitcher from "@/components/language-switcher";
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
@@ -96,9 +95,6 @@ export default async function RootLayout({
           <Toaster />
           <footer className="bg-card border-t border-border py-4 text-center text-sm text-muted-foreground">
             {t("footerCopyright", { year: new Date().getFullYear() })}
-            <div className="mt-2">
-              <LanguageSwitcher />
-            </div>
           </footer>
         </NextIntlClientProvider>
       </body>

@@ -1,12 +1,14 @@
+import CustomButton from "@/components/custom-button"; // Importar el nuevo CustomButton
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Button ya no se usa aquí
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  BarChart3,
+  Edit3,
+  KeyRound,
+  Languages,
+  Wand2,
+  Zap,
+} from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import NextLink from "next/link";
 
 export default async function HomePage({
   params,
@@ -16,29 +18,180 @@ export default async function HomePage({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "HomePage" });
 
+  const features = [
+    {
+      icon: <Wand2 className="h-10 w-10 text-primary mb-4" />,
+      title: t("feature1Title"),
+      description: t("feature1Description"),
+    },
+    {
+      icon: <Edit3 className="h-10 w-10 text-primary mb-4" />,
+      title: t("feature2Title"),
+      description: t("feature2Description"),
+    },
+    {
+      icon: <Languages className="h-10 w-10 text-primary mb-4" />,
+      title: t("feature3Title"),
+      description: t("feature3Description"),
+    },
+  ];
+
   return (
-    <div className="container mx-auto flex flex-col items-center justify-center min-h-screen p-4">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center">
-            {t("title")}
-          </CardTitle>
-          <CardDescription className="text-center">
-            {t("subtitle")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <p className="text-lg text-center">{t("description")}</p>
-          <div className="flex justify-center">
-            <NextLink href={`/${locale}/editor`} className="btn btn-primary">
-              {t("goToEditorButton")}
-            </NextLink>
-          </div>
-          <p className="text-sm text-muted-foreground text-center">
-            {t("additionalInfo")}
+    <div className="space-y-16 md:space-y-24">
+      {/* Hero Section */}
+      <section className="text-center pt-12 md:pt-16 pb-12 md:pb-16 bg-black/50 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center bg-no-repeat text-white relative overflow-hidden">
+        {" "}
+        {/* Fondo por defecto o explícito */}
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+          {t("heroTitle")}
+        </h1>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+          {t("heroSubtitle")}
+        </p>{" "}
+        {/* Usar CustomButton para el CTA principal */}
+        <CustomButton href="/editor">{t("heroCtaButton")}</CustomButton>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 md:py-20 bg-muted/50">
+        {" "}
+        {/* Fondo sutil para esta sección */}
+        {/* Fondo sutil para esta sección */}
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+          {t("featuresTitle")}
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          {features.map((feature) => (
+            <Card
+              key={feature.title}
+              className="text-center shadow-lg hover:shadow-xl transition-shadow duration-300"
+            >
+              <CardHeader className="items-center">
+                {feature.icon}
+                <CardTitle>{feature.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Gemini API Key Section */}
+      <section className="bg-card py-16 md:py-20 rounded-lg shadow-lg">
+        {" "}
+        {/* Usamos bg-card para diferenciar */}
+        <div className="container mx-auto text-center">
+          <KeyRound className="h-12 w-12 text-primary mx-auto mb-6" />
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            {t("geminiApiTitle")}
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-4">
+            {t("geminiApiIntro")}
           </p>
-        </CardContent>
-      </Card>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-4">
+            {t.rich("geminiApiGetFree", {
+              link: (chunks) => (
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium"
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
+          </p>
+          <div className="mt-8 bg-primary/10 text-primary p-6 rounded-lg inline-flex items-center gap-3 max-w-2xl mx-auto">
+            <Zap className="h-8 w-8 flex-shrink-0" />
+            <p className="text-left font-medium text-lg">
+              {t("geminiApiFreeTier")}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Secondary Call to Action Section */}
+      <section className="text-center py-12">
+        {/* Usar CustomButton para el CTA secundario con variante outline */}
+        <CustomButton href="/editor" variant="outline">
+          {t("secondaryCtaButton")}
+        </CustomButton>
+      </section>
+
+      {/* Token Usage Estimation Section */}
+      <section className="py-12 md:py-16 bg-background">
+        {" "}
+        {/* Volvemos al fondo por defecto */}
+        {/* Volvemos al fondo por defecto */}
+        <div className="container mx-auto text-center">
+          <BarChart3 className="h-12 w-12 text-primary mx-auto mb-6" />
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            {t("tokenEstimationTitle")}
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
+            {t("tokenEstimationIntro")}
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto text-left">
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {t("tokenEstimationCreateTitle")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {t("tokenEstimationCreateDesc")}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {t("tokenEstimationReviseTitle")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {t("tokenEstimationReviseDesc")}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {t("tokenEstimationTranslateTitle")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {t("tokenEstimationTranslateDesc")}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card md:col-span-2 lg:col-span-3">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {t("tokenEstimationImageTitle")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {t("tokenEstimationImageDesc")}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          <p className="mt-10 text-lg text-muted-foreground max-w-3xl mx-auto">
+            {t("tokenEstimationMonthly")}
+          </p>
+          <p className="mt-4 text-sm text-muted-foreground max-w-3xl mx-auto">
+            <em>{t("tokenEstimationNote")}</em>
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

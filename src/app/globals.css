@@ -74,6 +74,19 @@
   }
 }
 
+/* En src/app/globals.css */
+.btn {
+  @apply py-2 px-4 rounded font-semibold transition-colors duration-200; /* Estilos base para todos los botones */
+}
+
+.btn-primary {
+  @apply bg-blue-500 text-white hover:bg-blue-600; /* Estilo para el botón primario */
+}
+
+.btn-outline {
+  @apply border border-blue-500 text-blue-500 hover:bg-blue-50 hover:text-blue-600; /* Estilo para el botón outline */
+}
+
 @layer base {
   * {
     @apply border-border;
