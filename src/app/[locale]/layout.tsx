@@ -1,9 +1,12 @@
-import { locales } from "@/i18n/routing";
+import Header from "@/components/header";
+import LanguageSwitcher from "@/components/language-switcher";
+import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { locales } from "../../i18n/routing";
 import "../globals.css";
 
 const inter = Inter({
@@ -24,10 +27,13 @@ export type ParamProps = {
 export async function generateMetadata({
   params,
 }: ParamProps): Promise<Metadata> {
+  console.log("generateMetadata: Iniciando...");
   const { locale } = await params;
+  console.log(`generateMetadata: Locale obtenido: ${locale}`);
 
   if (!locales.includes(locale as any)) {
     notFound();
+    // Esta función lanza un error, por lo que no se debería llegar más allá si se llama.
   }
 
   return {
@@ -38,9 +44,15 @@ export async function generateMetadata({
 
 const getMessages = async (locale: string) => {
   try {
+    console.log(
+      `getMessages: Intentando cargar mensajes para locale: ${locale}`
+    );
     return (await import(`@/messages/${locale}.json`)).default;
   } catch (error) {
-    console.error(`No se encontraron mensajes para el locale: ${locale}`);
+    console.error(
+      `getMessages: Error al cargar mensajes para locale "${locale}":`,
+      error
+    );
     return {};
   }
 };
@@ -53,25 +65,42 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+
+  if (!locale) {
+    console.error(
+      "RootLayout: El locale obtenido de params es undefined o null. Esto es un problema."
+    );
+    notFound();
+  }
+
+  if (!locales.includes(locale as any)) {
+    console.error(
+      `RootLayout: Locale "${locale}" no está en la lista de locales válidos. Llamando a notFound().`
+    );
+    notFound();
+  }
   const messages = await getMessages(locale);
+  const t = await getTranslations({ locale, namespace: "Layout" });
+  const tHeader = await getTranslations({ locale, namespace: "Header" });
 
   return (
-    <html lang={locale} className={`${inter.variable} ${robotoMono.variable}`}>
-      <body className="font-sans">
-        <Suspense
-          fallback={
-            <div
-              className="flex justify-center items-center min-h-screen text-xl"
-              suppressHydrationWarning={true}
-            >
-              Cargando Layout y Contenido...
-            </div>
-          }
-        >
-          <NextIntlClientProvider locale={locale} messages={messages}>
+    <html lang={locale}>
+      <body
+        className={`${inter.variable} ${robotoMono.variable} antialiased flex flex-col min-h-screen`}
+      >
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Header title={tHeader("appName")} />
+          <main className="flex-grow container mx-auto px-4 py-8">
             {children}
-          </NextIntlClientProvider>
-        </Suspense>
+          </main>
+          <Toaster />
+          <footer className="bg-card border-t border-border py-4 text-center text-sm text-muted-foreground">
+            {t("footerCopyright", { year: new Date().getFullYear() })}
+            <div className="mt-2">
+              <LanguageSwitcher />
+            </div>
+          </footer>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
