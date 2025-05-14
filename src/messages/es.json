@@ -131,6 +131,13 @@
   "MarkdownPreview": {
     "defaultAriaLabel": "Vista previa del contenido Markdown",
     "noContentToDisplay": "No hay contenido para mostrar."
+  },
+  "HomePage": {
+    "title": "Bienvenido a AegisPad AI",
+    "subtitle": "Tu Asistente Inteligente para la Creación de Artículos",
+    "description": "Descubre cómo nuestra IA puede ayudarte a generar, revisar y traducir contenido de manera eficiente. ¡Empieza a crear artículos impactantes hoy mismo!",
+    "goToEditorButton": "Ir al Editor",
+    "additionalInfo": "Haz clic en el botón para comenzar a usar el editor de artículos."
   }
 }
 

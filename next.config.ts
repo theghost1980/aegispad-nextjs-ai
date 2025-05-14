@@ -1,10 +1,7 @@
-// next.config.ts
 import type {NextConfig} from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
-// 2. Inicializa el plugin (puedes pasar opciones aquí si las necesitas,
-//    pero para el uso básico simplemente se llama)
-const withNextIntl = createNextIntlPlugin();
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -25,8 +22,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // ... otras configuraciones que tengas
 };
 
-// 3. Exporta la configuración normal de Next.js envuelta por el plugin de next-intl
 export default withNextIntl(nextConfig);
