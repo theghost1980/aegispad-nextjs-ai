@@ -20,53 +20,17 @@ import {
   TranslateArticleInput,
   TranslateArticleOutput,
 } from "@/ai/flows/translate-article";
-import ArticleEditor from "@/components/article-editor";
+import DetectedLanguageInfo from "@/components/editor-sections/DetectedLanguageInfo"; // Importar el nuevo componente
+import EditAndRefineCard from "@/components/editor-sections/EditAndRefineCard"; // Importar el nuevo componente
+import EditorTokenUsage from "@/components/editor-sections/EditorTokenUsage"; // Importar el nuevo componente
+import RefineCombinedFormatCard from "@/components/editor-sections/RefineCombinedFormatCard"; // Importar el nuevo componente
+import SessionSummaryCard from "@/components/editor-sections/SessionSummaryCard";
+import StartArticleCard from "@/components/editor-sections/StartArticleCard"; // Importar el nuevo componente
+import TranslateArticleCard from "@/components/editor-sections/TranslateArticleCard"; // Importar el nuevo componente
+import TranslationResultView from "@/components/editor-sections/TranslationResultView"; // Importar el nuevo componente
 import GlobalLoader from "@/components/global-loader";
 import LoadingSpinner from "@/components/loading-spinner";
-import MarkdownPreview from "@/components/markdown-preview";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import {
-  CheckSquare,
-  ClipboardCopy,
-  Coins,
-  Edit3,
-  Eraser,
-  FileTerminal,
-  FileText,
-  Globe,
-  Image as ImageIcon,
-  Languages,
-  Layers,
-  PencilLine,
-  SearchCheck,
-  Wand2,
-} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
@@ -97,6 +61,10 @@ export default function ArticleForgePage() {
   const [targetLanguage, setTargetLanguage] = useState<string>(
     availableLanguages[0].value
   );
+  const [sourceLanguageForCreation, setSourceLanguageForCreation] =
+    useState<string>(
+      "English" // Asegúrate que "English" esté en tu `availableLanguages` o usa otro valor por defecto
+    );
   const [generateMainImage, setGenerateMainImage] = useState<boolean>(false);
 
   const [currentOperationMessage, setCurrentOperationMessage] = useState<
@@ -185,7 +153,11 @@ export default function ArticleForgePage() {
       let operationDetails = { text: 0, image: 0 };
 
       try {
-        const input: CreateArticleInput = { prompt, generateMainImage };
+        const input: CreateArticleInput = {
+          prompt,
+          generateMainImage,
+          language: sourceLanguageForCreation, // Añadir el idioma
+        };
         const result: CreateArticleOutput = await createArticle(input);
         setArticleMarkdown(result.article);
 
@@ -219,6 +191,7 @@ export default function ArticleForgePage() {
     setCurrentOperationMessage(null);
     setPrompt("");
     setArticleMarkdown(t("userWriting.startPlaceholder"));
+    setSourceLanguageForCreation("English"); // Resetear al empezar a escribir manualmente
     setTargetLanguage(availableLanguages[0].value);
     setTranslatedArticleMarkdown("");
     setOriginalArticleForTranslation("");
@@ -462,6 +435,7 @@ export default function ArticleForgePage() {
     setPrompt("");
     setArticleMarkdown("");
     setTargetLanguage(availableLanguages[0].value);
+    setSourceLanguageForCreation("English"); // Resetear al limpiar todo
     setTranslatedArticleMarkdown("");
     setOriginalArticleForTranslation("");
     setCurrentOperationMessage(null);
@@ -557,21 +531,6 @@ export default function ArticleForgePage() {
     </div>
   );
 
-  const mainActionButtonText =
-    initialWorkflow === "aiCreate"
-      ? t("startArticleCard.aiCreateButtonText")
-      : t("startArticleCard.userWriteButtonText");
-
-  const mainActionButtonIcon =
-    initialWorkflow === "aiCreate" ? (
-      <Wand2 className="mr-2" />
-    ) : (
-      <PencilLine className="mr-2" />
-    );
-
-  const isMainButtonDisabled =
-    initialWorkflow === "aiCreate" ? isLoading || !prompt.trim() : isLoading;
-
   const mainActionHandler =
     initialWorkflow === "aiCreate"
       ? handleCreateArticle
@@ -596,490 +555,107 @@ export default function ArticleForgePage() {
         operationMessage={currentOperationMessage}
       />
 
-      <div className="fixed top-[calc(3.5rem+1rem)] md:top-[calc(3.5rem+1.5rem)] right-4 md:right-6 z-50 w-[calc(100%-2rem)] md:w-auto max-w-xs md:max-w-sm">
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full bg-card text-card-foreground shadow-xl rounded-lg border"
-          defaultValue="token-stats"
-        >
-          <AccordionItem value="token-stats" className="border-b-0 rounded-lg">
-            <AccordionTrigger className="flex w-full items-center justify-between rounded-t-lg p-4 text-left hover:no-underline data-[state=open]:rounded-b-none data-[state=open]:border-b">
-              <div className="flex items-center text-lg font-semibold">
-                <Coins className="mr-2 h-5 w-5 text-primary" />
-                {tTokenUsage("title")}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="p-4 data-[state=closed]:p-0">
-              {renderTokenUsageDetails()}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
+      <EditorTokenUsage
+        currentRequestTokens={currentRequestTokens}
+        detailedTokenUsage={detailedTokenUsage}
+        sessionTotalTokens={sessionTotalTokens}
+        estimatedInitialSessionTokens={ESTIMATED_INITIAL_SESSION_TOKENS}
+        tokensLeftInSession={tokensLeftInSession}
+        tTokenUsage={tTokenUsage}
+      />
 
-      <Card className="shadow-lg max-w-3xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            {initialWorkflow === "aiCreate" ? (
-              <Wand2 className="mr-2 h-6 w-6 text-primary" />
-            ) : (
-              <PencilLine className="mr-2 h-6 w-6 text-primary" />
-            )}
-            {t("startArticleCard.title")}
-          </CardTitle>
-          <CardDescription>{t("startArticleCard.description")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <Label className="text-lg font-medium">
-              {t("startArticleCard.workflowTitle")}
-            </Label>
-            <RadioGroup
-              value={initialWorkflow}
-              onValueChange={(value: InitialWorkflow) => {
-                setInitialWorkflow(value);
-                if (value === "userWrite") {
-                  setPrompt("");
-                  setGenerateMainImage(false);
-                }
-              }}
-              className="mt-2 space-y-2"
-              disabled={isLoading}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="aiCreate" id="workflow-ai-create" />
-                <Label htmlFor="workflow-ai-create" className="font-normal">
-                  {t("startArticleCard.aiCreateLabel")}
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="userWrite" id="workflow-user-write" />
-                <Label htmlFor="workflow-user-write" className="font-normal">
-                  {t("startArticleCard.userWriteLabel")}
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {initialWorkflow === "aiCreate" && (
-            <>
-              <div>
-                <Label htmlFor="prompt" className="text-lg font-medium">
-                  {t("startArticleCard.promptLabel")}
-                </Label>
-                <Textarea
-                  id="prompt"
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder={t("startArticleCard.promptPlaceholder")}
-                  className="min-h-[120px] mt-1 text-base"
-                  disabled={isLoading}
-                  aria-label={t("startArticleCard.promptLabel")}
-                />
-              </div>
-              <div className="flex items-center space-x-2 pt-2">
-                <Switch
-                  id="generateMainImage"
-                  checked={generateMainImage}
-                  onCheckedChange={setGenerateMainImage}
-                  disabled={isLoading}
-                  aria-label={t("startArticleCard.generateImageLabel")}
-                />
-                <Label
-                  htmlFor="generateMainImage"
-                  className="text-base font-normal cursor-pointer"
-                >
-                  <ImageIcon className="inline-block mr-2 h-5 w-5 align-text-bottom" />
-                  {t("startArticleCard.generateImageLabel")}
-                </Label>
-              </div>
-            </>
-          )}
-        </CardContent>
-        <CardFooter className="flex justify-between items-center">
-          <Button onClick={clearAll} variant="outline" disabled={isLoading}>
-            <Eraser className="mr-2" /> {t("startArticleCard.clearAllButton")}
-          </Button>
-          <Button onClick={mainActionHandler} disabled={isMainButtonDisabled}>
-            {isLoading &&
-            (currentOperationMessage === currentLoadingMessageForButton ||
-              currentOperationMessage?.startsWith(
-                t("startArticleCard.creatingArticleMessage").substring(0, 10)
-              )) ? (
-              <LoadingSpinner className="mr-2" />
-            ) : (
-              mainActionButtonIcon
-            )}
-            {mainActionButtonText}
-          </Button>
-        </CardFooter>
-      </Card>
+      <StartArticleCard
+        initialWorkflow={initialWorkflow}
+        onInitialWorkflowChange={(value: InitialWorkflow) => {
+          setInitialWorkflow(value);
+          if (value === "userWrite") {
+            setPrompt(""); // Limpiar prompt si se cambia a escritura manual
+            setGenerateMainImage(false); // Desactivar imagen si se cambia a escritura manual
+          }
+        }}
+        prompt={prompt}
+        onPromptChange={setPrompt}
+        generateMainImage={generateMainImage}
+        sourceLanguageForCreation={sourceLanguageForCreation}
+        onSourceLanguageForCreationChange={setSourceLanguageForCreation}
+        onGenerateMainImageChange={setGenerateMainImage}
+        onMainAction={mainActionHandler}
+        onClearAll={clearAll}
+        isLoading={isLoading}
+        currentOperationMessage={currentOperationMessage}
+        t={(key, values) => t(`startArticleCard.${key}`, values)}
+      />
 
       {detectedLanguage && articleMarkdown && (
-        <Card className="shadow-lg max-w-3xl mx-auto">
-          <CardContent className="p-4">
-            <div className="flex items-center text-sm">
-              <SearchCheck className="mr-2 h-5 w-5 text-green-600" />
-              <span>
-                {t("detectLanguageCard.detectedLanguageLabel")}{" "}
-                <strong>{detectedLanguage}</strong>
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        <DetectedLanguageInfo
+          detectedLanguage={detectedLanguage}
+          t={(key, values) => t(`detectLanguageCard.${key}`, values)}
+        />
       )}
 
       {articleMarkdown && (
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Edit3 className="mr-2 h-6 w-6 text-primary" />
-              {t("editArticleCard.title")}
-            </CardTitle>
-            <CardDescription>
-              {t("editArticleCard.description")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ArticleEditor
-              markdown={articleMarkdown}
-              onMarkdownChange={setArticleMarkdown}
-              isLoading={isLoading}
-            />
-          </CardContent>
-          <CardFooter>
-            <Button
-              onClick={handleReviseArticle}
-              disabled={isLoading || !articleMarkdown.trim()}
-              className="w-full md:w-auto"
-            >
-              {isLoading &&
-              currentOperationMessage ===
-                t("editArticleCard.revisingArticleMessage") ? (
-                <LoadingSpinner className="mr-2" />
-              ) : (
-                <Edit3 className="mr-2" />
-              )}
-              {t("editArticleCard.reviseButton")}
-            </Button>
-          </CardFooter>
-        </Card>
+        <EditAndRefineCard
+          articleMarkdown={articleMarkdown}
+          onArticleMarkdownChange={setArticleMarkdown}
+          onReviseArticle={handleReviseArticle}
+          isLoading={isLoading}
+          currentOperationMessage={currentOperationMessage}
+          t={(key, values) => t(`editArticleCard.${key}`, values)}
+        />
       )}
 
       {articleMarkdown && (
-        <Card className="shadow-lg max-w-3xl mx-auto">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Languages className="mr-2 h-6 w-6 text-primary" />
-              {t("translateArticleCard.title")}
-            </CardTitle>
-            <CardDescription>
-              {detectedLanguage
-                ? t("translateArticleCard.descriptionWithSource", {
-                    detectedLanguage,
-                  })
-                : t("translateArticleCard.description")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="targetLanguage" className="text-lg font-medium">
-                {t("translateArticleCard.targetLanguageLabel")}
-              </Label>
-              <Select
-                value={targetLanguage}
-                onValueChange={setTargetLanguage}
-                disabled={isLoading}
-              >
-                <SelectTrigger
-                  id="targetLanguage"
-                  className="mt-1 text-base"
-                  aria-label={t("translateArticleCard.targetLanguageLabel")}
-                >
-                  <SelectValue
-                    placeholder={t(
-                      "translateArticleCard.selectLanguagePlaceholder"
-                    )}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableLanguages.map((lang) => (
-                    <SelectItem key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button
-              onClick={handleTranslateArticle}
-              disabled={
-                isLoading || !articleMarkdown.trim() || !targetLanguage.trim()
-              }
-              className="w-full md:w-auto"
-            >
-              {isLoading &&
-              currentOperationMessage ===
-                t("translateArticleCard.translatingArticleMessage") ? (
-                <LoadingSpinner className="mr-2" />
-              ) : (
-                <Languages className="mr-2" />
-              )}
-              {t("translateArticleCard.translateButton")}
-            </Button>
-          </CardFooter>
-        </Card>
+        <TranslateArticleCard
+          targetLanguage={targetLanguage}
+          onTargetLanguageChange={setTargetLanguage}
+          availableLanguages={availableLanguages}
+          detectedLanguage={detectedLanguage}
+          onTranslateArticle={handleTranslateArticle}
+          isLoading={isLoading}
+          currentOperationMessage={currentOperationMessage}
+          articleMarkdown={articleMarkdown}
+          t={(key, values) => t(`translateArticleCard.${key}`, values)}
+        />
       )}
 
       {translatedArticleMarkdown && originalArticleForTranslation && (
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Globe className="mr-2 h-6 w-6 text-primary" />
-              {t("translationResultCard.title")}
-            </CardTitle>
-            <CardDescription>
-              {t("translationResultCard.description", { targetLanguage })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center text-xl">
-                  <FileText size={20} className="mr-2 text-muted-foreground" />
-                  {detectedLanguage
-                    ? `${t(
-                        "translationResultCard.originalArticleTitle"
-                      )} (${detectedLanguage})`
-                    : t("translationResultCard.originalArticleTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <Textarea
-                  value={originalArticleForTranslation}
-                  readOnly
-                  className="min-h-[300px] text-sm resize-y bg-muted/20 h-full"
-                  aria-label={t(
-                    "translationResultCard.originalArticleAriaLabel"
-                  )}
-                />
-              </CardContent>
-            </Card>
-            <Card className="flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center text-xl">
-                  <Languages size={20} className="mr-2 text-muted-foreground" />{" "}
-                  {t("translationResultCard.translatedArticleTitle", {
-                    targetLanguage,
-                  })}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                <MarkdownPreview
-                  markdown={translatedArticleMarkdown}
-                  minHeight="300px"
-                  className="h-full"
-                  ariaLabel={t(
-                    "translationResultCard.translatedPreviewAriaLabel",
-                    { targetLanguage }
-                  )}
-                />
-              </CardContent>
-            </Card>
-          </CardContent>
-        </Card>
+        <TranslationResultView
+          originalArticleForTranslation={originalArticleForTranslation}
+          translatedArticleMarkdown={translatedArticleMarkdown}
+          targetLanguage={targetLanguage}
+          detectedLanguage={detectedLanguage}
+          t={(key, values) => t(`translationResultCard.${key}`, values)}
+        />
       )}
 
       {originalArticleForTranslation && translatedArticleMarkdown && (
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Layers className="mr-2 h-6 w-6 text-primary" />
-              {t("refineFormatCard.title")}
-            </CardTitle>
-            <CardDescription>
-              {t("refineFormatCard.description")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <Label className="text-lg font-medium">
-                {t("refineFormatCard.combinationFormatLabel")}
-              </Label>
-              <RadioGroup
-                value={selectedCombineFormat}
-                onValueChange={(value: "simple" | "detailsTag") =>
-                  setSelectedCombineFormat(value)
-                }
-                className="mt-2 space-y-2"
-                disabled={isLoading}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="simple" id="format-simple" />
-                  <Label htmlFor="format-simple" className="font-normal">
-                    {t("refineFormatCard.formatSimpleLabel")}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="detailsTag" id="format-details" />
-                  <Label htmlFor="format-details" className="font-normal">
-                    {t("refineFormatCard.formatDetailsLabel")}
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-            <Button
-              onClick={handleCombineFormat}
-              disabled={
-                isLoading ||
-                !originalArticleForTranslation.trim() ||
-                !translatedArticleMarkdown.trim()
-              }
-              className="w-full md:w-auto"
-            >
-              {isLoading &&
-              currentOperationMessage ===
-                t("refineFormatCard.generatingCombinedMessage") ? (
-                <LoadingSpinner className="mr-2" />
-              ) : (
-                <CheckSquare className="mr-2" />
-              )}
-              {t("refineFormatCard.generateCombinedButton")}
-            </Button>
-
-            {finalCombinedOutput && (
-              <div className="mt-6">
-                <h3 className="text-xl font-semibold mb-2">
-                  {t("refineFormatCard.combinedOutputTitle")}
-                </h3>
-                <ArticleEditor
-                  markdown={finalCombinedOutput}
-                  onMarkdownChange={setFinalCombinedOutput}
-                  isLoading={
-                    isLoading &&
-                    currentOperationMessage ===
-                      t("refineFormatCard.generatingCombinedMessage")
-                  }
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <RefineCombinedFormatCard
+          selectedCombineFormat={selectedCombineFormat}
+          onSelectedCombineFormatChange={setSelectedCombineFormat}
+          onCombineFormat={handleCombineFormat}
+          finalCombinedOutput={finalCombinedOutput}
+          onFinalCombinedOutputChange={setFinalCombinedOutput}
+          isLoading={isLoading}
+          currentOperationMessage={currentOperationMessage}
+          originalArticleForTranslation={originalArticleForTranslation}
+          translatedArticleMarkdown={translatedArticleMarkdown}
+          t={(key, values) => t(`refineFormatCard.${key}`, values)}
+        />
       )}
 
       {sessionTotalTokens > 0 && (
-        <Card className="shadow-lg max-w-3xl mx-auto">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileTerminal className="mr-2 h-6 w-6 text-primary" />
-              {t("sessionSummaryCard.title")}
-            </CardTitle>
-            <CardDescription>
-              {t("sessionSummaryCard.description")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <h4 className="text-lg font-semibold mb-2">
-                {t("sessionSummaryCard.workflowTitle")}
-              </h4>
-              <div className="p-3 border rounded-md bg-muted/30 text-sm">
-                <p>
-                  {t("sessionSummaryCard.workflowLabel")}
-                  <span className="font-semibold ml-1">
-                    {initialWorkflow === "aiCreate"
-                      ? t("startArticleCard.aiCreateLabel")
-                      : t("startArticleCard.userWriteLabel")}
-                  </span>
-                </p>
-                {detectedLanguage && (
-                  <p className="mt-1">
-                    {t("sessionSummaryCard.detectedLanguageLabel")}
-                    <span className="font-semibold ml-1">
-                      {detectedLanguage}
-                    </span>
-                  </p>
-                )}
-              </div>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-2">
-                {t("sessionSummaryCard.tokenUsageTitle")}
-              </h4>
-              <div className="space-y-1 text-sm p-3 border rounded-md bg-muted/30">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    {t("sessionSummaryCard.totalTokensUsedLabel")}
-                  </span>
-                  <span className="font-semibold">
-                    {sessionTotalTokens.toLocaleString()}
-                  </span>
-                </div>
-                {sessionTextTokensUsed > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {t("sessionSummaryCard.textGenerationTokensLabel")}
-                    </span>
-                    <span className="font-semibold">
-                      {sessionTextTokensUsed.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-                {sessionImageTokensUsed > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      {t("sessionSummaryCard.imageGenerationTokensLabel")}
-                    </span>
-                    <span className="font-semibold">
-                      {sessionImageTokensUsed.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {finalCombinedOutput.trim() && (
-              <div>
-                <Label
-                  htmlFor="finalOutputReadOnly"
-                  className="text-lg font-medium"
-                >
-                  {t("sessionSummaryCard.finalCombinedArticleLabel")}
-                </Label>
-                <Textarea
-                  id="finalOutputReadOnly"
-                  value={finalCombinedOutput}
-                  readOnly
-                  className="min-h-[200px] mt-1 text-base bg-muted/30"
-                  aria-label={t("sessionSummaryCard.finalCombinedArticleLabel")}
-                />
-              </div>
-            )}
-            {!finalCombinedOutput.trim() && (
-              <p className="text-muted-foreground italic">
-                {t("sessionSummaryCard.noFinalCombinedArticleMessage")}
-              </p>
-            )}
-          </CardContent>
-          <CardFooter>
-            <Button
-              onClick={handleCopySummary}
-              disabled={isLoading}
-              className="w-full md:w-auto"
-            >
-              {isLoading &&
-              currentOperationMessage ===
-                t("sessionSummaryCard.preparingSummaryMessage") ? (
-                <LoadingSpinner className="mr-2" />
-              ) : (
-                <ClipboardCopy className="mr-2" />
-              )}
-              {t("sessionSummaryCard.copySummaryButton")}
-            </Button>
-          </CardFooter>
-        </Card>
+        <SessionSummaryCard
+          initialWorkflow={initialWorkflow}
+          detectedLanguage={detectedLanguage}
+          sessionTotalTokens={sessionTotalTokens}
+          sessionTextTokensUsed={sessionTextTokensUsed}
+          sessionImageTokensUsed={sessionImageTokensUsed}
+          finalCombinedOutput={finalCombinedOutput}
+          onCopySummary={handleCopySummary}
+          isLoading={isLoading}
+          currentOperationMessage={currentOperationMessage}
+          t={(key, values) => t(`sessionSummaryCard.${key}`, values)}
+        />
       )}
     </div>
   );

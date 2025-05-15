@@ -38,7 +38,9 @@
       "clearAllButton": "Limpiar Todo",
       "creatingArticleMessage": "Creando artículo...",
       "creatingArticleWithImageMessage": "Creando artículo y generando imagen...",
-      "startingUserWritingMessage": "Preparando editor..."
+      "startingUserWritingMessage": "Preparando editor...",
+      "sourceLanguageLabel": "Lenguage Origen",
+      "selectSourceLanguagePlaceholder": "Selecciona el idioma del artículo"
     },
     "detectLanguageCard": {
       "detectingLanguageMessage": "Detectando idioma...",
