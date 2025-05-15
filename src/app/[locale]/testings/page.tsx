@@ -16,9 +16,12 @@ import {
 } from "@/constants/constants";
 import { useGeminiKeyManager } from "@/hooks/use-gemini-key-manager";
 import { HelpCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 export default function TestingsPage() {
+  const t = useTranslations("TestingsPage");
+  const tErrorHook = useTranslations("GeminiKeyManagerErrors");
   const { isKeychainAvailable, encodeData, decodeData, isLoadingKeychain } =
     useGeminiKeyManager();
   const [username, setUsername] = useState("");
@@ -32,9 +35,7 @@ export default function TestingsPage() {
 
   const handleTestEncodeAndDecode = async () => {
     if (!username.trim() || !dataToEncode.trim()) {
-      alert(
-        "Por favor, introduce un nombre de usuario de Hive y los datos a codificar."
-      );
+      alert(t("alertInputsRequired"));
       return;
     }
 
@@ -51,8 +52,15 @@ export default function TestingsPage() {
       setDecodedData(decoded);
       setStatus("success");
     } catch (e: any) {
-      console.error("Error durante la encriptación/desencriptación:", e);
-      setError(e.message || "Ocurrió un error desconocido.");
+      console.log("error: ", { e }); //TODO REMOVE
+      console.error(t("errorLabel"), e);
+      // Intenta traducir el mensaje de error si es una clave conocida, sino usa un fallback
+      try {
+        setError(tErrorHook(e.message as any));
+      } catch (translationError) {
+        // Si e.message no es una clave válida en tErrorHook, usa un mensaje genérico
+        setError(t("unknownError"));
+      }
       setStatus("error");
     }
   };
@@ -62,16 +70,16 @@ export default function TestingsPage() {
       <div className="container mx-auto p-4">
         <Card className="max-w-lg mx-auto">
           <CardHeader>
-            <CardTitle>Página de Pruebas de Hive Keychain</CardTitle>
+            <CardTitle>{t("title")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoadingKeychain ? (
-              <SpinLoader message="Verificando Hive Keychain..." />
+              <SpinLoader message={t("loaderMessage")} />
             ) : (
               <div className="space-y-4">
                 <>
                   <p>
-                    Hive Keychain disponible:{" "}
+                    {t("keychainAvailable")}{" "}
                     <span
                       className={
                         isKeychainAvailable
@@ -79,16 +87,13 @@ export default function TestingsPage() {
                           : "text-red-600 font-semibold"
                       }
                     >
-                      {isKeychainAvailable ? "Sí" : "No"}
+                      {isKeychainAvailable ? t("yes") : t("no")}
                     </span>
                   </p>
 
                   {!isKeychainAvailable && (
                     <div className="text-center p-4 border rounded-md text-red-600">
-                      <p className="mb-2">
-                        Hive Keychain no detectado. Necesitas instalar la
-                        extensión para usar esta funcionalidad.
-                      </p>
+                      <p className="mb-2">{t("keychainNotDetected")}</p>
                       <a
                         href={HIVE_KEYCHAIN_INSTALL_URL}
                         target="_blank"
@@ -96,7 +101,7 @@ export default function TestingsPage() {
                         suppressHydrationWarning={true}
                         className="text-blue-600 hover:underline block mb-2"
                       >
-                        🔗 Haz clic aquí para instalar Hive Keychain
+                        {t("installLink")}
                       </a>
                       <a
                         href={HIVE_KEYCHAIN_WEBSITE_URL}
@@ -105,21 +110,19 @@ export default function TestingsPage() {
                         suppressHydrationWarning={true}
                         className="text-blue-600 hover:underline block"
                       >
-                        🌐 Visita la página oficial de Hive Keychain
+                        {t("websiteLink")}
                       </a>
                     </div>
                   )}
 
                   {isKeychainAvailable && (
                     <div className="space-y-3 border p-4 rounded-md">
-                      <h3 className="font-semibold">
-                        Prueba de Encriptación → Desencriptación
-                      </h3>
+                      <h3 className="font-semibold">{t("testSectionTitle")}</h3>
                       <Input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Tu nombre de usuario de Hive"
+                        placeholder={t("usernamePlaceholder")}
                         disabled={
                           status !== "idle" &&
                           status !== "success" &&
@@ -130,7 +133,7 @@ export default function TestingsPage() {
                         type="text"
                         value={dataToEncode}
                         onChange={(e) => setDataToEncode(e.target.value)}
-                        placeholder="Datos a encriptar (ej: tu clave API)"
+                        placeholder={t("dataPlaceholder")}
                         disabled={
                           status !== "idle" &&
                           status !== "success" &&
@@ -148,17 +151,17 @@ export default function TestingsPage() {
                           !dataToEncode.trim()
                         }
                       >
-                        {status === "idle" && "Iniciar Prueba"}
-                        {status === "encoding" && "Encriptando..."}
-                        {status === "decoding" && "Desencriptando..."}
-                        {status === "success" && "Prueba Exitosa (Reiniciar)"}
-                        {status === "error" && "Error (Reintentar)"}
+                        {status === "idle" && t("buttonInitial")}
+                        {status === "encoding" && t("buttonEncoding")}
+                        {status === "decoding" && t("buttonDecoding")}
+                        {status === "success" && t("buttonSuccess")}
+                        {status === "error" && t("buttonError")}
                       </Button>
 
                       {status !== "idle" && (
                         <div className="mt-4 text-sm text-muted-foreground">
                           <p>
-                            Estado:{" "}
+                            {t("statusLabel")}{" "}
                             <span
                               className={`font-semibold ${
                                 status === "success"
@@ -174,14 +177,15 @@ export default function TestingsPage() {
 
                           {dataToEncode && (
                             <p>
-                              Datos Originales: <code>{dataToEncode}</code>
+                              {t("originalDataLabel")}{" "}
+                              <code>{dataToEncode}</code>
                             </p>
                           )}
 
                           {encodedData && (
                             <div>
                               <div className="flex items-center gap-1">
-                                <p>Datos Encriptados:</p>
+                                <p>{t("encryptedDataLabel")}</p>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
@@ -191,46 +195,36 @@ export default function TestingsPage() {
                                     className="max-w-xs text-xs p-2"
                                   >
                                     <p className="font-semibold mb-1">
-                                      Información de Encriptación:
+                                      {t("tooltipEncryptionTitle")}
                                     </p>
-                                    <p>
-                                      Hive Keychain usa AES-256 (derivado de tus
-                                      claves de Hive vía ECDH) para proteger
-                                      este dato. El prefijo '#' indica un
-                                      mensaje encriptado.
-                                    </p>
+                                    <p>{t("tooltipEncryptionBody")}</p>
                                     <p className="mt-1 font-semibold">
-                                      Seguridad:
+                                      {t("tooltipSecurityTitle")}
                                     </p>
-                                    <p>
-                                      Descifrar esto por fuerza bruta es
-                                      inviable. La seguridad depende de la
-                                      custodia de tu clave privada de Hive. Si
-                                      tu clave privada se compromete, este dato
-                                      puede ser desencriptado. MANTEN TUS CLAVES
-                                      DE HIVE SEGURAS!
-                                    </p>
+                                    <p>{t("tooltipSecurityBody")}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </div>
                               <div className="w-full overflow-x-auto rounded-md bg-muted p-2 text-sm font-mono text-muted-foreground">
                                 <code>{encodedData}</code>
+                                <p className="mt-1 text-xs text-gray-500">
+                                  {t("storageNote")}
+                                </p>
                               </div>
-                              <p className="mt-1 text-xs text-gray-500">
-                                Esta es la cadena que se guardará localmente
-                                (encriptada).
-                              </p>
                             </div>
                           )}
 
                           {decodedData && (
                             <p>
-                              Datos Desencriptados: <code>{decodedData}</code>
+                              {t("decryptedDataLabel")}{" "}
+                              <code>{decodedData}</code>
                             </p>
                           )}
 
                           {error && (
-                            <p className="text-red-600">Error: {error}</p>
+                            <p className="text-red-600">
+                              {t("errorLabel")} {error}
+                            </p>
                           )}
                         </div>
                       )}

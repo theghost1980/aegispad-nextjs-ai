@@ -32,23 +32,23 @@ export function useGeminiKeyManager() {
     (username: string, dataToEncode: string): Promise<string> => {
       return new Promise((resolve, reject) => {
         if (!isKeychainAvailable) {
-          reject(
-            new Error("Hive Keychain no está disponible para la codificación.")
-          );
+          reject(new Error("keychainNotAvailableEncode"));
           return;
         }
         if (!username || !dataToEncode) {
-          reject(
-            new Error(
-              "El nombre de usuario y los datos a codificar son requeridos."
-            )
-          );
+          reject(new Error("inputsRequiredEncode"));
           return;
         }
 
         const formattedDataToEncode = dataToEncode.startsWith("#")
           ? dataToEncode
           : `#${dataToEncode}`;
+        const verification = /^#\s+$/.test(formattedDataToEncode);
+        console.log({ verification }); //TODO REM
+        if (/^#\s+$/.test(formattedDataToEncode)) {
+          reject(new Error("errorInvalidEncodedFormat"));
+          return;
+        }
 
         KeychainHelper.requestEncodeMessage(
           username,
@@ -63,20 +63,14 @@ export function useGeminiKeyManager() {
               ) {
                 resolve(response.result);
               } else {
-                reject(
-                  new Error(
-                    "La codificación no alteró los datos o el formato es inesperado."
-                  )
-                );
+                reject(new Error("encodeProcessFailed"));
               }
             } else {
-              reject(
-                new Error(
-                  response.message ||
-                    response.error ||
-                    "Error al codificar el mensaje."
-                )
-              );
+              const errorMessageKey =
+                response.error === "incomplete"
+                  ? "errorInvalidEncodedFormat"
+                  : (response.error as string) || "encodeGenericError";
+              reject(new Error(errorMessageKey));
             }
           }
         );
@@ -89,19 +83,11 @@ export function useGeminiKeyManager() {
     (username: string, encodedData: string): Promise<string> => {
       return new Promise((resolve, reject) => {
         if (!isKeychainAvailable) {
-          reject(
-            new Error(
-              "Hive Keychain no está disponible para la decodificación."
-            )
-          );
+          reject(new Error("keychainNotAvailableDecode"));
           return;
         }
         if (!username || !encodedData || !encodedData.trim()) {
-          reject(
-            new Error(
-              "El nombre de usuario y los datos codificados son requeridos y no pueden estar vacíos."
-            )
-          );
+          reject(new Error("inputsRequiredDecode"));
           return;
         }
 
@@ -117,19 +103,11 @@ export function useGeminiKeyManager() {
               ) {
                 resolve(response.result);
               } else {
-                reject(
-                  new Error(
-                    "La decodificación no produjo el resultado esperado o el formato es incorrecto."
-                  )
-                );
+                new Error("decodeProcessFailed");
               }
             } else {
               reject(
-                new Error(
-                  response.message ||
-                    response.error ||
-                    "Error al decodificar el mensaje."
-                )
+                new Error((response.error as string) || "decodeGenericError")
               );
             }
           }
