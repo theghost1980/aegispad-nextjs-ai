@@ -3,7 +3,11 @@
     "footerCopyright": "© {year} AegisPad. Todos los derechos reservados."
   },
   "Header": {
-    "appName": "AegisPad"
+    "appName": "AegisPad",
+    "navHome": "Inicio",
+    "navEditor": "Editor",
+    "navTestings": "Pruebas Keychain",
+    "navFaq": "Preguntas Frecuentes"
   },
   "LanguageSwitcher": {
     "selectLanguage": "Idioma",
@@ -200,5 +204,14 @@
     "decodeProcessFailed": "La decodificación no produjo el resultado esperado o el formato es incorrecto.",
     "decodeGenericError": "Error al decodificar el mensaje.",
     "errorInvalidEncodedFormat": "Formato de datos inválido para codificación. No puede ser solo '#' seguido de espacios."
+  },
+  "FaqPage": {
+    "title": "Preguntas Frecuentes",
+    "sampleQ1Title": "¿Qué es AegisPad?",
+    "sampleQ1Content": "AegisPad es una forja inteligente de artículos que te ayuda a crear, refinar y traducir contenido utilizando el poder de la IA de Gemini y a asegurar tu clave API de Gemini con Hive Keychain.",
+    "sampleQ2Title": "¿Cómo obtengo una Clave API de Gemini?",
+    "sampleQ2Content": "Puedes obtener una Clave API de Gemini de forma gratuita desde Google AI Studio. AegisPad utiliza esta clave para potenciar sus funciones de IA. El nivel gratuito ofrece una generosa cantidad de tokens para la creación de contenido.",
+    "sampleQ3Title": "¿Cómo se almacena mi clave API de Gemini?",
+    "sampleQ3Content": "Tu clave API de Gemini, una vez proporcionada, se encripta utilizando tu cuenta de Hive Keychain (específicamente, tu clave de Posting) y se almacena localmente en el almacenamiento local de tu navegador. Se desencripta solo cuando es necesario para interactuar con la API de Gemini y nunca se envía a nuestros servidores sin encriptar."
   }
 }

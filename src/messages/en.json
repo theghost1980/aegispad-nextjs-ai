@@ -3,7 +3,11 @@
     "footerCopyright": "© {year} AegisPad. All rights reserved."
   },
   "Header": {
-    "appName": "AegisPad"
+    "appName": "AegisPad",
+    "navHome": "Home",
+    "navEditor": "Editor",
+    "navTestings": "Keychain Tests",
+    "navFaq": "FAQ"
   },
   "LanguageSwitcher": {
     "selectLanguage": "Language",
@@ -200,5 +204,14 @@
     "decodeProcessFailed": "Decoding did not produce the expected result or format is incorrect.",
     "decodeGenericError": "Error decoding message.",
     "errorInvalidEncodedFormat": "Invalid data format for encoding. Cannot be just '#' followed by spaces."
+  },
+  "FaqPage": {
+    "title": "Frequently Asked Questions",
+    "sampleQ1Title": "What is AegisPad?",
+    "sampleQ1Content": "AegisPad is an intelligent article forge that helps you create, refine, and translate content using the power of Gemini AI and secure your Gemini API key with Hive Keychain.",
+    "sampleQ2Title": "How do I get a Gemini API Key?",
+    "sampleQ2Content": "You can get a Gemini API Key for free from Google AI Studio. AegisPad uses this key to power its AI features. The free tier offers a generous amount of tokens for content creation.",
+    "sampleQ3Title": "How is my Gemini API key stored?",
+    "sampleQ3Content": "Your Gemini API key, once provided, is encrypted using your Hive Keychain account (specifically, your Posting key) and stored locally in your browser's local storage. It is decrypted only when needed to interact with the Gemini API and is never sent to our servers unencrypted."
   }
 }

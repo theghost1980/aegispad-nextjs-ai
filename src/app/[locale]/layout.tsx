@@ -46,7 +46,7 @@ const getMessages = async (locale: string) => {
     console.log(
       `getMessages: Intentando cargar mensajes para locale: ${locale}`
     );
-    return (await import(`@/messages/${locale}.json`)).default;
+    return (await import(`@/messages/${locale}.json`)).default; // Corregir ruta de carga de mensajes
   } catch (error) {
     console.error(
       `getMessages: Error al cargar mensajes para locale "${locale}":`,
@@ -80,7 +80,6 @@ export default async function RootLayout({
   }
   const messages = await getMessages(locale);
   const t = await getTranslations({ locale, namespace: "Layout" });
-  const tHeader = await getTranslations({ locale, namespace: "Header" });
 
   return (
     <html lang={locale}>
@@ -88,7 +87,7 @@ export default async function RootLayout({
         className={`${inter.variable} ${robotoMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Header title={tHeader("appName")} />
+          <Header />
           <main className="flex-grow container mx-auto px-4 py-8">
             {children}
           </main>
