@@ -1,0 +1,226 @@
+{
+  "Layout": {
+    "footerCopyright": "© {year} AegisPad. Todos os direitos reservados."
+  },
+  "Header": {
+    "appName": "AegisPad",
+    "navHome": "Início",
+    "navEditor": "Editor",
+    "navTestings": "Testes Keychain",
+    "navFaq": "FAQ"
+  },
+  "LanguageSwitcher": {
+    "selectLanguage": "Idioma",
+    "english": "Inglês",
+    "spanish": "Espanhol",
+    "french": "Francês",
+    "portugueseBrazil": "Português (Brasil)"
+  },
+  "TokenUsage": {
+    "title": "Uso de Tokens",
+    "lastOp": "Tokens Usados (Última Op.):",
+    "textTokens": "└ Texto:",
+    "imageTokens": "└ Imagem:",
+    "sessionTotal": "Total de Tokens (Sessão):",
+    "sessionQuota": "Cota de Sessão Suposta:",
+    "estRemaining": "Tokens Restantes Estimados:"
+  },
+  "ArticleForgePage": {
+    "startArticleCard": {
+      "title": "Comece Seu Artigo",
+      "description": "Escolha seu ponto de partida: deixe a IA criar um rascunho com base em suas ideias ou comece a escrever do zero você mesmo.",
+      "workflowTitle": "Como você gostaria de começar?",
+      "aiCreateLabel": "Deixar a IA criar o conteúdo",
+      "userWriteLabel": "Eu mesmo vou escrever o conteúdo",
+      "promptLabel": "Seu Tópico ou Comando para a IA",
+      "promptPlaceholder": "Ex: O impacto da IA na escrita criativa...",
+      "generateImageLabel": "Gerar uma imagem principal (apenas criação por IA)",
+      "aiCreateButtonText": "Vamos Perguntar à IA",
+      "userWriteButtonText": "Vou Começar a Escrever",
+      "clearAllButton": "Limpar Tudo",
+      "creatingArticleMessage": "Criando artigo...",
+      "creatingArticleWithImageMessage": "Criando artigo e gerando imagem...",
+      "startingUserWritingMessage": "Preparando editor...",
+      "sourceLanguageLabel": "Idioma de Criação",
+      "selectSourceLanguagePlaceholder": "Selecione o idioma do artigo"
+    },
+    "detectLanguageCard": {
+      "detectingLanguageMessage": "Detectando idioma...",
+      "detectedLanguageLabel": "Idioma do Artigo Detectado:"
+    },
+    "editArticleCard": {
+      "title": "Editar & Refinar Artigo",
+      "description": "O conteúdo do seu artigo está abaixo. Você pode editar o Markdown diretamente ou usar a IA para ajudar a revisá-lo.",
+      "reviseButton": "Revisar Artigo com IA",
+      "revisingArticleMessage": "Revisando artigo..."
+    },
+    "translateArticleCard": {
+      "title": "Traduzir Artigo",
+      "description": "Traduzir o artigo atual para outro idioma.",
+      "descriptionWithSource": "Traduzir o artigo atual (detectado como {detectedLanguage}) para outro idioma.",
+      "targetLanguageLabel": "Idioma de Destino",
+      "selectLanguagePlaceholder": "Selecione um idioma",
+      "translateButton": "Traduzir Artigo",
+      "translatingArticleMessage": "Traduzindo artigo..."
+    },
+    "translationResultCard": {
+      "title": "Resultado da Tradução",
+      "description": "Mostrando artigo original e sua tradução para {targetLanguage}.",
+      "originalArticleTitle": "Artigo Original",
+      "translatedArticleTitle": "Traduzido para {targetLanguage}",
+      "originalArticleAriaLabel": "Conteúdo do artigo original antes da tradução (Markdown)",
+      "translatedPreviewAriaLabel": "Artigo traduzido para {targetLanguage}"
+    },
+    "refineFormatCard": {
+      "title": "Refinar Formato Final",
+      "description": "Combine o artigo original e traduzido em uma única saída. Escolha seu formato preferido.",
+      "combinationFormatLabel": "Formato de Combinação",
+      "formatSimpleLabel": "Simples (Original e depois Tradução com separador)",
+      "formatDetailsLabel": "Tag Detalhes (Tradução expansível sob o original)",
+      "formatInlineLabel": "Entre Linhas (Original > Traduzido)",
+      "generateCombinedButton": "Gerar Saída Combinada",
+      "generatingCombinedMessage": "Gerando formato de artigo combinado...",
+      "combinedOutputTitle": "Saída do Artigo Combinado:",
+      "formatInCommentsLabel": "Como Comentários (Original + Tradução para Comentário)",
+      "inComments_forPublishingAsComment": "Para publicar como comentário (Tradução para {language}):",
+      "inComments_startCopying": "COMECE A COPIAR DAQUI PARA O SEU COMENTÁRIO:",
+      "inComments_endCopying": "FIM DA CÓPIA PARA O SEU COMENTÁRIO."
+    },
+    "sessionSummaryCard": {
+      "title": "Resumo da Sessão & Saída Final",
+      "description": "Um detalhamento da atividade da sua sessão atual e do artigo combinado final, se gerado.",
+      "workflowTitle": "Fluxo de Trabalho Usado",
+      "workflowLabel": "Fluxo de Trabalho Selecionado:",
+      "detectedLanguageLabel": "Idioma do Artigo Detectado:",
+      "tokenUsageTitle": "Uso de Tokens (Esta Sessão)",
+      "totalTokensUsedLabel": "Total de Tokens Usados:",
+      "textGenerationTokensLabel": "  └ Tokens de Geração de Texto:",
+      "imageGenerationTokensLabel": "  └ Tokens de Geração de Imagem:",
+      "finalCombinedArticleLabel": "Artigo Combinado Final (Somente leitura)",
+      "noFinalCombinedArticleMessage": "Nenhum artigo combinado final foi gerado nesta sessão.",
+      "copySummaryButton": "Copiar Resumo Completo & Saída",
+      "preparingSummaryMessage": "Preparando resumo para cópia..."
+    },
+    "toastMessages": {
+      "errorTitle": "Erro",
+      "successTitle": "Sucesso",
+      "clearedTitle": "Limpado",
+      "promptEmptyError": "O comando não pode estar vazio.",
+      "articleEmptyError": "O conteúdo do artigo não pode estar vazio.",
+      "targetLanguageEmptyError": "O idioma de destino não pode estar vazio.",
+      "combineEmptyError": "Os artigos original e traduzido devem existir para combinar.",
+      "articleCreatedSuccess": "Artigo criado com sucesso!",
+      "articleCreatedWithImageSuccess": "Artigo criado com sucesso! Imagem principal gerada.",
+      "articleRevisedSuccess": "Artigo revisado com sucesso!",
+      "articleTranslatedSuccess": "Artigo traduzido para {targetLanguage} com sucesso!",
+      "languageDetectedSuccess": "Idioma detectado: {language}",
+      "combinedFormatSuccess": "Formato de artigo combinado gerado!",
+      "summaryCopiedSuccess": "Resumo da sessão copiado para a área de transferência!",
+      "createFailedError": "Falha ao criar artigo. Por favor, tente novamente.",
+      "reviseFailedError": "Falha ao revisar artigo. Por favor, tente novamente.",
+      "translateFailedError": "Falha ao traduzir artigo. Por favor, tente novamente.",
+      "detectLanguageFailedError": "Falha ao detectar idioma. Por favor, tente novamente.",
+      "copySummaryFailedError": "Falha ao copiar resumo. Por favor, tente novamente ou copie manualmente.",
+      "allClearedMessage": "Todos os campos e dados da sessão foram limpos.",
+      "userWritingStartedMessage": "Editor pronto! Você pode começar a escrever seu artigo."
+    },
+    "loadingSpinnerClient": "Carregando AegisPad...",
+    "userWriting": {
+      "startPlaceholder": "## Título do Seu Artigo\n\nComece a escrever seu artigo aqui em formato Markdown...\n\n### Seção 1\n\nConteúdo para a seção 1.\n\n### Seção 2\n\nConteúdo para a seção 2."
+    }
+  },
+  "ArticleEditor": {
+    "markdownEditorTitle": "Editor Markdown",
+    "previewTitle": "Pré-visualização",
+    "markdownPlaceholder": "Seu artigo em formato Markdown aparecerá aqui...",
+    "ariaLabelEditor": "Editor Markdown para o conteúdo do artigo",
+    "ariaLabelPreview": "Pré-visualização do artigo",
+    "noContentToDisplay": "Nenhum conteúdo para exibir."
+  },
+  "GlobalLoader": {
+    "defaultLoadingMessage": "Processando..."
+  },
+  "MarkdownPreview": {
+    "defaultAriaLabel": "Pré-visualização do conteúdo Markdown",
+    "noContentToDisplay": "Nenhum conteúdo para exibir."
+  },
+  "HomePage": {
+    "heroTitle": "AegisPad: Sua Forja Inteligente de Artigos",
+    "heroSubtitle": "Crie, refine e traduza conteúdo com o poder da IA Gemini. Liberte sua criatividade sem limites e leve suas ideias para o próximo nível.",
+    "heroCtaButton": "Comece Agora",
+    "featuresTitle": "Tudo o que Você Precisa para Criar Conteúdo Impactante",
+    "feature1Title": "Criação Assistida por IA",
+    "feature1Description": "Transforme suas ideias em artigos completos. Basta fornecer um tópico e deixar nossa IA gerar um rascunho inicial, até mesmo com uma imagem principal!",
+    "feature2Title": "Revisão Inteligente",
+    "feature2Description": "Aperfeiçoe seus textos. Nossa IA pode revisar e aprimorar seus artigos existentes, sugerindo melhorias e polindo sua mensagem.",
+    "feature3Title": "Tradução Global",
+    "feature3Description": "Quebre as barreiras do idioma. Traduza seus artigos para vários idiomas de forma rápida e precisa, expandindo seu alcance.",
+    "geminiApiTitle": "Desenvolvido por Gemini: Acesso Gratuito e Fácil",
+    "geminiApiIntro": "O AegisPad utiliza a poderosa API Gemini do Google para seus recursos de inteligência artificial, oferecendo resultados de ponta.",
+    "geminiApiGetFree": "Para começar, você precisará da sua própria Chave de API Gemini. Você pode obter uma gratuitamente no <link>Google AI Studio</link>.",
+    "geminiApiFreeTier": "Ótima notícia! Com o nível gratuito do Gemini, você obtém aproximadamente 1 milhão de tokens por mês sem custo, o suficiente para uma vasta quantidade de criação de conteúdo!",
+    "tokenEstimationTitle": "Estimativa de Uso de Tokens",
+    "tokenEstimationIntro": "Entender o consumo de tokens ajuda você a gerenciar sua cota gratuita e planejar seu trabalho com eficiência.",
+    "tokenEstimationCreateTitle": "Criação de Artigo (500 palavras)",
+    "tokenEstimationCreateDesc": "~2.000 - 5.000 tokens",
+    "tokenEstimationReviseTitle": "Revisão de Artigo (500 palavras)",
+    "tokenEstimationReviseDesc": "~1.500 - 4.000 tokens",
+    "tokenEstimationTranslateTitle": "Tradução de Artigo (500 palavras)",
+    "tokenEstimationTranslateDesc": "~1.000 - 3.000 tokens",
+    "tokenEstimationImageTitle": "Geração de Imagem",
+    "tokenEstimationImageDesc": "~250 - 1.000 tokens (varia conforme a complexidade)",
+    "tokenEstimationMonthly": "Com 1 milhão de tokens gratuitos por mês, você poderia, por exemplo, criar mais de 200 artigos curtos ou realizar centenas de revisões e traduções.",
+    "tokenEstimationNote": "Observação: Estas são estimativas. O uso real pode variar com base na complexidade do conteúdo, comprimento e no modelo Gemini específico usado.",
+    "secondaryCtaButton": "Experimentar o Editor Agora"
+  },
+  "TestingsPage": {
+    "title": "Página de Teste Hive Keychain",
+    "loaderMessage": "Verificando Hive Keychain...",
+    "keychainAvailable": "Hive Keychain disponível:",
+    "yes": "Sim",
+    "no": "Não",
+    "keychainNotDetected": "Hive Keychain não detectado. Você precisa instalar a extensão para usar esta funcionalidade.",
+    "installLink": "🔗 Clique aqui para instalar o Hive Keychain",
+    "websiteLink": "🌐 Visite o site oficial do Hive Keychain",
+    "testSectionTitle": "Teste de Criptografia → Descriptografia",
+    "usernamePlaceholder": "Seu nome de usuário Hive",
+    "dataPlaceholder": "Dados para criptografar (ex: sua chave de API)",
+    "buttonInitial": "Iniciar Teste",
+    "buttonEncoding": "Criptografando...",
+    "buttonDecoding": "Descriptografando...",
+    "buttonSuccess": "Teste Bem-sucedido (Reiniciar)",
+    "buttonError": "Erro (Tentar Novamente)",
+    "statusLabel": "Status:",
+    "originalDataLabel": "Dados Originais:",
+    "encryptedDataLabel": "Dados Criptografados:",
+    "tooltipEncryptionTitle": "Informações de Criptografia:",
+    "tooltipEncryptionBody": "O Hive Keychain usa AES-256 (derivado de suas chaves Hive via ECDH) para proteger esses dados. O prefixo '#' indica uma mensagem criptografada.",
+    "tooltipSecurityTitle": "Segurança:",
+    "tooltipSecurityBody": "Força bruta aqui é inviável. A segurança depende da custódia da sua chave privada Hive. Se sua chave privada for comprometida, esses dados podem ser descriptografados. MANTENHA SUAS CHAVES HIVE SEGURAS!",
+    "storageNote": "Esta é a string que será armazenada localmente (criptografada).",
+    "decryptedDataLabel": "Dados Descriptografados:",
+    "errorLabel": "Erro:",
+    "alertInputsRequired": "Por favor, insira um nome de usuário Hive e dados para criptografar.",
+    "unknownError": "Ocorreu um erro desconhecido."
+  },
+  "GeminiKeyManagerErrors": {
+    "keychainNotAvailableEncode": "O Hive Keychain não está disponível para codificação.",
+    "inputsRequiredEncode": "Nome de usuário e dados para codificar são obrigatórios.",
+    "encodeProcessFailed": "A codificação não alterou os dados ou o formato é inesperado.",
+    "encodeGenericError": "Erro ao codificar mensagem.",
+    "keychainNotAvailableDecode": "O Hive Keychain não está disponível para decodificação.",
+    "inputsRequiredDecode": "Nome de usuário e dados codificados são obrigatórios e não podem estar vazios.",
+    "decodeProcessFailed": "A decodificação não produziu o resultado esperado ou o formato está incorreto.",
+    "decodeGenericError": "Erro ao decodificar mensagem.",
+    "errorInvalidEncodedFormat": "Formato de dados inválido para codificação. Não pode ser apenas '#' seguido por espaços."
+  },
+  "FaqPage": {
+    "title": "Perguntas Frequentes",
+    "sampleQ1Title": "O que é AegisPad?",
+    "sampleQ1Content": "AegisPad é uma forja inteligente de artigos que ajuda você a criar, refinar e traduzir conteúdo usando o poder da IA Gemini e proteger sua chave de API Gemini com o Hive Keychain.",
+    "sampleQ2Title": "Como obtenho uma Chave de API Gemini?",
+    "sampleQ2Content": "Você pode obter uma Chave de API Gemini gratuitamente no Google AI Studio. O AegisPad usa esta chave para alimentar seus recursos de IA. O nível gratuito oferece uma quantidade generosa de tokens para criação de conteúdo.",
+    "sampleQ3Title": "Como minha chave de API Gemini é armazenada?",
+    "sampleQ3Content": "Sua chave de API Gemini, uma vez fornecida, é criptografada usando sua conta Hive Keychain (especificamente, sua chave de Postagem) e armazenada localmente no armazenamento local do seu navegador. Ela é descriptografada apenas quando necessário para interagir com a API Gemini e nunca é enviada aos nossos servidores descriptografada."
+  }
+}

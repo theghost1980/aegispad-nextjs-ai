@@ -7,10 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { usePathname, useRouter } from "@/i18n/routing"; // Usar hooks de next-intl/routing
 import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
-import { locales } from "../i18n/routing";
 
 export default function LanguageSwitcher() {
   const t = useTranslations("LanguageSwitcher");
@@ -19,30 +18,8 @@ export default function LanguageSwitcher() {
   const pathname = usePathname();
 
   const onSelectChange = (newLocale: string) => {
-    let newPath;
-    const pathSegments = pathname.split("/");
-
-    if (locales.includes(pathSegments[1] as any)) {
-      pathSegments[1] = newLocale;
-      newPath = pathSegments.join("/");
-    } else {
-      if (newLocale !== "en") {
-        newPath = `/${newLocale}${pathname === "/" ? "" : pathname}`;
-      } else {
-        newPath = pathname;
-        if (pathname.startsWith(`/${locale}`)) {
-          newPath = pathname.substring(locale.length + 1) || "/";
-        } else {
-          newPath = pathname;
-        }
-      }
-    }
-    if (newPath !== "/" && !newPath.startsWith("/")) {
-      newPath = "/" + newPath;
-    }
-
-    router.push(newPath);
-    router.refresh();
+    // La forma recomendada de cambiar de locale con next-intl/navigation
+    router.push(pathname, { locale: newLocale });
   };
 
   return (
@@ -55,6 +32,8 @@ export default function LanguageSwitcher() {
         <SelectContent>
           <SelectItem value="en">{t("english")}</SelectItem>
           <SelectItem value="es">{t("spanish")}</SelectItem>
+          <SelectItem value="fr">{t("french")}</SelectItem>
+          <SelectItem value="pt-BR">{t("portugueseBrazil")}</SelectItem>
         </SelectContent>
       </Select>
     </div>

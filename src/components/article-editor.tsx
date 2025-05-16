@@ -1,4 +1,3 @@
-// src/components/article-editor.tsx
 "use client";
 
 import MarkdownPreview from "@/components/markdown-preview";
@@ -9,14 +8,14 @@ import type { FC } from "react";
 
 interface ArticleEditorProps {
   markdown: string;
-  onMarkdownChange?: (markdown: string) => void; // Hacer onMarkdownChange opcional
+  onMarkdownChange?: (markdown: string) => void;
   isLoading?: boolean;
-  readOnly?: boolean; // Añadir la prop readOnly
+  readOnly?: boolean;
 }
 
 const ArticleEditor: FC<ArticleEditorProps> = ({
   markdown,
-  onMarkdownChange = () => {}, // Proveer un default no-op si no se pasa
+  onMarkdownChange = () => {},
   isLoading = false,
   readOnly = false,
 }) => {
@@ -34,7 +33,7 @@ const ArticleEditor: FC<ArticleEditorProps> = ({
             onChange={(e) => onMarkdownChange(e.target.value)}
             placeholder={t("markdownPlaceholder")}
             className="min-h-[400px] text-sm resize-y h-full"
-            disabled={isLoading || readOnly} // Usar readOnly para deshabilitar
+            disabled={isLoading || readOnly}
             aria-label={t("ariaLabelEditor")}
           />
         </CardContent>

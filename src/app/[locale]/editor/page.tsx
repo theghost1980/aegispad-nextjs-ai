@@ -23,14 +23,19 @@ import {
 import DetectedLanguageInfo from "@/components/editor-sections/DetectedLanguageInfo"; // Importar el nuevo componente
 import EditAndRefineCard from "@/components/editor-sections/EditAndRefineCard"; // Importar el nuevo componente
 import EditorTokenUsage from "@/components/editor-sections/EditorTokenUsage"; // Importar el nuevo componente
-import RefineCombinedFormatCard from "@/components/editor-sections/RefineCombinedFormatCard"; // Importar el nuevo componente
+import RefineCombinedFormatCard, {
+  CombineFormatType,
+} from "@/components/editor-sections/RefineCombinedFormatCard"; // Importar el nuevo componente
 import SessionSummaryCard from "@/components/editor-sections/SessionSummaryCard";
 import StartArticleCard from "@/components/editor-sections/StartArticleCard"; // Importar el nuevo componente
 import TranslateArticleCard from "@/components/editor-sections/TranslateArticleCard"; // Importar el nuevo componente
 import TranslationResultView from "@/components/editor-sections/TranslationResultView"; // Importar el nuevo componente
 import GlobalLoader from "@/components/global-loader";
 import LoadingSpinner from "@/components/loading-spinner";
+import { COMMENT_NOTES_BY_LOCALE } from "@/constants/constants";
 import { useToast } from "@/hooks/use-toast";
+import { getLocaleFromLanguageValue } from "@/utils/language";
+import { splitMarkdownIntoParagraphs } from "@/utils/markdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
@@ -88,9 +93,8 @@ export default function ArticleForgePage() {
     useState<number>(0);
 
   const [finalCombinedOutput, setFinalCombinedOutput] = useState<string>("");
-  const [selectedCombineFormat, setSelectedCombineFormat] = useState<
-    "simple" | "detailsTag"
-  >("simple");
+  const [selectedCombineFormat, setSelectedCombineFormat] =
+    useState<CombineFormatType>("simple");
 
   const [initialWorkflow, setInitialWorkflow] =
     useState<InitialWorkflow>("aiCreate");
@@ -352,8 +356,47 @@ export default function ArticleForgePage() {
 
       if (selectedCombineFormat === "simple") {
         combined = `${originalContent}\n\n<hr />\n\n## Translation (${targetLanguage})\n\n${translatedContent}`;
-      } else {
+      } else if (selectedCombineFormat === "detailsTag") {
         combined = `${originalContent}\n\n<details>\n  <summary>Translation (${targetLanguage})</summary>\n\n${translatedContent}\n</details>`;
+      } else if (selectedCombineFormat === "inline") {
+        const originalParagraphs = splitMarkdownIntoParagraphs(originalContent);
+        const translatedParagraphs =
+          splitMarkdownIntoParagraphs(translatedContent);
+
+        const maxLength = Math.max(
+          originalParagraphs.length,
+          translatedParagraphs.length
+        );
+
+        for (let i = 0; i < maxLength; i++) {
+          const originalPara = originalParagraphs[i] || "";
+          const translatedPara = translatedParagraphs[i] || "";
+
+          if (originalPara.trim() || translatedPara.trim()) {
+            combined += `${originalPara.trim()}\n\n> ${translatedPara.trim()}\n\n`;
+          }
+        }
+        combined = combined.trim();
+      } else if (selectedCombineFormat === "inComments") {
+        const targetLangDisplay =
+          availableLanguages.find((lang) => lang.value === targetLanguage)
+            ?.label || targetLanguage;
+
+        // Usar `detectedLanguage` para determinar el idioma de la nota, ya que es el idioma de `originalArticleForTranslation`
+        const sourceLocale = getLocaleFromLanguageValue(detectedLanguage);
+        const noteTextInSourceLanguage =
+          COMMENT_NOTES_BY_LOCALE[sourceLocale] ||
+          COMMENT_NOTES_BY_LOCALE["en"]; // Fallback a inglés
+
+        const fullTranslationNote = `> ${noteTextInSourceLanguage}`;
+
+        const forPublishingText = t(
+          "refineFormatCard.inComments_forPublishingAsComment",
+          { language: targetLangDisplay }
+        );
+        const startCopyText = t("refineFormatCard.inComments_startCopying");
+        const endCopyText = t("refineFormatCard.inComments_endCopying");
+        combined = `${originalContent}\n\n${fullTranslationNote}\n\n---\n**${forPublishingText}**\n---\n**${startCopyText}**\n---\n${translatedContent}\n---\n**${endCopyText}**\n---`;
       }
       setFinalCombinedOutput(combined);
       setCurrentOperationMessage(null);
@@ -468,80 +511,10 @@ export default function ArticleForgePage() {
     ESTIMATED_INITIAL_SESSION_TOKENS - sessionTotalTokens
   );
 
-  const renderTokenUsageDetails = () => (
-    <div className="space-y-2 text-sm">
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">{tTokenUsage("lastOp")}</span>
-        <span className="font-semibold">
-          {currentRequestTokens?.toLocaleString() ?? "N/A"}
-        </span>
-      </div>
-      {(detailedTokenUsage?.text || detailedTokenUsage?.image) && (
-        <div className="pl-2 text-xs">
-          {detailedTokenUsage.text !== undefined && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {tTokenUsage("textTokens")}
-              </span>
-              <span className="font-semibold">
-                {detailedTokenUsage.text.toLocaleString()}
-              </span>
-            </div>
-          )}
-          {detailedTokenUsage.image !== undefined && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {tTokenUsage("imageTokens")}
-              </span>
-              <span className="font-semibold">
-                {detailedTokenUsage.image.toLocaleString()}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">
-          {tTokenUsage("sessionTotal")}
-        </span>
-        <span className="font-semibold">
-          {sessionTotalTokens.toLocaleString()}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">
-          {tTokenUsage("sessionQuota")}
-        </span>
-        <span className="font-semibold">
-          {ESTIMATED_INITIAL_SESSION_TOKENS.toLocaleString()}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">
-          {tTokenUsage("estRemaining")}
-        </span>
-        <span
-          className={`font-semibold ${
-            tokensLeftInSession <= 0 ? "text-destructive" : "text-foreground"
-          }`}
-        >
-          {tokensLeftInSession.toLocaleString()}
-        </span>
-      </div>
-    </div>
-  );
-
   const mainActionHandler =
     initialWorkflow === "aiCreate"
       ? handleCreateArticle
       : handleStartUserWriting;
-
-  const currentLoadingMessageForButton =
-    initialWorkflow === "aiCreate"
-      ? generateMainImage
-        ? t("startArticleCard.creatingArticleWithImageMessage")
-        : t("startArticleCard.creatingArticleMessage")
-      : t("startArticleCard.startingUserWritingMessage");
 
   return (
     <div

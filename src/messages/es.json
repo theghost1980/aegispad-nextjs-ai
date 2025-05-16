@@ -12,7 +12,9 @@
   "LanguageSwitcher": {
     "selectLanguage": "Idioma",
     "english": "Inglés",
-    "spanish": "Español"
+    "spanish": "Español",
+    "french": "Francés",
+    "portugueseBrazil": "Portugués (Brasil)"
   },
   "TokenUsage": {
     "title": "Uso de Tokens",
@@ -75,9 +77,14 @@
       "combinationFormatLabel": "Formato de Combinación",
       "formatSimpleLabel": "Simple (Original y luego Traducción con separador)",
       "formatDetailsLabel": "Etiqueta Details (Traducción expandible bajo el original)",
+      "formatInlineLabel": "Entre Líneas (Original > Traducido)",
       "generateCombinedButton": "Generar Salida Combinada",
       "generatingCombinedMessage": "Generando formato de artículo combinado...",
-      "combinedOutputTitle": "Salida del Artículo Combinado:"
+      "combinedOutputTitle": "Salida del Artículo Combinado:",
+      "formatInCommentsLabel": "Como Comentarios (Original + Traducción para Comentario)",
+      "inComments_forPublishingAsComment": "Para publicar como comentario (Traducción al {language}):",
+      "inComments_startCopying": "COMIENZA A COPIAR DESDE AQUÍ PARA TU COMENTARIO:",
+      "inComments_endCopying": "FIN DE LA COPIA PARA TU COMENTARIO."
     },
     "sessionSummaryCard": {
       "title": "Resumen de Sesión y Salida Final",

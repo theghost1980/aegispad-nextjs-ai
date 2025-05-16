@@ -1,7 +1,7 @@
 Importante: //TODO
 
-- agregar localstorage y zustand para persistencia
 - inicio de sesion con cuenta HIVE (usar keychain-helper y Hive Keychain).
+- agregar localstorage y zustand para persistencia.
 - ver si hay manera de pedir el consumo actual y mediciones de la apikey gemini
 - agregar la posibilidad de hacer post de articulos desde el cliente y generar reporte
 - proteger rutas de creacion de contenido solo cuando usuario HIVE logueado.

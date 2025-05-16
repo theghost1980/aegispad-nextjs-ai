@@ -12,7 +12,9 @@
   "LanguageSwitcher": {
     "selectLanguage": "Language",
     "english": "English",
-    "spanish": "Spanish"
+    "spanish": "Spanish",
+    "french": "French",
+    "portugueseBrazil": "Portuguese (Brazil)"
   },
   "TokenUsage": {
     "title": "Token Usage",
@@ -75,9 +77,14 @@
       "combinationFormatLabel": "Combination Format",
       "formatSimpleLabel": "Simple (Original then Translation with separator)",
       "formatDetailsLabel": "Details Tag (Translation expandable under original)",
+      "formatInlineLabel": "Between Lines (Original > Translated)",
       "generateCombinedButton": "Generate Combined Output",
       "generatingCombinedMessage": "Generating combined article format...",
-      "combinedOutputTitle": "Combined Article Output:"
+      "combinedOutputTitle": "Combined Article Output:",
+      "formatInCommentsLabel": "As Comments (Original + Translation for Comment)",
+      "inComments_forPublishingAsComment": "For publishing as a comment (Translation to {language}):",
+      "inComments_startCopying": "START COPYING FROM HERE FOR YOUR COMMENT:",
+      "inComments_endCopying": "END OF COPYING FOR YOUR COMMENT."
     },
     "sessionSummaryCard": {
       "title": "Session Summary & Final Output",

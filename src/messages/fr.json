@@ -1,0 +1,226 @@
+{
+  "Layout": {
+    "footerCopyright": "© {year} AegisPad. Tous droits réservés."
+  },
+  "Header": {
+    "appName": "AegisPad",
+    "navHome": "Accueil",
+    "navEditor": "Éditeur",
+    "navTestings": "Tests Keychain",
+    "navFaq": "FAQ"
+  },
+  "LanguageSwitcher": {
+    "selectLanguage": "Langue",
+    "english": "Anglais",
+    "spanish": "Espagnol",
+    "french": "Français",
+    "portugueseBrazil": "Portugais (Brésil)"
+  },
+  "TokenUsage": {
+    "title": "Utilisation des Jetons",
+    "lastOp": "Jetons Utilisés (Dernière Op.) :",
+    "textTokens": "└ Texte :",
+    "imageTokens": "└ Image :",
+    "sessionTotal": "Total Jetons (Session) :",
+    "sessionQuota": "Quota de Session Supposé :",
+    "estRemaining": "Jetons Restants Estimés :"
+  },
+  "ArticleForgePage": {
+    "startArticleCard": {
+      "title": "Commencez Votre Article",
+      "description": "Choisissez votre point de départ : laissez l'IA rédiger une ébauche basée sur vos idées, ou commencez à écrire vous-même à partir de zéro.",
+      "workflowTitle": "Comment souhaitez-vous commencer ?",
+      "aiCreateLabel": "Laisser l'IA créer le contenu",
+      "userWriteLabel": "Je vais écrire le contenu moi-même",
+      "promptLabel": "Votre Sujet ou Invite pour l'IA",
+      "promptPlaceholder": "Ex : L'impact de l'IA sur l'écriture créative...",
+      "generateImageLabel": "Générer une image principale (création IA uniquement)",
+      "aiCreateButtonText": "Demandons à l'IA",
+      "userWriteButtonText": "Je Commence à Écrire",
+      "clearAllButton": "Tout Effacer",
+      "creatingArticleMessage": "Création de l'article...",
+      "creatingArticleWithImageMessage": "Création de l'article et génération de l'image...",
+      "startingUserWritingMessage": "Préparation de l'éditeur...",
+      "sourceLanguageLabel": "Langue de Création",
+      "selectSourceLanguagePlaceholder": "Sélectionner la langue de l'article"
+    },
+    "detectLanguageCard": {
+      "detectingLanguageMessage": "Détection de la langue...",
+      "detectedLanguageLabel": "Langue de l'Article Détectée :"
+    },
+    "editArticleCard": {
+      "title": "Modifier & Affiner l'Article",
+      "description": "Le contenu de votre article est ci-dessous. Vous pouvez modifier le Markdown directement ou utiliser l'IA pour vous aider à le réviser.",
+      "reviseButton": "Réviser l'Article avec l'IA",
+      "revisingArticleMessage": "Révision de l'article..."
+    },
+    "translateArticleCard": {
+      "title": "Traduire l'Article",
+      "description": "Traduire l'article actuel dans une autre langue.",
+      "descriptionWithSource": "Traduire l'article actuel (détecté comme {detectedLanguage}) dans une autre langue.",
+      "targetLanguageLabel": "Langue Cible",
+      "selectLanguagePlaceholder": "Sélectionner une langue",
+      "translateButton": "Traduire l'Article",
+      "translatingArticleMessage": "Traduction de l'article..."
+    },
+    "translationResultCard": {
+      "title": "Résultat de la Traduction",
+      "description": "Affichage de l'article original et de sa traduction en {targetLanguage}.",
+      "originalArticleTitle": "Article Original",
+      "translatedArticleTitle": "Traduit en {targetLanguage}",
+      "originalArticleAriaLabel": "Contenu de l'article original avant traduction (Markdown)",
+      "translatedPreviewAriaLabel": "Article traduit en {targetLanguage}"
+    },
+    "refineFormatCard": {
+      "title": "Affiner le Format Final",
+      "description": "Combinez l'article original et traduit en une seule sortie. Choisissez votre format préféré.",
+      "combinationFormatLabel": "Format de Combinaison",
+      "formatSimpleLabel": "Simple (Original puis Traduction avec séparateur)",
+      "formatDetailsLabel": "Balise Détails (Traduction extensible sous l'original)",
+      "formatInlineLabel": "Entre les Lignes (Original > Traduit)",
+      "generateCombinedButton": "Générer la Sortie Combinée",
+      "generatingCombinedMessage": "Génération du format d'article combiné...",
+      "combinedOutputTitle": "Sortie de l'Article Combiné :",
+      "formatInCommentsLabel": "En Commentaires (Original + Traduction pour Commentaire)",
+      "inComments_forPublishingAsComment": "Pour publier en tant que commentaire (Traduction en {language}) :",
+      "inComments_startCopying": "COMMENCEZ À COPIER D'ICI POUR VOTRE COMMENTAIRE :",
+      "inComments_endCopying": "FIN DE LA COPIE POUR VOTRE COMMENTAIRE."
+    },
+    "sessionSummaryCard": {
+      "title": "Résumé de la Session & Sortie Finale",
+      "description": "Un aperçu de l'activité de votre session actuelle et de l'article combiné final, s'il a été généré.",
+      "workflowTitle": "Flux de Travail Utilisé",
+      "workflowLabel": "Flux de Travail Sélectionné :",
+      "detectedLanguageLabel": "Langue de l'Article Détectée :",
+      "tokenUsageTitle": "Utilisation des Jetons (Cette Session)",
+      "totalTokensUsedLabel": "Total des Jetons Utilisés :",
+      "textGenerationTokensLabel": "  └ Jetons de Génération de Texte :",
+      "imageGenerationTokensLabel": "  └ Jetons de Génération d'Image :",
+      "finalCombinedArticleLabel": "Article Combiné Final (Lecture seule)",
+      "noFinalCombinedArticleMessage": "Aucun article combiné final n'a été généré dans cette session.",
+      "copySummaryButton": "Copier le Résumé Complet & la Sortie",
+      "preparingSummaryMessage": "Préparation du résumé pour la copie..."
+    },
+    "toastMessages": {
+      "errorTitle": "Erreur",
+      "successTitle": "Succès",
+      "clearedTitle": "Effacé",
+      "promptEmptyError": "L'invite ne peut pas être vide.",
+      "articleEmptyError": "Le contenu de l'article ne peut pas être vide.",
+      "targetLanguageEmptyError": "La langue cible ne peut pas être vide.",
+      "combineEmptyError": "Les articles original et traduit doivent exister pour être combinés.",
+      "articleCreatedSuccess": "Article créé avec succès !",
+      "articleCreatedWithImageSuccess": "Article créé avec succès ! Image principale générée.",
+      "articleRevisedSuccess": "Article révisé avec succès !",
+      "articleTranslatedSuccess": "Article traduit en {targetLanguage} avec succès !",
+      "languageDetectedSuccess": "Langue détectée : {language}",
+      "combinedFormatSuccess": "Format d'article combiné généré !",
+      "summaryCopiedSuccess": "Résumé de la session copié dans le presse-papiers !",
+      "createFailedError": "Échec de la création de l'article. Veuillez réessayer.",
+      "reviseFailedError": "Échec de la révision de l'article. Veuillez réessayer.",
+      "translateFailedError": "Échec de la traduction de l'article. Veuillez réessayer.",
+      "detectLanguageFailedError": "Échec de la détection de la langue. Veuillez réessayer.",
+      "copySummaryFailedError": "Échec de la copie du résumé. Veuillez réessayer ou copier manuellement.",
+      "allClearedMessage": "Tous les champs et données de session ont été effacés.",
+      "userWritingStartedMessage": "Éditeur prêt ! Vous pouvez commencer à écrire votre article."
+    },
+    "loadingSpinnerClient": "Chargement d'AegisPad...",
+    "userWriting": {
+      "startPlaceholder": "## Titre de Votre Article\nCommencez à écrire votre article ici au format Markdown...\n\n### Section 1\n\nContenu pour la section 1.\n\n### Section 2\n\nContenu pour la section 2."
+    }
+  },
+  "ArticleEditor": {
+    "markdownEditorTitle": "Éditeur Markdown",
+    "previewTitle": "Aperçu",
+    "markdownPlaceholder": "Votre article au format Markdown apparaîtra ici...",
+    "ariaLabelEditor": "Éditeur Markdown pour le contenu de l'article",
+    "ariaLabelPreview": "Aperçu de l'article",
+    "noContentToDisplay": "Aucun contenu à afficher."
+  },
+  "GlobalLoader": {
+    "defaultLoadingMessage": "Traitement en cours..."
+  },
+  "MarkdownPreview": {
+    "defaultAriaLabel": "Aperçu du contenu Markdown",
+    "noContentToDisplay": "Aucun contenu à afficher."
+  },
+  "HomePage": {
+    "heroTitle": "AegisPad : Votre Forge d'Articles Intelligente",
+    "heroSubtitle": "Créez, affinez et traduisez du contenu avec la puissance de Gemini AI. Libérez votre créativité sans limites et faites passer vos idées au niveau supérieur.",
+    "heroCtaButton": "Commencer Maintenant",
+    "featuresTitle": "Tout ce dont Vous Avez Besoin pour Créer un Contenu Percutant",
+    "feature1Title": "Création Assistée par IA",
+    "feature1Description": "Transformez vos idées en articles complets. Fournissez simplement un sujet et laissez notre IA générer une première ébauche, même avec une image principale !",
+    "feature2Title": "Révision Intelligente",
+    "feature2Description": "Perfectionnez vos textes. Notre IA peut examiner et améliorer vos articles existants, suggérer des améliorations et peaufiner votre message.",
+    "feature3Title": "Traduction Globale",
+    "feature3Description": "Brisez les barrières linguistiques. Traduisez vos articles dans plusieurs langues rapidement et avec précision, élargissant ainsi votre portée.",
+    "geminiApiTitle": "Propulsé par Gemini : Accès Gratuit et Facile",
+    "geminiApiIntro": "AegisPad utilise la puissante API Gemini de Google pour ses fonctionnalités d'intelligence artificielle, vous offrant des résultats de pointe.",
+    "geminiApiGetFree": "Pour commencer, vous aurez besoin de votre propre clé API Gemini. Vous pouvez en obtenir une gratuitement sur <link>Google AI Studio</link>.",
+    "geminiApiFreeTier": "Bonne nouvelle ! Avec le niveau gratuit de Gemini, vous obtenez environ 1 million de jetons par mois sans frais, assez pour une grande quantité de création de contenu !",
+    "tokenEstimationTitle": "Estimation de l'Utilisation des Jetons",
+    "tokenEstimationIntro": "Comprendre la consommation de jetons vous aide à gérer votre quota gratuit et à planifier efficacement votre travail.",
+    "tokenEstimationCreateTitle": "Création d'Article (500 mots)",
+    "tokenEstimationCreateDesc": "~2 000 - 5 000 jetons",
+    "tokenEstimationReviseTitle": "Révision d'Article (500 mots)",
+    "tokenEstimationReviseDesc": "~1 500 - 4 000 jetons",
+    "tokenEstimationTranslateTitle": "Traduction d'Article (500 mots)",
+    "tokenEstimationTranslateDesc": "~1 000 - 3 000 jetons",
+    "tokenEstimationImageTitle": "Génération d'Image",
+    "tokenEstimationImageDesc": "~250 - 1 000 jetons (varie selon la complexité)",
+    "tokenEstimationMonthly": "Avec 1 million de jetons gratuits par mois, vous pourriez, par exemple, créer plus de 200 articles courts ou effectuer des centaines de révisions et de traductions.",
+    "tokenEstimationNote": "Remarque : Ce sont des estimations. L'utilisation réelle peut varier en fonction de la complexité du contenu, de la longueur et du modèle Gemini spécifique utilisé.",
+    "secondaryCtaButton": "Essayer l'Éditeur Maintenant"
+  },
+  "TestingsPage": {
+    "title": "Page de Test Hive Keychain",
+    "loaderMessage": "Vérification de Hive Keychain...",
+    "keychainAvailable": "Hive Keychain disponible :",
+    "yes": "Oui",
+    "no": "Non",
+    "keychainNotDetected": "Hive Keychain non détecté. Vous devez installer l'extension pour utiliser cette fonctionnalité.",
+    "installLink": "🔗 Cliquez ici pour installer Hive Keychain",
+    "websiteLink": "🌐 Visitez le site officiel de Hive Keychain",
+    "testSectionTitle": "Test de Chiffrement → Déchiffrement",
+    "usernamePlaceholder": "Votre nom d'utilisateur Hive",
+    "dataPlaceholder": "Données à chiffrer (ex : votre clé API)",
+    "buttonInitial": "Démarrer le Test",
+    "buttonEncoding": "Chiffrement...",
+    "buttonDecoding": "Déchiffrement...",
+    "buttonSuccess": "Test Réussi (Redémarrer)",
+    "buttonError": "Erreur (Réessayer)",
+    "statusLabel": "Statut :",
+    "originalDataLabel": "Données Originales :",
+    "encryptedDataLabel": "Données Chiffrées :",
+    "tooltipEncryptionTitle": "Informations sur le Chiffrement :",
+    "tooltipEncryptionBody": "Hive Keychain utilise AES-256 (dérivé de vos clés Hive via ECDH) pour protéger ces données. Le préfixe '#' indique un message chiffré.",
+    "tooltipSecurityTitle": "Sécurité :",
+    "tooltipSecurityBody": "Le forçage brutal est infaisable. La sécurité dépend de la garde de votre clé privée Hive. Si votre clé privée est compromise, ces données peuvent être déchiffrées. GARDEZ VOS CLÉS HIVE EN SÉCURITÉ !",
+    "storageNote": "Ceci est la chaîne qui sera stockée localement (chiffrée).",
+    "decryptedDataLabel": "Données Déchiffrées :",
+    "errorLabel": "Erreur :",
+    "alertInputsRequired": "Veuillez entrer un nom d'utilisateur Hive et des données à chiffrer.",
+    "unknownError": "Une erreur inconnue s'est produite."
+  },
+  "GeminiKeyManagerErrors": {
+    "keychainNotAvailableEncode": "Hive Keychain n'est pas disponible pour le chiffrement.",
+    "inputsRequiredEncode": "Le nom d'utilisateur et les données à chiffrer sont requis.",
+    "encodeProcessFailed": "Le chiffrement n'a pas modifié les données ou le format est inattendu.",
+    "encodeGenericError": "Erreur lors du chiffrement du message.",
+    "keychainNotAvailableDecode": "Hive Keychain n'est pas disponible pour le déchiffrement.",
+    "inputsRequiredDecode": "Le nom d'utilisateur et les données chiffrées sont requis et ne peuvent pas être vides.",
+    "decodeProcessFailed": "Le déchiffrement n'a pas produit le résultat attendu ou le format est incorrect.",
+    "decodeGenericError": "Erreur lors du déchiffrement du message.",
+    "errorInvalidEncodedFormat": "Format de données invalide pour le chiffrement. Ne peut pas être juste '#' suivi d'espaces."
+  },
+  "FaqPage": {
+    "title": "Questions Fréquemment Posées",
+    "sampleQ1Title": "Qu'est-ce qu'AegisPad ?",
+    "sampleQ1Content": "AegisPad est une forge d'articles intelligente qui vous aide à créer, affiner et traduire du contenu en utilisant la puissance de Gemini AI et à sécuriser votre clé API Gemini avec Hive Keychain.",
+    "sampleQ2Title": "Comment obtenir une clé API Gemini ?",
+    "sampleQ2Content": "Vous pouvez obtenir une clé API Gemini gratuitement sur Google AI Studio. AegisPad utilise cette clé pour alimenter ses fonctionnalités d'IA. Le niveau gratuit offre une quantité généreuse de jetons pour la création de contenu.",
+    "sampleQ3Title": "Comment ma clé API Gemini est-elle stockée ?",
+    "sampleQ3Content": "Votre clé API Gemini, une fois fournie, est chiffrée à l'aide de votre compte Hive Keychain (spécifiquement, votre clé de publication) et stockée localement dans le stockage local de votre navigateur. Elle n'est déchiffrée que lorsque cela est nécessaire pour interagir avec l'API Gemini et n'est jamais envoyée à nos serveurs non chiffrée."
+  }
+}

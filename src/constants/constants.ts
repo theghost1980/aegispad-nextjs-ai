@@ -5,3 +5,48 @@ export const KEYCHAIN_ENCRYPTION_TEST_MESSAGE =
 export const HIVE_KEYCHAIN_INSTALL_URL =
   "https://chromewebstore.google.com/detail/hive-keychain/jcacnejopjdphbnjgfaaobbfafkihpep";
 export const HIVE_KEYCHAIN_WEBSITE_URL = "https://hive-keychain.com/";
+
+export const COMMENT_NOTES_BY_LOCALE: { [key: string]: string } = {
+  en: "Translation as comment.",
+  es: "Traducción como comentario.",
+  fr: "Traduction en commentaire.",
+  de: "Übersetzung als Kommentar.",
+  pt: "Tradução como comentário.",
+  it: "Traduzione come commento.",
+  ja: "コメントとしての翻訳。",
+  ko: "댓글로 번역.",
+  ru: "Перевод в виде комментария.",
+  zh: "作为评论的翻译。",
+  ar: "ترجمة كتعليق.",
+  hi: "टिप्पणी के रूप में अनुवाद।",
+  nl: "Vertaling als commentaar.",
+  sv: "Översättning som kommentar.",
+  pl: "Tłumaczenie jako komentarz.",
+  tr: "Yorum olarak çeviri.",
+  // Agrega más idiomas según sea necesario
+};
+
+export const LANGUAGE_TO_LOCALE_MAP: { [key: string]: string } = {
+  spanish: "es",
+  english: "en",
+  french: "fr",
+  german: "de",
+  "portuguese (brazil)": "pt",
+  portuguese: "pt",
+  italian: "it",
+  japanese: "ja",
+  korean: "ko",
+  russian: "ru",
+  "chinese (simplified)": "zh",
+  chinese: "zh",
+  arabic: "ar",
+  hindi: "hi",
+  dutch: "nl",
+  swedish: "sv",
+  polish: "pl",
+  turkish: "tr",
+  // Incluir códigos de locale directamente para pasarlos si ya están en ese formato
+  es: "es",
+  en: "en",
+  // ... (puedes completar el resto de códigos de locale si lo ves necesario, aunque la lógica principal es para los nombres completos)
+};

@@ -15,7 +15,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CheckSquare, Layers } from "lucide-react";
 import type { FC } from "react";
 
-type CombineFormatType = "simple" | "detailsTag";
+export type CombineFormatType =
+  | "simple"
+  | "detailsTag"
+  | "inline"
+  | "inComments";
 
 interface RefineCombinedFormatCardProps {
   selectedCombineFormat: CombineFormatType;
@@ -75,6 +79,18 @@ const RefineCombinedFormatCard: FC<RefineCombinedFormatCardProps> = ({
               <RadioGroupItem value="detailsTag" id="format-details" />
               <Label htmlFor="format-details" className="font-normal">
                 {t("formatDetailsLabel")}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="inline" id="format-inline" />
+              <Label htmlFor="format-inline" className="font-normal">
+                {t("formatInlineLabel")}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="inComments" id="format-in-comments" />
+              <Label htmlFor="format-in-comments" className="font-normal">
+                {t("formatInCommentsLabel")}
               </Label>
             </div>
           </RadioGroup>
