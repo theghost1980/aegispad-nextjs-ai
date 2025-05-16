@@ -32,10 +32,21 @@ import TranslateArticleCard from "@/components/editor-sections/TranslateArticleC
 import TranslationResultView from "@/components/editor-sections/TranslationResultView"; // Importar el nuevo componente
 import GlobalLoader from "@/components/global-loader";
 import LoadingSpinner from "@/components/loading-spinner";
+import OnboardingAssistant from "@/components/onboarding-assistant/onboarding-assistant";
+import { Button } from "@/components/ui/button"; // Importar Button
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { COMMENT_NOTES_BY_LOCALE } from "@/constants/constants";
+import { useGeminiKeyManager } from "@/hooks/use-gemini-key-manager";
+import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
 import { getLocaleFromLanguageValue } from "@/utils/language";
 import { splitMarkdownIntoParagraphs } from "@/utils/markdown";
+import { AlertCircle, Settings } from "lucide-react"; // Importar iconos
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
@@ -60,6 +71,12 @@ type InitialWorkflow = "aiCreate" | "userWrite";
 export default function ArticleForgePage() {
   const t = useTranslations("ArticleForgePage");
   const tTokenUsage = useTranslations("TokenUsage");
+  const tOnboarding = useTranslations("OnboardingAssistant"); // Para el título del Dialog
+
+  const { isLoggedIn: isHiveLoggedIn, isLoadingKeychain: isLoadingHiveAuth } =
+    useHiveAuth();
+  const { hasStoredApiKey, isLoadingKeychain: isLoadingGeminiCheck } =
+    useGeminiKeyManager();
 
   const [prompt, setPrompt] = useState<string>("");
   const [articleMarkdown, setArticleMarkdown] = useState<string>("");
@@ -103,6 +120,8 @@ export default function ArticleForgePage() {
   const [isProcessing, startProcessingTransition] = useTransition();
 
   const [clientLoaded, setClientLoaded] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [hasCheckedInitialSetup, setHasCheckedInitialSetup] = useState(false);
 
   const { toast } = useToast();
 
@@ -111,6 +130,36 @@ export default function ArticleForgePage() {
   useEffect(() => {
     setClientLoaded(true);
   }, []);
+
+  useEffect(() => {
+    // Este efecto se ejecutará cada vez que cambie el estado de login, API key o los estados de carga.
+    // Solo actuamos si las comprobaciones de keychain han finalizado.
+    if (!isLoadingHiveAuth && !isLoadingGeminiCheck) {
+      setHasCheckedInitialSetup(true); // Marcar que la verificación inicial se ha hecho
+      if (!isHiveLoggedIn() || !hasStoredApiKey()) {
+        setIsOnboardingOpen(true);
+      } else {
+        // Si el usuario está logueado y tiene API key, nos aseguramos que el modal esté cerrado.
+        // Esto es útil si el estado cambia después de que el modal se haya mostrado.
+        setIsOnboardingOpen(false);
+      }
+    }
+  }, [
+    isHiveLoggedIn,
+    hasStoredApiKey,
+    isLoadingHiveAuth,
+    isLoadingGeminiCheck,
+  ]);
+
+  const handleOnboardingComplete = () => {
+    setIsOnboardingOpen(false);
+    // No es necesario resetear hasCheckedInitialSetup aquí con la nueva lógica del useEffect.
+    // El useEffect se re-evaluará naturalmente si isHiveLoggedIn o hasStoredApiKey cambian.
+  };
+
+  // Determinar si el contenido principal del editor puede mostrarse
+  const canUseEditor =
+    isHiveLoggedIn() && hasStoredApiKey() && hasCheckedInitialSetup;
 
   const handleTokenUpdate = (
     tokensUsed: number,
@@ -478,7 +527,7 @@ export default function ArticleForgePage() {
     setPrompt("");
     setArticleMarkdown("");
     setTargetLanguage(availableLanguages[0].value);
-    setSourceLanguageForCreation("English"); // Resetear al limpiar todo
+    setSourceLanguageForCreation("English");
     setTranslatedArticleMarkdown("");
     setOriginalArticleForTranslation("");
     setCurrentOperationMessage(null);
@@ -497,7 +546,11 @@ export default function ArticleForgePage() {
     });
   };
 
-  if (!clientLoaded) {
+  if (
+    !clientLoaded ||
+    (isLoadingHiveAuth && !hasCheckedInitialSetup) ||
+    (isLoadingGeminiCheck && !hasCheckedInitialSetup)
+  ) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <LoadingSpinner size={48} />{" "}
@@ -505,7 +558,6 @@ export default function ArticleForgePage() {
       </div>
     );
   }
-
   const tokensLeftInSession = Math.max(
     0,
     ESTIMATED_INITIAL_SESSION_TOKENS - sessionTotalTokens
@@ -528,108 +580,141 @@ export default function ArticleForgePage() {
         operationMessage={currentOperationMessage}
       />
 
-      <EditorTokenUsage
-        currentRequestTokens={currentRequestTokens}
-        detailedTokenUsage={detailedTokenUsage}
-        sessionTotalTokens={sessionTotalTokens}
-        estimatedInitialSessionTokens={ESTIMATED_INITIAL_SESSION_TOKENS}
-        tokensLeftInSession={tokensLeftInSession}
-        tTokenUsage={tTokenUsage}
-      />
+      {canUseEditor ? (
+        <>
+          <EditorTokenUsage
+            currentRequestTokens={currentRequestTokens}
+            detailedTokenUsage={detailedTokenUsage}
+            sessionTotalTokens={sessionTotalTokens}
+            estimatedInitialSessionTokens={ESTIMATED_INITIAL_SESSION_TOKENS}
+            tokensLeftInSession={tokensLeftInSession}
+            tTokenUsage={tTokenUsage}
+          />
 
-      <StartArticleCard
-        initialWorkflow={initialWorkflow}
-        onInitialWorkflowChange={(value: InitialWorkflow) => {
-          setInitialWorkflow(value);
-          if (value === "userWrite") {
-            setPrompt(""); // Limpiar prompt si se cambia a escritura manual
-            setGenerateMainImage(false); // Desactivar imagen si se cambia a escritura manual
-          }
-        }}
-        prompt={prompt}
-        onPromptChange={setPrompt}
-        generateMainImage={generateMainImage}
-        sourceLanguageForCreation={sourceLanguageForCreation}
-        onSourceLanguageForCreationChange={setSourceLanguageForCreation}
-        onGenerateMainImageChange={setGenerateMainImage}
-        onMainAction={mainActionHandler}
-        onClearAll={clearAll}
-        isLoading={isLoading}
-        currentOperationMessage={currentOperationMessage}
-        t={(key, values) => t(`startArticleCard.${key}`, values)}
-      />
+          <StartArticleCard
+            initialWorkflow={initialWorkflow}
+            onInitialWorkflowChange={(value: InitialWorkflow) => {
+              setInitialWorkflow(value);
+              if (value === "userWrite") {
+                setPrompt(""); // Limpiar prompt si se cambia a escritura manual
+                setGenerateMainImage(false); // Desactivar imagen si se cambia a escritura manual
+              }
+            }}
+            prompt={prompt}
+            onPromptChange={setPrompt}
+            generateMainImage={generateMainImage}
+            sourceLanguageForCreation={sourceLanguageForCreation}
+            onSourceLanguageForCreationChange={setSourceLanguageForCreation}
+            onGenerateMainImageChange={setGenerateMainImage}
+            onMainAction={mainActionHandler}
+            onClearAll={clearAll}
+            isLoading={isLoading}
+            currentOperationMessage={currentOperationMessage}
+            t={(key, values) => t(`startArticleCard.${key}`, values)}
+          />
 
-      {detectedLanguage && articleMarkdown && (
-        <DetectedLanguageInfo
-          detectedLanguage={detectedLanguage}
-          t={(key, values) => t(`detectLanguageCard.${key}`, values)}
-        />
+          {detectedLanguage && articleMarkdown && (
+            <DetectedLanguageInfo
+              detectedLanguage={detectedLanguage}
+              t={(key, values) => t(`detectLanguageCard.${key}`, values)}
+            />
+          )}
+
+          {articleMarkdown && (
+            <EditAndRefineCard
+              articleMarkdown={articleMarkdown}
+              onArticleMarkdownChange={setArticleMarkdown}
+              onReviseArticle={handleReviseArticle}
+              isLoading={isLoading}
+              currentOperationMessage={currentOperationMessage}
+              t={(key, values) => t(`editArticleCard.${key}`, values)}
+            />
+          )}
+
+          {articleMarkdown && (
+            <TranslateArticleCard
+              targetLanguage={targetLanguage}
+              onTargetLanguageChange={setTargetLanguage}
+              availableLanguages={availableLanguages}
+              detectedLanguage={detectedLanguage}
+              onTranslateArticle={handleTranslateArticle}
+              isLoading={isLoading}
+              currentOperationMessage={currentOperationMessage}
+              articleMarkdown={articleMarkdown}
+              t={(key, values) => t(`translateArticleCard.${key}`, values)}
+            />
+          )}
+
+          {translatedArticleMarkdown && originalArticleForTranslation && (
+            <TranslationResultView
+              originalArticleForTranslation={originalArticleForTranslation}
+              translatedArticleMarkdown={translatedArticleMarkdown}
+              targetLanguage={targetLanguage}
+              detectedLanguage={detectedLanguage}
+              t={(key, values) => t(`translationResultCard.${key}`, values)}
+            />
+          )}
+
+          {originalArticleForTranslation && translatedArticleMarkdown && (
+            <RefineCombinedFormatCard
+              selectedCombineFormat={selectedCombineFormat}
+              onSelectedCombineFormatChange={setSelectedCombineFormat}
+              onCombineFormat={handleCombineFormat}
+              finalCombinedOutput={finalCombinedOutput}
+              onFinalCombinedOutputChange={setFinalCombinedOutput}
+              isLoading={isLoading}
+              currentOperationMessage={currentOperationMessage}
+              originalArticleForTranslation={originalArticleForTranslation}
+              translatedArticleMarkdown={translatedArticleMarkdown}
+              t={(key, values) => t(`refineFormatCard.${key}`, values)}
+            />
+          )}
+
+          {sessionTotalTokens > 0 && (
+            <SessionSummaryCard
+              initialWorkflow={initialWorkflow}
+              detectedLanguage={detectedLanguage}
+              sessionTotalTokens={sessionTotalTokens}
+              sessionTextTokensUsed={sessionTextTokensUsed}
+              sessionImageTokensUsed={sessionImageTokensUsed}
+              finalCombinedOutput={finalCombinedOutput}
+              onCopySummary={handleCopySummary}
+              isLoading={isLoading}
+              currentOperationMessage={currentOperationMessage}
+              t={(key, values) => t(`sessionSummaryCard.${key}`, values)}
+            />
+          )}
+        </>
+      ) : // Si el editor no se puede usar Y el modal de onboarding NO está abierto (pero debería estarlo)
+      !isOnboardingOpen && hasCheckedInitialSetup ? (
+        <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center text-center p-6 space-y-4">
+          <AlertCircle className="h-16 w-16 text-destructive" />
+          <h2 className="text-2xl font-semibold">
+            {t("onboardingRequiredTitle")}
+          </h2>
+          <p className="text-muted-foreground max-w-md">
+            {t("onboardingRequiredDescription")}
+          </p>
+          <Button onClick={() => setIsOnboardingOpen(true)} size="lg">
+            <Settings className="mr-2 h-5 w-5" /> {t("startSetupButton")}
+          </Button>
+        </div>
+      ) : (
+        // Placeholder mientras el modal de onboarding está activo o las comprobaciones iniciales no han terminado
+        <div className="min-h-[calc(100vh-200px)]"></div>
       )}
 
-      {articleMarkdown && (
-        <EditAndRefineCard
-          articleMarkdown={articleMarkdown}
-          onArticleMarkdownChange={setArticleMarkdown}
-          onReviseArticle={handleReviseArticle}
-          isLoading={isLoading}
-          currentOperationMessage={currentOperationMessage}
-          t={(key, values) => t(`editArticleCard.${key}`, values)}
-        />
-      )}
-
-      {articleMarkdown && (
-        <TranslateArticleCard
-          targetLanguage={targetLanguage}
-          onTargetLanguageChange={setTargetLanguage}
-          availableLanguages={availableLanguages}
-          detectedLanguage={detectedLanguage}
-          onTranslateArticle={handleTranslateArticle}
-          isLoading={isLoading}
-          currentOperationMessage={currentOperationMessage}
-          articleMarkdown={articleMarkdown}
-          t={(key, values) => t(`translateArticleCard.${key}`, values)}
-        />
-      )}
-
-      {translatedArticleMarkdown && originalArticleForTranslation && (
-        <TranslationResultView
-          originalArticleForTranslation={originalArticleForTranslation}
-          translatedArticleMarkdown={translatedArticleMarkdown}
-          targetLanguage={targetLanguage}
-          detectedLanguage={detectedLanguage}
-          t={(key, values) => t(`translationResultCard.${key}`, values)}
-        />
-      )}
-
-      {originalArticleForTranslation && translatedArticleMarkdown && (
-        <RefineCombinedFormatCard
-          selectedCombineFormat={selectedCombineFormat}
-          onSelectedCombineFormatChange={setSelectedCombineFormat}
-          onCombineFormat={handleCombineFormat}
-          finalCombinedOutput={finalCombinedOutput}
-          onFinalCombinedOutputChange={setFinalCombinedOutput}
-          isLoading={isLoading}
-          currentOperationMessage={currentOperationMessage}
-          originalArticleForTranslation={originalArticleForTranslation}
-          translatedArticleMarkdown={translatedArticleMarkdown}
-          t={(key, values) => t(`refineFormatCard.${key}`, values)}
-        />
-      )}
-
-      {sessionTotalTokens > 0 && (
-        <SessionSummaryCard
-          initialWorkflow={initialWorkflow}
-          detectedLanguage={detectedLanguage}
-          sessionTotalTokens={sessionTotalTokens}
-          sessionTextTokensUsed={sessionTextTokensUsed}
-          sessionImageTokensUsed={sessionImageTokensUsed}
-          finalCombinedOutput={finalCombinedOutput}
-          onCopySummary={handleCopySummary}
-          isLoading={isLoading}
-          currentOperationMessage={currentOperationMessage}
-          t={(key, values) => t(`sessionSummaryCard.${key}`, values)}
-        />
-      )}
+      <Dialog open={isOnboardingOpen} onOpenChange={setIsOnboardingOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{tOnboarding("assistantModalTitle")}</DialogTitle>
+            {/* <DialogDescription>
+              {tOnboarding("assistantModalDescription")}
+            </DialogDescription> */}
+          </DialogHeader>
+          <OnboardingAssistant onComplete={handleOnboardingComplete} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

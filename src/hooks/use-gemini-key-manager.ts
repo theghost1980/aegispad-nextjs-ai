@@ -1,9 +1,11 @@
 "use client";
 
+import { GEMINI_API_KEY_LOCAL_STORAGE_KEY } from "@/constants/constants";
+import { validateGeminiApiKeyWithAPI } from "@/utils/gemini-api"; // Importar la utilidad
 import { KeychainHelper, KeychainHelperUtils } from "keychain-helper";
 import { useCallback, useEffect, useState } from "react";
 
-interface KeychainResponse<T = any> {
+export interface KeychainResponse<T = any> {
   success: boolean;
   error?: string;
   result?: T;
@@ -28,6 +30,28 @@ export function useGeminiKeyManager() {
     return () => clearTimeout(timer);
   }, []);
 
+  const testApiKey = useCallback(
+    async (apiKey: string): Promise<{ isValid: boolean; error?: string }> => {
+      if (!apiKey || apiKey.trim() === "") {
+        return { isValid: false, error: "API key cannot be empty." };
+      }
+      try {
+        const isValid = await validateGeminiApiKeyWithAPI(apiKey);
+        if (isValid) {
+          return { isValid: true };
+        } else {
+          return { isValid: false, error: "Invalid API Key." };
+        }
+      } catch (error: any) {
+        return {
+          isValid: false,
+          error: error.message || "Failed to test API key.",
+        };
+      }
+    },
+    []
+  );
+
   const encodeData = useCallback(
     (username: string, dataToEncode: string): Promise<string> => {
       return new Promise((resolve, reject) => {
@@ -43,8 +67,7 @@ export function useGeminiKeyManager() {
         const formattedDataToEncode = dataToEncode.startsWith("#")
           ? dataToEncode
           : `#${dataToEncode}`;
-        const verification = /^#\s+$/.test(formattedDataToEncode);
-        console.log({ verification }); //TODO REM
+
         if (/^#\s+$/.test(formattedDataToEncode)) {
           reject(new Error("errorInvalidEncodedFormat"));
           return;
@@ -117,5 +140,45 @@ export function useGeminiKeyManager() {
     [isKeychainAvailable]
   );
 
-  return { isKeychainAvailable, encodeData, decodeData, isLoadingKeychain };
+  const storeEncryptedApiKey = useCallback((encryptedApiKey: string) => {
+    try {
+      localStorage.setItem(GEMINI_API_KEY_LOCAL_STORAGE_KEY, encryptedApiKey);
+    } catch (error) {
+      console.error("Error storing encrypted API key:", error);
+      //TODO Podrías manejar este error, quizás con un toast
+    }
+  }, []);
+
+  const getStoredEncryptedApiKey = useCallback((): string | null => {
+    try {
+      return localStorage.getItem(GEMINI_API_KEY_LOCAL_STORAGE_KEY);
+    } catch (error) {
+      console.error("Error retrieving encrypted API key:", error);
+      return null;
+    }
+  }, []);
+
+  const clearStoredApiKey = useCallback(() => {
+    try {
+      localStorage.removeItem(GEMINI_API_KEY_LOCAL_STORAGE_KEY);
+    } catch (error) {
+      console.error("Error clearing stored API key:", error);
+    }
+  }, []);
+
+  const hasStoredApiKey = useCallback((): boolean => {
+    return !!getStoredEncryptedApiKey();
+  }, [getStoredEncryptedApiKey]);
+
+  return {
+    isKeychainAvailable,
+    encodeData,
+    decodeData,
+    isLoadingKeychain,
+    testApiKey,
+    storeEncryptedApiKey,
+    getStoredEncryptedApiKey,
+    clearStoredApiKey,
+    hasStoredApiKey,
+  };
 }

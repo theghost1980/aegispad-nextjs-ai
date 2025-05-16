@@ -5,7 +5,6 @@ export const KEYCHAIN_ENCRYPTION_TEST_MESSAGE =
 export const HIVE_KEYCHAIN_INSTALL_URL =
   "https://chromewebstore.google.com/detail/hive-keychain/jcacnejopjdphbnjgfaaobbfafkihpep";
 export const HIVE_KEYCHAIN_WEBSITE_URL = "https://hive-keychain.com/";
-
 export const COMMENT_NOTES_BY_LOCALE: { [key: string]: string } = {
   en: "Translation as comment.",
   es: "Traducción como comentario.",
@@ -25,7 +24,6 @@ export const COMMENT_NOTES_BY_LOCALE: { [key: string]: string } = {
   tr: "Yorum olarak çeviri.",
   // Agrega más idiomas según sea necesario
 };
-
 export const LANGUAGE_TO_LOCALE_MAP: { [key: string]: string } = {
   spanish: "es",
   english: "en",
@@ -50,3 +48,5 @@ export const LANGUAGE_TO_LOCALE_MAP: { [key: string]: string } = {
   en: "en",
   // ... (puedes completar el resto de códigos de locale si lo ves necesario, aunque la lógica principal es para los nombres completos)
 };
+export const HIVE_USERNAME_LOCAL_STORAGE_KEY = "aegispad_hive_username";
+export const GEMINI_API_KEY_INFO_URL = "https://aistudio.google.com/app/apikey";

@@ -127,7 +127,10 @@
     "loadingSpinnerClient": "Cargando AegisPad...",
     "userWriting": {
       "startPlaceholder": "## Título de Tu Artículo\n\nComienza a escribir tu artículo aquí en formato Markdown...\n\n### Sección 1\n\nContenido para la sección 1.\n\n### Sección 2\n\nContenido para la sección 2."
-    }
+    },
+    "onboardingRequiredTitle": "Configuración Requerida",
+    "onboardingRequiredDescription": "Para usar el editor de AegisPad, necesitas completar una configuración rápida. Esto incluye iniciar sesión con tu cuenta HIVE y proporcionar tu clave API de Gemini.",
+    "startSetupButton": "Iniciar Asistente de Configuración"
   },
   "ArticleEditor": {
     "markdownEditorTitle": "Editor Markdown",
@@ -222,5 +225,90 @@
     "sampleQ2Content": "Puedes obtener una Clave API de Gemini de forma gratuita desde Google AI Studio. AegisPad utiliza esta clave para potenciar sus funciones de IA. El nivel gratuito ofrece una generosa cantidad de tokens para la creación de contenido.",
     "sampleQ3Title": "¿Cómo se almacena mi clave API de Gemini?",
     "sampleQ3Content": "Tu clave API de Gemini, una vez proporcionada, se encripta utilizando tu cuenta de Hive Keychain (específicamente, tu clave de Posting) y se almacena localmente en el almacenamiento local de tu navegador. Se desencripta solo cuando es necesario para interactuar con la API de Gemini y nunca se envía a nuestros servidores sin encriptar."
+  },
+  "OnboardingAssistant": {
+    "loadingAssistant": "Cargando asistente...",
+    "setupCompleted": "¡Tu configuración de AegisPad está completa!",
+    "assistantModalTitle": "Asistente de Configuración de AegisPad",
+    "completed": {
+      "title": "¡Configuración Completa! ¡Todo Listo!",
+      "description": "AegisPad ahora está configurado con tu cuenta HIVE y tu clave API de Gemini. Aquí te indicamos cómo puedes comenzar:",
+      "nextStepsTitle": "Próximos Pasos:",
+      "step1AI": "<strong>Deja que la IA Cree:</strong> Ve al editor, proporciona un tema o indicación, y deja que la IA de AegisPad genere un borrador inicial para ti.",
+      "step2Manual": "<strong>Escribe Tú Mismo:</strong> ¿Prefieres comenzar manualmente? Elige 'Escribiré el contenido yo mismo' y comienza a crear tu artículo en el editor Markdown.",
+      "step3Explore": "<strong>Explora Funciones:</strong> Prueba la traducción, la revisión de contenido y los diferentes formatos de salida disponibles.",
+      "getStartedButton": "¡Comencemos!"
+    },
+    "HiveLoginStep": {
+      "title": "Inicia Sesión con Tu Cuenta HIVE",
+      "description": "Para gestionar de forma segura tu clave API de Gemini y potencialmente publicar contenido, por favor inicia sesión con tu cuenta HIVE a través de Hive Keychain.",
+      "usernameLabel": "Nombre de Usuario HIVE",
+      "usernamePlaceholder": "Introduce tu nombre de usuario HIVE",
+      "loginButton": "Iniciar Sesión con Hive Keychain",
+      "loggingInButton": "Iniciando sesión...",
+      "howToCreateAccountButton": "¿Cómo Crear una Cuenta HIVE?",
+      "keychainNotDetected": "¡Extensión Hive Keychain no detectada!",
+      "installKeychainPrompt": "Por favor <link>instala Hive Keychain</link> y actualiza la página para continuar, o aprende cómo crear una cuenta.",
+      "learnToCreateAccountButton": "Aprende a Crear una Cuenta HIVE / Instalar Keychain"
+    },
+    "HiveAccountInfoStep": {
+      "title": "Información de Cuenta HIVE y Keychain",
+      "description": "Para usar AegisPad, necesitarás una cuenta HIVE y la extensión de navegador Hive Keychain.",
+      "infoText": "Aquí tienes algunos recursos para empezar:",
+      "createAccountEcency": "Crear una cuenta HIVE con Ecency",
+      "createAccountHiveOnboard": "Crear una cuenta HIVE con HiveOnboard",
+      "installKeychain": "Instalar la extensión Hive Keychain",
+      "backToLoginButton": "Ya tengo una cuenta / Volver al inicio de sesión"
+    },
+    "ApiKeyInputStep": {
+      "title": "Ingresa tu Clave API de Gemini",
+      "securityNoteTitle": "Tu Seguridad Importa",
+      "securityNoteDescription": "Tu clave API de Gemini será encriptada usando tu cuenta HIVE (@{username}) y almacenada de forma segura solo en el almacenamiento local de tu navegador. AegisPad nunca verá ni almacenará tu clave sin encriptar en sus servidores.",
+      "apiKeyLabel": "Clave API de Gemini",
+      "apiKeyPlaceholder": "Pega tu clave API de Gemini aquí",
+      "apiKeyHint": "Tu clave típicamente comienza con 'AIza...'.",
+      "errorTitle": "Error de Clave API",
+      "saveAndTestButton": "Guardar y Probar Clave API",
+      "testingAndSavingButton": "Probando y Guardando...",
+      "howToGetApiKeyButton": "¿Cómo Obtener una Clave API?"
+    },
+    "ApiKeyInfoStep": {
+      "title": "Cómo Obtener una Clave API de Gemini",
+      "description": "Sigue estos sencillos pasos para obtener tu clave API de Gemini gratuita desde Google AI Studio.",
+      "step1": "Visita <link>Google AI Studio</link> e inicia sesión con tu cuenta de Google.",
+      "step2": "Una vez iniciada la sesión, haz clic en 'Obtener clave API' o navega a la sección de claves API.",
+      "step3": "Crea una nueva clave API. Cópiala y pégala en AegisPad en el paso anterior.",
+      "securityBestPracticesTitle": "Mejores Prácticas de Seguridad:",
+      "practice1": "Mantén tu clave API confidencial. No la compartas públicamente.",
+      "practice2": "Considera restringir tu clave API a servicios específicos si Google AI Studio lo permite.",
+      "practice3": "{appName} encriptará tu clave localmente, pero siempre ten en cuenta la seguridad de tu clave.",
+      "backToInputButton": "Tengo mi Clave API / Volver"
+    },
+    "ReportStep": {
+      "title": "¡Configuración Completa!",
+      "description": "Ya está todo configurado y listo para usar AegisPad.",
+      "reportTitle": "Reporte de Configuración de AegisPad",
+      "configDateLabel": "Fecha de Configuración",
+      "hiveUsernameLabel": "Usuario HIVE",
+      "apiKeyStatusLabel": "Estado de Clave API Gemini",
+      "recommendation": "Te recomendamos copiar y guardar este reporte para tus registros.",
+      "copyReportButton": "Copiar Reporte",
+      "completeButton": "Comenzar a Usar AegisPad",
+      "copySuccessMessage": "¡Reporte copiado al portapapeles!",
+      "copyFailedMessage": "Error al copiar el reporte. Por favor, copia manualmente."
+    },
+    "reportMessages": {
+      "apiKeyOk": "Agregada y encriptada de forma segura en tu dispositivo.",
+      "apiKeyOkAndStored": "Previamente configurada y almacenada de forma segura."
+    }
+  },
+  "Errors": {
+    "hiveLoginFailed": "Error al iniciar sesión con Hive. Por favor, verifica tu nombre de usuario y asegúrate de que Keychain está desbloqueado.",
+    "apiKeyEncryptionFailed": "Error al cifrar y guardar la clave API. Error: {error}",
+    "hiveUsernameMissing": "Falta el nombre de usuario de Hive. No se puede continuar.",
+    "apiKeyInvalid": "La clave API de Gemini proporcionada es inválida o no pudo ser verificada.",
+    "reportDataMissing": "Error: Los datos del reporte no están disponibles.",
+    "unknownError": "Ocurrió un error desconocido. Por favor, inténtalo de nuevo.",
+    "notAvailable": "N/D"
   }
 }
