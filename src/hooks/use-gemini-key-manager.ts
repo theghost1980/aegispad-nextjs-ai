@@ -1,7 +1,6 @@
 "use client";
 
-import { GEMINI_API_KEY_LOCAL_STORAGE_KEY } from "@/constants/constants";
-import { validateGeminiApiKeyWithAPI } from "@/utils/gemini-api"; // Importar la utilidad
+import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { KeychainHelper, KeychainHelperUtils } from "keychain-helper";
 import { useCallback, useEffect, useState } from "react";
 
@@ -18,16 +17,15 @@ export interface KeychainResponse<T = any> {
 export function useGeminiKeyManager() {
   const [isKeychainAvailable, setIsKeychainAvailable] = useState(false);
   const [isLoadingKeychain, setIsLoadingKeychain] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { authToken } = useHiveAuth();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      KeychainHelperUtils.isKeychainInstalled(window, (isInstalled) => {
-        setIsKeychainAvailable(isInstalled);
-        setIsLoadingKeychain(false);
-      });
-    }, 500);
-
-    return () => clearTimeout(timer);
+    KeychainHelperUtils.isKeychainInstalled(window, (isInstalled) => {
+      setIsKeychainAvailable(isInstalled);
+      setIsLoadingKeychain(false);
+    });
   }, []);
 
   const testApiKey = useCallback(
@@ -36,16 +34,29 @@ export function useGeminiKeyManager() {
         return { isValid: false, error: "API key cannot be empty." };
       }
       try {
-        const isValid = await validateGeminiApiKeyWithAPI(apiKey);
-        if (isValid) {
+        const response = await fetch("/api/ai/validate-gemini-key", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ apiKey }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.isValid) {
           return { isValid: true };
         } else {
-          return { isValid: false, error: "Invalid API Key." };
+          return {
+            isValid: false,
+            error: result.error || "Invalid API Key or validation failed.",
+          };
         }
       } catch (error: any) {
+        console.error("Error calling API to test Gemini key:", error);
         return {
           isValid: false,
-          error: error.message || "Failed to test API key.",
+          error: "Failed to communicate with the server to test API key.",
         };
       }
     },
@@ -75,9 +86,9 @@ export function useGeminiKeyManager() {
 
         KeychainHelper.requestEncodeMessage(
           username,
-          username,
+          "aegispad",
           formattedDataToEncode,
-          "Posting",
+          "Memo",
           (response: KeychainResponse) => {
             if (response.success && response.result) {
               if (
@@ -117,7 +128,7 @@ export function useGeminiKeyManager() {
         KeychainHelper.requestVerifyKey(
           username,
           encodedData,
-          "Posting",
+          "Memo",
           (response: KeychainResponse) => {
             if (response.success && response.result) {
               if (
@@ -140,45 +151,169 @@ export function useGeminiKeyManager() {
     [isKeychainAvailable]
   );
 
-  const storeEncryptedApiKey = useCallback((encryptedApiKey: string) => {
-    try {
-      localStorage.setItem(GEMINI_API_KEY_LOCAL_STORAGE_KEY, encryptedApiKey);
-    } catch (error) {
-      console.error("Error storing encrypted API key:", error);
-      //TODO Podrías manejar este error, quizás con un toast
-    }
-  }, []);
+  const saveApiKeyToBackend = useCallback(
+    async (
+      apiKeyToSave: string,
+      username: string,
+      encodedTested?: boolean
+    ): Promise<boolean> => {
+      setIsLoading(true);
+      setError(null);
+      let apiKey;
+      try {
+        if (encodedTested) {
+          apiKey = apiKeyToSave;
+        } else {
+          const testResult = await testApiKey(apiKeyToSave);
+          if (!testResult.isValid) {
+            throw new Error(testResult.error || "API Key is invalid.");
+          }
+          const encryptedKey = await encodeData(username, apiKeyToSave);
+          apiKey = encryptedKey;
+        }
 
-  const getStoredEncryptedApiKey = useCallback((): string | null => {
+        if (!authToken) {
+          throw new Error("User not authenticated. Cannot save API key.");
+        }
+
+        const response = await fetch("/api/user/gemini-key", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({ encryptedGeminiApiKey: apiKey }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Failed to save API key to backend."
+          );
+        }
+        setIsLoading(false);
+        return true;
+      } catch (e: any) {
+        setError(
+          e.message || "An unexpected error occurred while saving API key."
+        );
+        setIsLoading(false);
+        return false;
+      }
+    },
+    [testApiKey, encodeData, authToken]
+  );
+
+  const checkIfApiKeyIsConfigured = useCallback(async (): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
     try {
-      return localStorage.getItem(GEMINI_API_KEY_LOCAL_STORAGE_KEY);
-    } catch (error) {
-      console.error("Error retrieving encrypted API key:", error);
+      if (!authToken) {
+        setIsLoading(false);
+        return false;
+      }
+
+      const response = await fetch("/api/user/gemini-key", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to check API key status.");
+      }
+      const { encryptedApiKey } = await response.json();
+      setIsLoading(false);
+      return !!encryptedApiKey;
+    } catch (e: any) {
+      setError(
+        e.message ||
+          "An unexpected error occurred while checking API key status."
+      );
+      setIsLoading(false);
+      return false;
+    }
+  }, [authToken]);
+
+  const getEncryptedApiKeyFromBackend = useCallback(async (): Promise<
+    string | null
+  > => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (!authToken) {
+        setIsLoading(false);
+        return null;
+      }
+
+      const response = await fetch("/api/user/gemini-key", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "Failed to fetch encrypted API key."
+        );
+      }
+      const { encryptedApiKey } = await response.json();
+      setIsLoading(false);
+      return encryptedApiKey;
+    } catch (e: any) {
+      setError(
+        e.message ||
+          "An unexpected error occurred while fetching the encrypted API key."
+      );
+      setIsLoading(false);
       return null;
     }
-  }, []);
+  }, [authToken]);
 
-  const clearStoredApiKey = useCallback(() => {
+  const clearApiKeyFromBackend = useCallback(async (): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
     try {
-      localStorage.removeItem(GEMINI_API_KEY_LOCAL_STORAGE_KEY);
-    } catch (error) {
-      console.error("Error clearing stored API key:", error);
+      if (!authToken) {
+        throw new Error("User not authenticated. Cannot clear API key.");
+      }
+      const response = await fetch("/api/user/gemini-key", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete API key.");
+      }
+      setIsLoading(false);
+      return true;
+    } catch (e: any) {
+      setError(
+        e.message || "An unexpected error occurred while deleting API key."
+      );
+      setIsLoading(false);
+      return false;
     }
-  }, []);
-
-  const hasStoredApiKey = useCallback((): boolean => {
-    return !!getStoredEncryptedApiKey();
-  }, [getStoredEncryptedApiKey]);
+  }, [authToken]);
 
   return {
     isKeychainAvailable,
     encodeData,
     decodeData,
     isLoadingKeychain,
+    isLoading,
+    error,
+    setError,
     testApiKey,
-    storeEncryptedApiKey,
-    getStoredEncryptedApiKey,
-    clearStoredApiKey,
-    hasStoredApiKey,
+    saveApiKeyToBackend,
+    checkIfApiKeyIsConfigured,
+    clearApiKeyFromBackend,
+    getEncryptedApiKeyFromBackend,
   };
 }

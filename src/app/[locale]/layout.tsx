@@ -1,5 +1,6 @@
 import Header from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
+import { AppProvider } from "@/context/app-context";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -46,7 +47,7 @@ const getMessages = async (locale: string) => {
     console.log(
       `getMessages: Intentando cargar mensajes para locale: ${locale}`
     );
-    return (await import(`@/messages/${locale}.json`)).default; // Corregir ruta de carga de mensajes
+    return (await import(`@/messages/${locale}.json`)).default;
   } catch (error) {
     console.error(
       `getMessages: Error al cargar mensajes para locale "${locale}":`,
@@ -86,16 +87,18 @@ export default async function RootLayout({
       <body
         className={`${inter.variable} ${robotoMono.variable} antialiased flex flex-col min-h-screen`}
       >
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <Header />
-          <main className="flex-grow container mx-auto px-4 py-8">
-            {children}
-          </main>
-          <Toaster />
-          <footer className="bg-card border-t border-border py-4 text-center text-sm text-muted-foreground">
-            {t("footerCopyright", { year: new Date().getFullYear() })}
-          </footer>
-        </NextIntlClientProvider>
+        <AppProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <Header />
+            <main className="flex-grow container mx-auto px-4 py-8">
+              {children}
+            </main>
+            <Toaster />
+            <footer className="bg-card border-t border-border py-4 text-center text-sm text-muted-foreground">
+              {t("footerCopyright", { year: new Date().getFullYear() })}
+            </footer>
+          </NextIntlClientProvider>
+        </AppProvider>
       </body>
     </html>
   );

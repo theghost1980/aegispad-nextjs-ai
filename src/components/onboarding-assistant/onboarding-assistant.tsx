@@ -36,23 +36,23 @@ export default function OnboardingAssistant({
   const locale = useLocale();
 
   const {
-    login: hiveLogin,
-    // logout: hiveLogout, // No se usa directamente en el flujo inicial
-    isLoggedIn: isHiveLoggedIn,
-    storedUsername: hiveUsername,
-    isLoadingKeychain: isLoadingHiveKeychain,
+    login, // Esta es la función de login actualizada
+    hiveUsername, // Del AppContext, actualizado por useHiveAuth
+    isAuthenticated,
+    isLoading: isLoadingHiveAuth, // Estado de carga general del hook de auth
+    error: hiveAuthError,
     isKeychainAvailable: isHiveKeychainAvailable,
+    setError: setHiveAuthError,
   } = useHiveAuth();
 
   const {
     testApiKey,
-    encodeData: encryptApiKey,
-    // decodeData: decryptApiKey, // No se usa directamente en el flujo inicial
-    storeEncryptedApiKey,
-    // getStoredEncryptedApiKey, // No se usa directamente
-    hasStoredApiKey,
-    // clearStoredApiKey, // No se usa directamente
-    isLoadingKeychain: isLoadingGeminiKeychainCheck, // Puede ser el mismo que isLoadingHiveKeychain
+    saveApiKeyToBackend,
+    checkIfApiKeyIsConfigured,
+    clearApiKeyFromBackend, // Podría ser útil para un "reset"
+    isLoading: isLoadingGemini, // Estado de carga general del hook de gemini
+    error: geminiError,
+    setError: setGeminiError,
   } = useGeminiKeyManager();
 
   const [currentStep, setCurrentStep] =
@@ -61,7 +61,7 @@ export default function OnboardingAssistant({
   const [currentHiveUsername, setCurrentHiveUsername] = useState<string | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [isStepLoading, setIsStepLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reportData, setReportData] = useState<{
     date: string;
@@ -70,109 +70,161 @@ export default function OnboardingAssistant({
   } | null>(null);
 
   useEffect(() => {
-    // Sincronizar el nombre de usuario del hook con el estado local del asistente
-    if (hiveUsername) {
+    // Solo actualizar si es diferente para evitar re-renders innecesarios
+    if (hiveUsername && hiveUsername !== currentHiveUsername) {
       setCurrentHiveUsername(hiveUsername);
+    } else if (!hiveUsername && currentHiveUsername !== null) {
+      setCurrentHiveUsername(null);
     }
-  }, [hiveUsername]);
+  }, [hiveUsername, currentHiveUsername]);
 
   useEffect(() => {
     if (
       currentStep === "initialCheck" &&
-      !isLoadingHiveKeychain &&
-      !isLoadingGeminiKeychainCheck // Asegurarse de que ambas comprobaciones de keychain hayan terminado
+      !isLoadingHiveAuth &&
+      !isLoadingGemini
     ) {
-      if (isHiveLoggedIn() && hasStoredApiKey()) {
-        // Usuario ya configurado, idealmente generar reporte y mostrarlo o permitir reconfigurar
-        console.log("User already configured.");
-        const username = hiveUsername || tErrors("notAvailable");
-        setReportData({
-          date: new Date().toLocaleString(locale, {
-            dateStyle: "long",
-            timeStyle: "short",
-          }),
-          username: username,
-          apiKeyStatus: t("reportMessages.apiKeyOkAndStored"),
-        });
-        setCurrentStep("report");
-      } else if (!isHiveLoggedIn()) {
-        setCurrentStep("hiveLogin");
-      } else {
-        // Logueado en Hive pero sin API key
-        setCurrentStep("apiKeyInput");
-      }
+      console.log("[Onboarding InitialCheck] Running initial check...");
+      const performInitialCheck = async () => {
+        setIsStepLoading(true);
+        const isApiKeyConfigured = isAuthenticated
+          ? await checkIfApiKeyIsConfigured()
+          : false;
+        if (isAuthenticated && isApiKeyConfigured) {
+          console.log("[Onboarding] User already configured.");
+          // Asegurarnos de que hiveUsername (del contexto) esté disponible
+          // Si no, esperar a que se propague o usar un valor temporal si es solo para el reporte.
+          // Pero para la lógica de flujo, isAuthenticated es la clave.
+          const usernameForReport =
+            hiveUsername || currentHiveUsername || tErrors("notAvailable");
+          setReportData({
+            date: new Date().toLocaleString(locale, {
+              dateStyle: "long",
+              timeStyle: "short",
+            }),
+            username: usernameForReport,
+            apiKeyStatus: t("reportMessages.apiKeyOkAndStored"),
+          });
+          setCurrentStep("report");
+        } else if (!isAuthenticated) {
+          console.log(
+            "[Onboarding InitialCheck] User not authenticated. Going to hiveLogin."
+          );
+          setCurrentStep("hiveLogin");
+        } else {
+          console.log(
+            "[Onboarding InitialCheck] Authenticated but API key not configured. Going to apiKeyInput."
+          );
+          setCurrentStep("apiKeyInput");
+        }
+        setIsStepLoading(false);
+      };
+      performInitialCheck();
     }
   }, [
     currentStep,
-    isHiveLoggedIn,
-    hasStoredApiKey,
-    isLoadingHiveKeychain,
-    isLoadingGeminiKeychainCheck,
+    isAuthenticated,
+    checkIfApiKeyIsConfigured,
+    isLoadingHiveAuth,
+    isLoadingGemini,
+    hiveUsername,
     onComplete,
-    t, // Añadir t como dependencia si se usa para generar reportData
+    t,
+    locale,
+    tErrors,
   ]);
 
   const handleHiveLoginAttempt = async (username: string) => {
-    setIsLoading(true);
+    setIsStepLoading(true);
     setErrorMessage(null);
-    const result = await hiveLogin(username);
-    if ("username" in result && result.username) {
-      setCurrentHiveUsername(result.username); // Actualizar el nombre de usuario aquí
-      setCurrentStep("apiKeyInput"); // Siguiente paso: pedir API key
-    } else {
-      // Usar type guard para verificar si 'result' es el tipo de error
-      if ("error" in result) {
-        if (result.error === "keychainNotAvailable") {
-          setCurrentStep("hiveAccountInfo");
-        } else {
-          // Acceder a result.message solo si 'error' existe
-          setErrorMessage(result.message || tErrors("hiveLoginFailed"));
-        }
-      }
-    }
-    setIsLoading(false);
-  };
+    if (hiveAuthError) setHiveAuthError(null);
 
-  const handleApiKeySubmitAttempt = async (apiKey: string) => {
-    if (!currentHiveUsername) {
-      setErrorMessage(tErrors("hiveUsernameMissing"));
-      setCurrentStep("hiveLogin"); // Forzar a re-loguear si no hay username
-      return;
-    }
-    setIsLoading(true);
-    setErrorMessage(null);
-    const testResult = await testApiKey(apiKey);
+    const loginSuccess = await login(username);
 
-    if (testResult.isValid) {
-      try {
-        const encryptedKey = await encryptApiKey(currentHiveUsername, apiKey);
-        storeEncryptedApiKey(encryptedKey);
+    if (loginSuccess) {
+      // Login exitoso. Ahora verificar si la API key ya está configurada.
+      // hiveUsername (del contexto) debería estar actualizado por el hook 'login'
+      // Esperar un breve momento para que el contexto se propague si es necesario,
+      // o confiar en que checkIfApiKeyIsConfigured usará el estado más reciente.
+      const userForCheck = hiveUsername || username;
+      console.log("[Onboarding] Hive login success for:", userForCheck);
+
+      setIsStepLoading(true); // Indicar carga para la comprobación de la API key
+      const isKeyAlreadyConfigured = await checkIfApiKeyIsConfigured();
+      // No necesitamos setIsStepLoading(false) aquí inmediatamente si el siguiente paso también carga
+      if (isKeyAlreadyConfigured) {
+        setIsStepLoading(false); // Termina la carga aquí si vamos a report
+        console.log(
+          "[Onboarding] API key already configured. Going to report."
+        );
         setReportData({
           date: new Date().toLocaleString(locale, {
             dateStyle: "long",
             timeStyle: "short",
           }),
-          username: currentHiveUsername,
-          apiKeyStatus: t("reportMessages.apiKeyOk"),
+          username: userForCheck,
+          apiKeyStatus: t("reportMessages.apiKeyOkAndStored"),
         });
         setCurrentStep("report");
-      } catch (encError: any) {
-        setErrorMessage(
-          tErrors("apiKeyEncryptionFailed", {
-            error: encError.message || String(encError),
-          })
+      } else {
+        console.log(
+          "[Onboarding] API key not configured. Going to apiKeyInput."
         );
+        setCurrentStep("apiKeyInput");
       }
     } else {
-      setErrorMessage(testResult.error || tErrors("apiKeyInvalid"));
+      setErrorMessage(hiveAuthError || tErrors("hiveLoginFailed"));
+      if (
+        hiveAuthError === "Hive Keychain is not installed or available." ||
+        !isHiveKeychainAvailable
+      ) {
+        setCurrentStep("hiveAccountInfo");
+      }
     }
-    setIsLoading(false);
+    // Asegurarse de que isStepLoading se ponga en false si no se cambió de paso
+    // o si el nuevo paso no tiene su propio indicador de carga.
+    if (currentStep !== "report" && currentStep !== "apiKeyInput")
+      setIsStepLoading(false);
   };
+
+  const handleApiKeySubmitAttempt = async (apiKey: string) => {
+    // Asegurarse de que currentHiveUsername (que viene del contexto via useEffect) esté seteado
+    // O mejor, usar directamente hiveUsername del contexto si ya está disponible y es la fuente de verdad.
+    const usernameForApiKey = hiveUsername || currentHiveUsername;
+    if (!usernameForApiKey) {
+      setErrorMessage(tErrors("hiveUsernameMissing"));
+      // Podríamos forzar a re-loguear, o simplemente mostrar el error y no proceder.
+      // setCurrentStep("hiveLogin");
+      return;
+    }
+    setErrorMessage(null);
+    setIsStepLoading(true);
+    if (geminiError) setGeminiError(null);
+    const saveSuccess = await saveApiKeyToBackend(apiKey, usernameForApiKey);
+    if (saveSuccess) {
+      setReportData({
+        date: new Date().toLocaleString(locale, {
+          dateStyle: "long",
+          timeStyle: "short",
+        }),
+        username: usernameForApiKey,
+        apiKeyStatus: t("reportMessages.apiKeyOk"),
+      });
+      setCurrentStep("report");
+    } else {
+      // El error debería estar en geminiError del hook
+      setErrorMessage(geminiError || tErrors("apiKeySaveFailed"));
+    }
+    setIsStepLoading(false);
+  };
+
+  const combinedIsLoading =
+    isStepLoading || isLoadingHiveAuth || isLoadingGemini;
 
   if (
     currentStep === "initialCheck" ||
-    isLoadingHiveKeychain ||
-    isLoadingGeminiKeychainCheck
+    isLoadingHiveAuth || // Si el hook de auth está cargando inicialmente
+    isLoadingGemini // Si el hook de gemini está cargando inicialmente
   ) {
     return <div>{t("loadingAssistant")}</div>;
   }
@@ -183,8 +235,8 @@ export default function OnboardingAssistant({
         <HiveLoginStep
           onLoginAttempt={handleHiveLoginAttempt}
           onGoToAccountInfo={() => setCurrentStep("hiveAccountInfo")}
-          isLoading={isLoading}
-          errorMessage={errorMessage}
+          isLoading={combinedIsLoading}
+          errorMessage={errorMessage || hiveAuthError} // Mostrar error local o del hook
           isKeychainAvailable={isHiveKeychainAvailable}
         />
       );
@@ -195,7 +247,13 @@ export default function OnboardingAssistant({
         />
       );
     case "apiKeyInput":
-      if (!currentHiveUsername) {
+      const usernameForApiKeyStep = hiveUsername || currentHiveUsername;
+      if (!isAuthenticated || !usernameForApiKeyStep) {
+        // Chequeo más robusto
+        // Este caso debería ser raro si el flujo es correcto y isAuthenticated es true
+        console.warn(
+          "[Onboarding] Attempted to go to apiKeyInput without a valid username or auth. Forcing to hiveLogin."
+        );
         setCurrentStep("hiveLogin"); // Safeguard
         return <div>{tErrors("hiveUsernameMissing")}</div>;
       }
@@ -203,9 +261,9 @@ export default function OnboardingAssistant({
         <ApiKeyInputStep
           onSubmit={handleApiKeySubmitAttempt}
           onGoToApiKeyInfo={() => setCurrentStep("apiKeyInfo")}
-          isLoading={isLoading}
-          errorMessage={errorMessage}
-          hiveUsername={currentHiveUsername}
+          isLoading={combinedIsLoading}
+          errorMessage={errorMessage || geminiError} // Mostrar error local o del hook
+          hiveUsername={usernameForApiKeyStep} // Preferir el del contexto
         />
       );
     case "apiKeyInfo":

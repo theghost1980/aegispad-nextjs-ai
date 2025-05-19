@@ -1,10 +1,10 @@
 "use client";
 
-import {
-  createArticle,
-  CreateArticleInput,
-  CreateArticleOutput,
-} from "@/ai/flows/create-article";
+// import {
+//   createArticle, // Ya no se usa directamente aquí
+//   CreateArticleInput,
+//   CreateArticleOutput,
+// } from "@/ai/flows/create-article";
 import {
   detectLanguage,
   DetectLanguageInput,
@@ -20,34 +20,25 @@ import {
   TranslateArticleInput,
   TranslateArticleOutput,
 } from "@/ai/flows/translate-article";
-import DetectedLanguageInfo from "@/components/editor-sections/DetectedLanguageInfo"; // Importar el nuevo componente
-import EditAndRefineCard from "@/components/editor-sections/EditAndRefineCard"; // Importar el nuevo componente
-import EditorTokenUsage from "@/components/editor-sections/EditorTokenUsage"; // Importar el nuevo componente
+import DetectedLanguageInfo from "@/components/editor-sections/DetectedLanguageInfo";
+import EditAndRefineCard from "@/components/editor-sections/EditAndRefineCard";
+import EditorTokenUsage from "@/components/editor-sections/EditorTokenUsage";
 import RefineCombinedFormatCard, {
   CombineFormatType,
-} from "@/components/editor-sections/RefineCombinedFormatCard"; // Importar el nuevo componente
+} from "@/components/editor-sections/RefineCombinedFormatCard";
 import SessionSummaryCard from "@/components/editor-sections/SessionSummaryCard";
-import StartArticleCard from "@/components/editor-sections/StartArticleCard"; // Importar el nuevo componente
-import TranslateArticleCard from "@/components/editor-sections/TranslateArticleCard"; // Importar el nuevo componente
-import TranslationResultView from "@/components/editor-sections/TranslationResultView"; // Importar el nuevo componente
+import StartArticleCard from "@/components/editor-sections/StartArticleCard";
+import TranslateArticleCard from "@/components/editor-sections/TranslateArticleCard";
+import TranslationResultView from "@/components/editor-sections/TranslationResultView";
 import GlobalLoader from "@/components/global-loader";
 import LoadingSpinner from "@/components/loading-spinner";
-import OnboardingAssistant from "@/components/onboarding-assistant/onboarding-assistant";
-import { Button } from "@/components/ui/button"; // Importar Button
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { COMMENT_NOTES_BY_LOCALE } from "@/constants/constants";
-import { useGeminiKeyManager } from "@/hooks/use-gemini-key-manager";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
 import { getLocaleFromLanguageValue } from "@/utils/language";
 import { splitMarkdownIntoParagraphs } from "@/utils/markdown";
-import { AlertCircle, Settings } from "lucide-react"; // Importar iconos
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
 const availableLanguages = [
@@ -71,12 +62,13 @@ type InitialWorkflow = "aiCreate" | "userWrite";
 export default function ArticleForgePage() {
   const t = useTranslations("ArticleForgePage");
   const tTokenUsage = useTranslations("TokenUsage");
-  const tOnboarding = useTranslations("OnboardingAssistant"); // Para el título del Dialog
+  const router = useRouter();
 
-  const { isLoggedIn: isHiveLoggedIn, isLoadingKeychain: isLoadingHiveAuth } =
-    useHiveAuth();
-  const { hasStoredApiKey, isLoadingKeychain: isLoadingGeminiCheck } =
-    useGeminiKeyManager();
+  const {
+    isAuthenticated: isHiveLoggedIn,
+    isLoading: isLoadingHiveAuth,
+    authToken, // Necesitamos el authToken para la llamada a la API
+  } = useHiveAuth();
 
   const [prompt, setPrompt] = useState<string>("");
   const [articleMarkdown, setArticleMarkdown] = useState<string>("");
@@ -84,9 +76,7 @@ export default function ArticleForgePage() {
     availableLanguages[0].value
   );
   const [sourceLanguageForCreation, setSourceLanguageForCreation] =
-    useState<string>(
-      "English" // Asegúrate que "English" esté en tu `availableLanguages` o usa otro valor por defecto
-    );
+    useState<string>("English");
   const [generateMainImage, setGenerateMainImage] = useState<boolean>(false);
 
   const [currentOperationMessage, setCurrentOperationMessage] = useState<
@@ -120,46 +110,22 @@ export default function ArticleForgePage() {
   const [isProcessing, startProcessingTransition] = useTransition();
 
   const [clientLoaded, setClientLoaded] = useState(false);
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
-  const [hasCheckedInitialSetup, setHasCheckedInitialSetup] = useState(false);
 
   const { toast } = useToast();
 
-  const isLoading = isProcessing;
+  const isLoading = isProcessing || isLoadingHiveAuth;
 
   useEffect(() => {
     setClientLoaded(true);
   }, []);
 
   useEffect(() => {
-    // Este efecto se ejecutará cada vez que cambie el estado de login, API key o los estados de carga.
-    // Solo actuamos si las comprobaciones de keychain han finalizado.
-    if (!isLoadingHiveAuth && !isLoadingGeminiCheck) {
-      setHasCheckedInitialSetup(true); // Marcar que la verificación inicial se ha hecho
-      if (!isHiveLoggedIn() || !hasStoredApiKey()) {
-        setIsOnboardingOpen(true);
-      } else {
-        // Si el usuario está logueado y tiene API key, nos aseguramos que el modal esté cerrado.
-        // Esto es útil si el estado cambia después de que el modal se haya mostrado.
-        setIsOnboardingOpen(false);
-      }
+    if (clientLoaded && !isLoadingHiveAuth && !isHiveLoggedIn) {
+      router.push("/login");
     }
-  }, [
-    isHiveLoggedIn,
-    hasStoredApiKey,
-    isLoadingHiveAuth,
-    isLoadingGeminiCheck,
-  ]);
+  }, [clientLoaded, isLoadingHiveAuth, isHiveLoggedIn, router]);
 
-  const handleOnboardingComplete = () => {
-    setIsOnboardingOpen(false);
-    // No es necesario resetear hasCheckedInitialSetup aquí con la nueva lógica del useEffect.
-    // El useEffect se re-evaluará naturalmente si isHiveLoggedIn o hasStoredApiKey cambian.
-  };
-
-  // Determinar si el contenido principal del editor puede mostrarse
-  const canUseEditor =
-    isHiveLoggedIn() && hasStoredApiKey() && hasCheckedInitialSetup;
+  const canUseEditor = isHiveLoggedIn;
 
   const handleTokenUpdate = (
     tokensUsed: number,
@@ -201,31 +167,56 @@ export default function ArticleForgePage() {
     setFinalCombinedOutput("");
     setDetectedLanguage(null);
 
+    if (!authToken) {
+      toast({
+        title: t("toastMessages.errorTitle"),
+        description: "Not Auth!", //TODO add locales
+        variant: "destructive",
+      });
+      setCurrentOperationMessage(null);
+      return;
+    }
+
     startProcessingTransition(async () => {
-      let totalTokensForOperation = 0;
-      let operationDetails = { text: 0, image: 0 };
+      // let totalTokensForOperation = 0; // TODO: El backend debe devolver el uso de tokens
+      // let operationDetails = { text: 0, image: 0 };
 
       try {
-        const input: CreateArticleInput = {
-          prompt,
-          generateMainImage,
-          language: sourceLanguageForCreation, // Añadir el idioma
-        };
-        const result: CreateArticleOutput = await createArticle(input);
-        setArticleMarkdown(result.article);
+        // Construir el prompt mejorado
+        const enhancedPrompt = `You are an expert article writer. Write an article of approximately 1000 words in ${sourceLanguageForCreation} in Markdown format based on the following prompt:\n\nPrompt: ${prompt}`;
 
-        totalTokensForOperation += result.tokenUsage.totalTokens;
-        operationDetails.text += result.tokenUsage.textGenerationTokens || 0;
-        operationDetails.image += result.tokenUsage.imageGenerationTokens || 0;
+        // Llamada a la nueva ruta del backend
+        const response = await fetch("/api/ai/generate-content", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            prompt: enhancedPrompt, // Enviar el prompt mejorado
+            // Nota: generateMainImage y language no se envían a esta ruta simple
+            // Si los necesitas, la ruta del backend debe ser adaptada.
+          }),
+        });
 
-        handleTokenUpdate(totalTokensForOperation, operationDetails);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Failed to create article via backend"
+          );
+        }
+
+        const result = await response.json();
+        setArticleMarkdown(result.generatedText);
+
+        // TODO: Actualizar handleTokenUpdate si el backend devuelve uso de tokens
+        // Por ahora, no podemos actualizar el uso de tokens con esta ruta
+        // handleTokenUpdate(totalTokensForOperation, operationDetails);
         setTranslatedArticleMarkdown("");
         setOriginalArticleForTranslation("");
         toast({
           title: t("toastMessages.successTitle"),
-          description: result.mainImageUrl
-            ? t("toastMessages.articleCreatedWithImageSuccess")
-            : t("toastMessages.articleCreatedSuccess"),
+          description: t("toastMessages.articleCreatedSuccess"), // Mensaje simplificado
         });
       } catch (error) {
         console.error("Error creating article:", error);
@@ -244,7 +235,7 @@ export default function ArticleForgePage() {
     setCurrentOperationMessage(null);
     setPrompt("");
     setArticleMarkdown(t("userWriting.startPlaceholder"));
-    setSourceLanguageForCreation("English"); // Resetear al empezar a escribir manualmente
+    setSourceLanguageForCreation("English");
     setTargetLanguage(availableLanguages[0].value);
     setTranslatedArticleMarkdown("");
     setOriginalArticleForTranslation("");
@@ -324,7 +315,7 @@ export default function ArticleForgePage() {
 
     startProcessingTransition(async () => {
       let totalTokensForOperation = 0;
-      let operationDetails = { text: 0, image: 0 }; // Image tokens won't be used here but keep structure
+      let operationDetails = { text: 0, image: 0 };
       let currentArticleContent = articleMarkdown;
       let sourceLanguage = detectedLanguage;
 
@@ -431,11 +422,10 @@ export default function ArticleForgePage() {
           availableLanguages.find((lang) => lang.value === targetLanguage)
             ?.label || targetLanguage;
 
-        // Usar `detectedLanguage` para determinar el idioma de la nota, ya que es el idioma de `originalArticleForTranslation`
         const sourceLocale = getLocaleFromLanguageValue(detectedLanguage);
         const noteTextInSourceLanguage =
           COMMENT_NOTES_BY_LOCALE[sourceLocale] ||
-          COMMENT_NOTES_BY_LOCALE["en"]; // Fallback a inglés
+          COMMENT_NOTES_BY_LOCALE["en"];
 
         const fullTranslationNote = `> ${noteTextInSourceLanguage}`;
 
@@ -546,15 +536,11 @@ export default function ArticleForgePage() {
     });
   };
 
-  if (
-    !clientLoaded ||
-    (isLoadingHiveAuth && !hasCheckedInitialSetup) ||
-    (isLoadingGeminiCheck && !hasCheckedInitialSetup)
-  ) {
+  if (clientLoaded && isLoadingHiveAuth) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <LoadingSpinner size={48} />{" "}
-        <p className="ml-2">{t("loadingSpinnerClient")}</p>
+        <LoadingSpinner size={48} />
+        <p className="ml-2">{t("loadingSpinnerClient")}</p>{" "}
       </div>
     );
   }
@@ -576,7 +562,7 @@ export default function ArticleForgePage() {
                     before:opacity-30 before:rounded-lg before:-z-10"
     >
       <GlobalLoader
-        isLoading={isLoading}
+        isLoading={isProcessing}
         operationMessage={currentOperationMessage}
       />
 
@@ -596,8 +582,8 @@ export default function ArticleForgePage() {
             onInitialWorkflowChange={(value: InitialWorkflow) => {
               setInitialWorkflow(value);
               if (value === "userWrite") {
-                setPrompt(""); // Limpiar prompt si se cambia a escritura manual
-                setGenerateMainImage(false); // Desactivar imagen si se cambia a escritura manual
+                setPrompt("");
+                setGenerateMainImage(false);
               }
             }}
             prompt={prompt}
@@ -685,36 +671,13 @@ export default function ArticleForgePage() {
             />
           )}
         </>
-      ) : // Si el editor no se puede usar Y el modal de onboarding NO está abierto (pero debería estarlo)
-      !isOnboardingOpen && hasCheckedInitialSetup ? (
+      ) : clientLoaded && !isLoadingHiveAuth ? (
         <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center text-center p-6 space-y-4">
-          <AlertCircle className="h-16 w-16 text-destructive" />
-          <h2 className="text-2xl font-semibold">
-            {t("onboardingRequiredTitle")}
-          </h2>
-          <p className="text-muted-foreground max-w-md">
-            {t("onboardingRequiredDescription")}
-          </p>
-          <Button onClick={() => setIsOnboardingOpen(true)} size="lg">
-            <Settings className="mr-2 h-5 w-5" /> {t("startSetupButton")}
-          </Button>
+          <LoadingSpinner size={48} />
         </div>
       ) : (
-        // Placeholder mientras el modal de onboarding está activo o las comprobaciones iniciales no han terminado
         <div className="min-h-[calc(100vh-200px)]"></div>
       )}
-
-      <Dialog open={isOnboardingOpen} onOpenChange={setIsOnboardingOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{tOnboarding("assistantModalTitle")}</DialogTitle>
-            {/* <DialogDescription>
-              {tOnboarding("assistantModalDescription")}
-            </DialogDescription> */}
-          </DialogHeader>
-          <OnboardingAssistant onComplete={handleOnboardingComplete} />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

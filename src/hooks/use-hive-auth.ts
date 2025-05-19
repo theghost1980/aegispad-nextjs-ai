@@ -1,8 +1,14 @@
 "use client";
 
-import { HIVE_USERNAME_LOCAL_STORAGE_KEY } from "@/constants/constants";
+import { AppContext } from "@/context/app-context";
+import { useRouter } from "@/i18n/routing";
+import {
+  clearUserSessionData,
+  getItem,
+  setItem,
+} from "@/lib/indexed-db-service";
 import { KeychainHelper, KeychainHelperUtils } from "keychain-helper";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 export interface KeychainLoginResponseData {
   type: string;
@@ -26,98 +32,189 @@ export interface KeychainLoginResponse {
 export function useHiveAuth() {
   const [isKeychainAvailable, setIsKeychainAvailable] = useState(false);
   const [isLoadingKeychain, setIsLoadingKeychain] = useState(true);
-  const [storedUsername, setStoredUsername] = useState<string | null>(null);
+  const { hiveUsername, setHiveUsername } = useContext(AppContext);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     KeychainHelperUtils.isKeychainInstalled(window, (isInstalled) => {
       setIsKeychainAvailable(isInstalled);
       setIsLoadingKeychain(false);
     });
-    try {
-      const username = localStorage.getItem(HIVE_USERNAME_LOCAL_STORAGE_KEY);
-      if (username) {
-        setStoredUsername(username);
+    const checkAuthStatus = async () => {
+      setIsLoading(true);
+      try {
+        const storedUsernameFromDB = await getItem<string>(
+          "currentUserHiveUsername"
+        );
+        const storedAccessToken = await getItem<string>("accessToken");
+
+        if (storedUsernameFromDB && storedAccessToken) {
+          setHiveUsername(storedUsernameFromDB);
+          setIsAuthenticated(true);
+          setAuthToken(storedAccessToken);
+        } else {
+          await clearUserSessionData();
+          setHiveUsername(null);
+          setIsAuthenticated(false);
+          setAuthToken(null);
+        }
+      } catch (e) {
+        console.error("Error loading auth status from IndexedDB", e);
+        setHiveUsername(null);
+        setIsAuthenticated(false);
+        setAuthToken(null);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error reading username from localStorage:", error);
-    }
-  }, []);
+    };
+    checkAuthStatus();
+  }, [hiveUsername]);
 
   const login = useCallback(
-    async (
-      usernameToLogin: string
-    ): Promise<{ username: string } | { error: string; message?: string }> => {
+    async (usernameToLogin: string): Promise<boolean> => {
+      setIsLoading(true);
+      setError(null);
+
       if (!isKeychainAvailable) {
-        return {
-          error: "keychainNotAvailable",
-          message: "Hive Keychain is not installed or available.",
-        };
+        setError("Hive Keychain is not installed or available.");
+        setIsLoading(false);
+        return false;
       }
       if (!usernameToLogin || usernameToLogin.trim() === "") {
-        return {
-          error: "usernameRequired",
-          message: "Hive username is required for login.",
-        };
+        setError("Hive username is required for login.");
+        setIsLoading(false);
+        return false;
       }
 
-      return new Promise((resolve) => {
-        const challenge = `AegisPadLoginChallenge_${Date.now()}_${Math.random()
-          .toString(36)
-          .substring(2, 15)}`;
+      try {
+        // 1. Get challenge from our backend
+        const challengeApiResponse = await fetch("/api/auth/challenge", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: usernameToLogin }),
+        });
 
-        KeychainHelper.requestLogin(
-          usernameToLogin,
-          challenge,
-          (response: KeychainLoginResponse) => {
-            if (
-              response.success &&
-              response.data &&
-              response.data.username &&
-              response.data.username.toLowerCase() ===
-                usernameToLogin.toLowerCase()
-            ) {
-              localStorage.setItem(
-                HIVE_USERNAME_LOCAL_STORAGE_KEY,
-                usernameToLogin
-              );
-              const confirmedUsername = response.data.username;
-              localStorage.setItem(
-                HIVE_USERNAME_LOCAL_STORAGE_KEY,
-                confirmedUsername
-              );
-              setStoredUsername(confirmedUsername);
-              resolve({ username: confirmedUsername });
-            } else {
-              resolve({
-                error: response.error || "loginFailed",
-                message:
-                  response.message ||
-                  "Login failed, user cancelled, or username mismatch.",
-              });
-            }
-          },
-          "AegisPad Login"
+        if (!challengeApiResponse.ok) {
+          const errorData = await challengeApiResponse.json();
+          throw new Error(
+            errorData.message || "Failed to get challenge from server."
+          );
+        }
+
+        const { challenge: backendChallenge } =
+          await challengeApiResponse.json();
+        if (!backendChallenge) {
+          throw new Error("Challenge not received from server.");
+        }
+
+        // 2. Use KeychainHelper.requestLogin to sign the backendChallenge
+        const keychainResponse: KeychainLoginResponse = await new Promise(
+          (resolveKeychain) => {
+            KeychainHelper.requestLogin(
+              usernameToLogin,
+              backendChallenge, // Usamos el challenge de nuestro backend aquí
+              (response: KeychainLoginResponse) => {
+                resolveKeychain(response);
+              },
+              "AegisPad Login Verification" // Título para la ventana de Keychain
+            );
+          }
         );
-      });
+
+        if (
+          !keychainResponse.success ||
+          !keychainResponse.result || // La firma
+          !keychainResponse.data ||
+          keychainResponse.data.message !== backendChallenge // Verificar que el challenge firmado es el nuestro
+        ) {
+          throw new Error(
+            keychainResponse.message ||
+              "Keychain signing failed, user cancelled, or challenge mismatch."
+          );
+        }
+
+        const signature = keychainResponse.result;
+
+        // 3. Send username, backendChallenge, and signature to our /api/auth/login
+        const loginApiResponse = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: usernameToLogin,
+            challenge: backendChallenge, // El challenge que generó nuestro backend y se firmó
+            signature,
+          }),
+        });
+
+        if (!loginApiResponse.ok) {
+          const errorData = await loginApiResponse.json();
+          throw new Error(errorData.message || "Backend login failed.");
+        }
+
+        const {
+          accessToken,
+          refreshToken: newRefreshToken,
+          user,
+        } = await loginApiResponse.json();
+
+        if (!accessToken || !newRefreshToken || !user || !user.username) {
+          throw new Error(
+            "Access token, refresh token, or user info not received."
+          );
+        }
+
+        // 4. Store tokens and user info
+        await setItem("accessToken", accessToken);
+        await setItem("refreshToken", newRefreshToken);
+        await setItem("currentUserHiveUsername", user.username);
+        await setItem("lastLoginTimestamp", Date.now());
+
+        setAuthToken(accessToken);
+        setHiveUsername(user.username);
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        return true; // Login exitoso
+      } catch (e: any) {
+        setError(e.message || "An unexpected error occurred during login.");
+        setIsLoading(false);
+        return false; // Login fallido
+      }
     },
-    [isKeychainAvailable]
+    [isKeychainAvailable, setHiveUsername, isAuthenticated]
   );
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(HIVE_USERNAME_LOCAL_STORAGE_KEY);
-    setStoredUsername(null);
-  }, []);
-
-  const isLoggedIn = useCallback((): boolean => {
-    return !!storedUsername;
-  }, [storedUsername]);
+  const logout = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Opcional: Llamar a una API /api/auth/logout para invalidar el refresh token en el backend
+      await clearUserSessionData();
+      setHiveUsername(null);
+      setIsAuthenticated(false);
+      setAuthToken(null);
+    } catch (e: any) {
+      setError(e.message || "An error occurred during logout.");
+    } finally {
+      setIsLoading(false);
+      router.push("/");
+    }
+  }, [setHiveUsername]);
 
   return {
     isKeychainAvailable,
     isLoadingKeychain,
     login,
     logout,
-    isLoggedIn,
-    storedUsername,
+    authToken,
+    hiveUsername,
+    isLoading,
+    error,
+    isAuthenticated,
+    setError,
   };
 }

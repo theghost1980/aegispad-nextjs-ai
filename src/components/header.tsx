@@ -3,6 +3,7 @@
 import AegisPadLogoIcon from "@/components/aegis-pad-logo-icon";
 import CustomButton from "@/components/custom-button"; // Importar CustomButton
 import LanguageSwitcher from "@/components/language-switcher";
+import { UserAvatarDropdown } from "@/components/user-avatar-dropdown";
 import { Link, usePathname } from "@/i18n/routing"; // Usar Link y usePathname de tu configuración de routing
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl"; // useTranslations también es de next-intl (sin /client)
@@ -57,6 +58,9 @@ export default function Header() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           <LanguageSwitcher />
           {/* Placeholder for Mobile Menu Button */}
+        </div>
+        <div className="ml-auto flex items-center space-x-4">
+          <UserAvatarDropdown />
         </div>
       </div>
     </header>
