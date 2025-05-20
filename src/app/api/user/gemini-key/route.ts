@@ -1,36 +1,11 @@
+import { getProfileIdFromAuth } from "@/lib/auth/server.utils";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
-import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined in environment variables.");
-}
-
-interface AuthenticatedRequestPayload {
-  sub: string; // profile_id
-  username: string;
-  role?: string;
-}
-async function getProfileIdFromAuth(
-  request: NextRequest
-): Promise<string | null> {
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = jwt.verify(
-      token,
-      JWT_SECRET!
-    ) as AuthenticatedRequestPayload;
-    return decoded.sub; // Este es el profile_id
-  } catch (error) {
-    console.error("Token verification failed:", error);
-    return null;
-  }
 }
 
 export async function POST(request: NextRequest) {

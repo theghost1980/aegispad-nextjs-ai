@@ -1,40 +1,14 @@
-import { decodeEncryptedApiKey } from "@/lib/encryption/server-encryption"; // Nuestra utilidad de desencriptación
+import { GEMINI_AI_MODEL_NAME } from "@/constants/constants";
+import { getProfileIdFromAuth } from "@/lib/auth/server.utils";
+import { decodeEncryptedApiKey } from "@/lib/encryption/server-encryption";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
-import { GoogleGenerativeAI } from "@google/generative-ai"; // O el nuevo SDK cuando migres
-import jwt from "jsonwebtoken";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined in environment variables.");
-}
-
-interface AuthenticatedRequestPayload {
-  sub: string; // profile_id
-  username: string;
-  role?: string;
-}
-
-// Esta función debería moverse a una utilidad compartida, ej: src/lib/auth/server-utils.ts
-async function getProfileIdFromAuth(
-  request: NextRequest
-): Promise<string | null> {
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = jwt.verify(
-      token,
-      JWT_SECRET!
-    ) as AuthenticatedRequestPayload;
-    return decoded.sub; // Este es el profile_id
-  } catch (error) {
-    console.error("Token verification failed:", error);
-    return null;
-  }
 }
 
 export async function POST(request: NextRequest) {
@@ -91,9 +65,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const genAI = new GoogleGenerativeAI(userGeminiApiKey);
-    // Asegúrate de usar un nombre de modelo válido, como 'gemini-1.5-flash-latest'
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-latest",
+      model: GEMINI_AI_MODEL_NAME,
     });
     const result = await model.generateContent(prompt);
     const response = result.response;

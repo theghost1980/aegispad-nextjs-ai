@@ -13,20 +13,20 @@ import { useCallback, useContext, useEffect, useState } from "react";
 export interface KeychainLoginResponseData {
   type: string;
   username: string;
-  message: string; // El challenge original
+  message: string;
   method: string;
-  rpc?: string; // El título que pasamos
+  rpc?: string;
   key: string;
 }
 
 export interface KeychainLoginResponse {
   success: boolean;
-  error: string | null; // Puede ser null o un string de error
-  result: string | null; // La firma o null en caso de error
-  data: KeychainLoginResponseData | null; // Puede ser null en caso de error
-  message: string; // Mensaje de éxito o error
+  error: string | null;
+  result: string | null;
+  data: KeychainLoginResponseData | null;
+  message: string;
   request_id: number;
-  publicKey?: string; // Opcional, a veces se incluye
+  publicKey?: string;
 }
 
 export function useHiveAuth() {
@@ -74,6 +74,196 @@ export function useHiveAuth() {
     };
     checkAuthStatus();
   }, [hiveUsername]);
+
+  // Estado y promesa para manejar refrescos concurrentes
+  const [isRefreshingToken, setIsRefreshingToken] = useState(false);
+  const [refreshPromise, setRefreshPromise] = useState<Promise<
+    string | null
+  > | null>(null);
+
+  const logout = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // TODO: Opcional: Llamar a una API /api/auth/logout para invalidar el refresh token en el backend
+      await clearUserSessionData();
+      setHiveUsername(null);
+      setIsAuthenticated(false);
+      setAuthToken(null);
+      if (refreshPromise) {
+        setRefreshPromise(null);
+      }
+    } catch (e: any) {
+      setError(e.message || "An error occurred during logout.");
+    } finally {
+      setIsLoading(false);
+      router.push("/");
+    }
+  }, [
+    setHiveUsername,
+    router,
+    refreshPromise, // state
+    setRefreshPromise, // setter
+    setIsLoading, // setter
+    setError, // setter
+    setIsAuthenticated, // setter
+    setAuthToken, // setter
+  ]);
+
+  // Función para refrescar el token de acceso usando el refresh token
+  const refreshAccessToken = useCallback(async (): Promise<string | null> => {
+    // Si ya hay un refresco en progreso, reutilizar la promesa existente
+    if (isRefreshingToken && refreshPromise) {
+      console.log("Refresh already in progress, waiting for existing promise.");
+      return refreshPromise;
+    }
+
+    setIsRefreshingToken(true);
+    setError(null); // Limpiar errores previos relacionados con auth
+
+    const promise = (async () => {
+      try {
+        const storedRefreshToken = await getItem<string>("refreshToken");
+
+        if (!storedRefreshToken) {
+          console.error(
+            "No refresh token found in storage during refresh attempt."
+          );
+          await logout(); // Forzar logout y redirigir
+          return null;
+        }
+
+        console.log("Attempting to refresh token...");
+        const response = await fetch("/api/auth/refresh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken: storedRefreshToken }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Token refresh failed:", errorData.message);
+          await logout(); // Forzar logout y redirigir
+          return null;
+        }
+
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+          await response.json();
+
+        if (!newAccessToken || !newRefreshToken) {
+          console.error("Refresh endpoint did not return new tokens.");
+          await logout(); // Forzar logout y redirigir
+          return null;
+        }
+
+        console.log(
+          "Token refreshed successfully. Updating storage and state."
+        );
+        await setItem("accessToken", newAccessToken);
+        await setItem("refreshToken", newRefreshToken);
+        setAuthToken(newAccessToken);
+
+        return newAccessToken;
+      } catch (e: any) {
+        console.error("An unexpected error occurred during token refresh:", e);
+        setError(e.message || "Failed to refresh authentication token.");
+        await logout();
+        return null;
+      } finally {
+        setIsRefreshingToken(false);
+        setRefreshPromise(null);
+      }
+    })();
+
+    setRefreshPromise(promise); // Almacenar la promesa para evitar duplicados
+    return promise; // Devolver la promesa inmediatamente
+  }, [
+    isRefreshingToken,
+    refreshPromise,
+    setAuthToken,
+    logout,
+    setIsRefreshingToken,
+    setError,
+    setRefreshPromise,
+    // getItem y setItem son importaciones estables, no necesitan ser dependencias
+  ]);
+
+  // Función wrapper para fetch que maneja el refresco de token
+  const authenticatedFetch = useCallback(
+    async (url: string, options: RequestInit = {}): Promise<Response> => {
+      let currentToken = authToken;
+
+      if (!currentToken) {
+        currentToken = await getItem<string>("accessToken");
+        if (currentToken) {
+          setAuthToken(currentToken);
+        }
+      }
+
+      if (!currentToken) {
+        console.error(
+          `authenticatedFetch: No auth token available for ${url}.`
+        );
+        await logout(); // Forzar logout si se intenta una llamada protegida sin token
+        throw new Error("Unauthorized: No authentication token available.");
+      }
+
+      const headers = {
+        ...options.headers,
+        Authorization: `Bearer ${currentToken}`,
+      };
+
+      let response = await fetch(url, { ...options, headers });
+
+      if (response.status === 401) {
+        console.log(`Received 401 for ${url}. Attempting to refresh token.`);
+        const newAccessToken = await refreshAccessToken();
+
+        if (newAccessToken) {
+          console.log(`Token refreshed. Retrying original request to ${url}.`);
+          const retryHeaders = {
+            ...options.headers,
+            Authorization: `Bearer ${newAccessToken}`,
+          };
+          response = await fetch(url, { ...options, headers: retryHeaders });
+
+          // Si el reintento falla (cualquier status no-OK), lanzar un error
+          if (!response.ok) {
+            console.error(
+              `Retry request to ${url} failed with status ${response.status}`
+            );
+            const errorBody = await response
+              .text()
+              .catch(() => "No response body");
+            throw new Error(
+              `Request retry failed: ${response.status} ${response.statusText} - ${errorBody}`
+            );
+          }
+        } else {
+          console.error(
+            `Token refresh failed for ${url}. Original request not retried.`
+          );
+          throw new Error(
+            "Authentication token expired and could not be refreshed."
+          );
+        }
+      }
+
+      // Si la respuesta inicial no fue 401 pero no fue OK, lanzar un error
+      if (!response.ok && response.status !== 401) {
+        console.error(
+          `Request to ${url} failed with status ${response.status}`
+        );
+        const errorBody = await response.text().catch(() => "No response body");
+        throw new Error(
+          `Request failed: ${response.status} ${response.statusText} - ${errorBody}`
+        );
+      }
+
+      return response;
+    },
+    [authToken, refreshAccessToken, logout, setAuthToken]
+  );
 
   const login = useCallback(
     async (usernameToLogin: string): Promise<boolean> => {
@@ -128,9 +318,9 @@ export function useHiveAuth() {
 
         if (
           !keychainResponse.success ||
-          !keychainResponse.result || // La firma
+          !keychainResponse.result ||
           !keychainResponse.data ||
-          keychainResponse.data.message !== backendChallenge // Verificar que el challenge firmado es el nuestro
+          keychainResponse.data.message !== backendChallenge
         ) {
           throw new Error(
             keychainResponse.message ||
@@ -146,7 +336,7 @@ export function useHiveAuth() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             username: usernameToLogin,
-            challenge: backendChallenge, // El challenge que generó nuestro backend y se firmó
+            challenge: backendChallenge,
             signature,
           }),
         });
@@ -178,32 +368,23 @@ export function useHiveAuth() {
         setHiveUsername(user.username);
         setIsAuthenticated(true);
         setIsLoading(false);
-        return true; // Login exitoso
+        return true;
       } catch (e: any) {
         setError(e.message || "An unexpected error occurred during login.");
         setIsLoading(false);
-        return false; // Login fallido
+        return false;
       }
     },
-    [isKeychainAvailable, setHiveUsername, isAuthenticated]
+    [
+      isKeychainAvailable,
+      setHiveUsername,
+      isAuthenticated,
+      setIsLoading,
+      setError,
+      setAuthToken,
+      setIsAuthenticated,
+    ]
   );
-
-  const logout = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // Opcional: Llamar a una API /api/auth/logout para invalidar el refresh token en el backend
-      await clearUserSessionData();
-      setHiveUsername(null);
-      setIsAuthenticated(false);
-      setAuthToken(null);
-    } catch (e: any) {
-      setError(e.message || "An error occurred during logout.");
-    } finally {
-      setIsLoading(false);
-      router.push("/");
-    }
-  }, [setHiveUsername]);
 
   return {
     isKeychainAvailable,
@@ -216,5 +397,6 @@ export function useHiveAuth() {
     error,
     isAuthenticated,
     setError,
+    authenticatedFetch,
   };
 }

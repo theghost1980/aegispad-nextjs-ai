@@ -1,3 +1,4 @@
+import { GEMINI_AI_MODEL_NAME } from "@/constants/constants";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash-latest",
+        model: GEMINI_AI_MODEL_NAME,
       });
       const response = await model.countTokens("test");
       return NextResponse.json({ isValid: true });
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { isValid: false, error: errorMessage },
         { status: 200 }
-      ); // Devolver 200 OK pero con isValid: false
+      );
     }
   } catch (error) {
     console.error("POST /api/ai/validate-gemini-key error:", error);

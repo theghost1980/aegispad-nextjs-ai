@@ -1,9 +1,11 @@
 import jwt from "jsonwebtoken";
+import ms from "ms"; // Importar la librería ms
 import { NextRequest, NextResponse } from "next/server";
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_TOKEN_EXPIRES_IN =
+  process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || "7d"; // Ejemplo: 7 días
 const JWT_ACCESS_TOKEN_EXPIRES_IN = "15m";
-// const JWT_REFRESH_TOKEN_EXPIRES_IN = '7d'; // No necesitamos generar un nuevo refresh token aquí necesariamente
 
 if (!JWT_SECRET) {
   throw new Error(
@@ -57,20 +59,6 @@ export async function POST(request: NextRequest) {
 
     const payload = decodedPayload as RefreshTokenPayload;
 
-    // Opcional: Verificar si el refresh token existe en la tabla `refresh_tokens` de Supabase
-    // si implementaste el guardado de hashes. Por ahora, omitimos este paso.
-    // const supabase = createSupabaseServiceRoleClient();
-    // const hashedToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
-    // const { data: storedToken, error: storedTokenError } = await supabase
-    //   .from('refresh_tokens')
-    //   .select('id')
-    //   .eq('token_hash', hashedToken)
-    //   .eq('profile_id', payload.sub) // Asegurar que pertenece al usuario
-    //   .single();
-    // if (storedTokenError || !storedToken) {
-    //   return NextResponse.json({ message: 'Refresh token not found or revoked.' }, { status: 401 });
-    // }
-
     // 2. Generar un nuevo accessToken
     const newAccessTokenPayload: {
       sub: string;
@@ -83,11 +71,62 @@ export async function POST(request: NextRequest) {
     if (payload.role) {
       newAccessTokenPayload.role = payload.role;
     }
-    const newAccessToken = jwt.sign(newAccessTokenPayload, JWT_SECRET!, {
-      expiresIn: JWT_ACCESS_TOKEN_EXPIRES_IN,
-    });
 
-    return NextResponse.json({ accessToken: newAccessToken });
+    // Convertir el string de expiración del access token a segundos
+    const accessTokenExpiresInMs = ms(JWT_ACCESS_TOKEN_EXPIRES_IN);
+    if (typeof accessTokenExpiresInMs !== "number") {
+      console.error(
+        `Invalid time string for JWT_ACCESS_TOKEN_EXPIRES_IN: ${JWT_ACCESS_TOKEN_EXPIRES_IN}`
+      );
+      throw new Error("Invalid access token expiration configuration.");
+    }
+    const accessTokenExpiresInSeconds = accessTokenExpiresInMs / 1000;
+
+    const accessTokenOptions: jwt.SignOptions = {
+      expiresIn: accessTokenExpiresInSeconds,
+    };
+    const newAccessToken = jwt.sign(
+      newAccessTokenPayload,
+      JWT_SECRET!,
+      accessTokenOptions
+    );
+
+    // 3. Generar un nuevo refreshToken (rotación)
+    const newRefreshTokenPayload: {
+      sub: string;
+      username: string;
+      role?: string;
+    } = {
+      sub: payload.sub,
+      username: payload.username,
+    };
+    if (payload.role) {
+      newRefreshTokenPayload.role = payload.role;
+    }
+
+    // Convertir el string de expiración del refresh token a segundos
+    const refreshTokenExpiresInMs = ms(JWT_REFRESH_TOKEN_EXPIRES_IN as any);
+    if (typeof refreshTokenExpiresInMs !== "number") {
+      console.error(
+        `Invalid time string for JWT_REFRESH_TOKEN_EXPIRES_IN: ${JWT_REFRESH_TOKEN_EXPIRES_IN}`
+      );
+      throw new Error("Invalid refresh token expiration configuration.");
+    }
+    const refreshTokenExpiresInSeconds = refreshTokenExpiresInMs / 1000;
+
+    const refreshTokenOptions: jwt.SignOptions = {
+      expiresIn: refreshTokenExpiresInSeconds,
+    };
+    const newRefreshToken = jwt.sign(
+      newRefreshTokenPayload,
+      JWT_SECRET!,
+      refreshTokenOptions
+    );
+
+    return NextResponse.json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
   } catch (error: any) {
     console.error("Refresh token API error:", error);
     return NextResponse.json(

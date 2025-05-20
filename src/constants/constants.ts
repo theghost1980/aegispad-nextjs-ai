@@ -50,3 +50,21 @@ export const LANGUAGE_TO_LOCALE_MAP: { [key: string]: string } = {
 };
 export const HIVE_USERNAME_LOCAL_STORAGE_KEY = "aegispad_hive_username";
 export const GEMINI_API_KEY_INFO_URL = "https://aistudio.google.com/app/apikey";
+export const GEMINI_AI_MODEL_NAME = "gemini-1.5-flash-latest";
+export const AVAILABLE_LANGUAGES = [
+  { value: "Spanish", label: "Spanish" },
+  { value: "French", label: "French" },
+  { value: "German", label: "German" },
+  { value: "Japanese", label: "Japanese" },
+  { value: "Chinese (Simplified)", label: "Chinese (Simplified)" },
+  { value: "Russian", label: "Russian" },
+  { value: "Portuguese (Brazil)", label: "Portuguese (Brazil)" },
+  { value: "Italian", label: "Italian" },
+  { value: "Korean", label: "Korean" },
+  { value: "Arabic", label: "Arabic" },
+  { value: "English", label: "English" },
+];
+
+export const ESTIMATED_INITIAL_SESSION_TOKENS = 100000;
+export const DEFAULT_TARGET_LANGUAGE = AVAILABLE_LANGUAGES[0].value;
+export const DEFAULT_SOURCE_LANGUAGE_CREATION = "English";

@@ -32,7 +32,13 @@ import TranslateArticleCard from "@/components/editor-sections/TranslateArticleC
 import TranslationResultView from "@/components/editor-sections/TranslationResultView";
 import GlobalLoader from "@/components/global-loader";
 import LoadingSpinner from "@/components/loading-spinner";
-import { COMMENT_NOTES_BY_LOCALE } from "@/constants/constants";
+import {
+  AVAILABLE_LANGUAGES,
+  COMMENT_NOTES_BY_LOCALE,
+  DEFAULT_SOURCE_LANGUAGE_CREATION,
+  DEFAULT_TARGET_LANGUAGE,
+  ESTIMATED_INITIAL_SESSION_TOKENS,
+} from "@/constants/constants";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
 import { getLocaleFromLanguageValue } from "@/utils/language";
@@ -40,22 +46,6 @@ import { splitMarkdownIntoParagraphs } from "@/utils/markdown";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-
-const availableLanguages = [
-  { value: "Spanish", label: "Spanish" },
-  { value: "French", label: "French" },
-  { value: "German", label: "German" },
-  { value: "Japanese", label: "Japanese" },
-  { value: "Chinese (Simplified)", label: "Chinese (Simplified)" },
-  { value: "Russian", label: "Russian" },
-  { value: "Portuguese (Brazil)", label: "Portuguese (Brazil)" },
-  { value: "Italian", label: "Italian" },
-  { value: "Korean", label: "Korean" },
-  { value: "Arabic", label: "Arabic" },
-  { value: "English", label: "English" },
-];
-
-const ESTIMATED_INITIAL_SESSION_TOKENS = 100000;
 
 type InitialWorkflow = "aiCreate" | "userWrite";
 
@@ -67,16 +57,16 @@ export default function ArticleForgePage() {
   const {
     isAuthenticated: isHiveLoggedIn,
     isLoading: isLoadingHiveAuth,
-    authToken, // Necesitamos el authToken para la llamada a la API
+    authenticatedFetch,
   } = useHiveAuth();
 
   const [prompt, setPrompt] = useState<string>("");
   const [articleMarkdown, setArticleMarkdown] = useState<string>("");
   const [targetLanguage, setTargetLanguage] = useState<string>(
-    availableLanguages[0].value
+    DEFAULT_TARGET_LANGUAGE
   );
   const [sourceLanguageForCreation, setSourceLanguageForCreation] =
-    useState<string>("English");
+    useState<string>(DEFAULT_SOURCE_LANGUAGE_CREATION);
   const [generateMainImage, setGenerateMainImage] = useState<boolean>(false);
 
   const [currentOperationMessage, setCurrentOperationMessage] = useState<
@@ -167,42 +157,30 @@ export default function ArticleForgePage() {
     setFinalCombinedOutput("");
     setDetectedLanguage(null);
 
-    if (!authToken) {
-      toast({
-        title: t("toastMessages.errorTitle"),
-        description: "Not Auth!", //TODO add locales
-        variant: "destructive",
-      });
-      setCurrentOperationMessage(null);
-      return;
-    }
-
     startProcessingTransition(async () => {
-      // let totalTokensForOperation = 0; // TODO: El backend debe devolver el uso de tokens
-      // let operationDetails = { text: 0, image: 0 };
-
       try {
         // Construir el prompt mejorado
         const enhancedPrompt = `You are an expert article writer. Write an article of approximately 1000 words in ${sourceLanguageForCreation} in Markdown format based on the following prompt:\n\nPrompt: ${prompt}`;
 
-        // Llamada a la nueva ruta del backend
-        const response = await fetch("/api/ai/generate-content", {
+        // Usar authenticatedFetch para la llamada a la API protegida
+        const response = await authenticatedFetch("/api/ai/generate-content", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
+            // El header de Authorization lo añade authenticatedFetch
           },
           body: JSON.stringify({
             prompt: enhancedPrompt, // Enviar el prompt mejorado
-            // Nota: generateMainImage y language no se envían a esta ruta simple
-            // Si los necesitas, la ruta del backend debe ser adaptada.
+            // Nota: generateMainImage y language no se envían a esta ruta específica.
+            // Si se necesitaran, la ruta del backend /api/ai/generate-content debería adaptarse.
           }),
         });
 
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(
-            errorData.message || "Failed to create article via backend"
+            errorData.message ||
+              `Failed to create article. Server responded with ${response.status}`
           );
         }
 
@@ -210,15 +188,16 @@ export default function ArticleForgePage() {
         setArticleMarkdown(result.generatedText);
 
         // TODO: Actualizar handleTokenUpdate si el backend devuelve uso de tokens
-        // Por ahora, no podemos actualizar el uso de tokens con esta ruta
+        // La ruta /api/ai/generate-content actualmente no devuelve el uso de tokens.
         // handleTokenUpdate(totalTokensForOperation, operationDetails);
         setTranslatedArticleMarkdown("");
         setOriginalArticleForTranslation("");
         toast({
           title: t("toastMessages.successTitle"),
-          description: t("toastMessages.articleCreatedSuccess"), // Mensaje simplificado
+          description: t("toastMessages.articleCreatedSuccess"),
         });
-      } catch (error) {
+      } catch (error: any) {
+        // Especificar 'any' o un tipo más específico para error
         console.error("Error creating article:", error);
         toast({
           title: t("toastMessages.errorTitle"),
@@ -235,8 +214,8 @@ export default function ArticleForgePage() {
     setCurrentOperationMessage(null);
     setPrompt("");
     setArticleMarkdown(t("userWriting.startPlaceholder"));
-    setSourceLanguageForCreation("English");
-    setTargetLanguage(availableLanguages[0].value);
+    setSourceLanguageForCreation(DEFAULT_SOURCE_LANGUAGE_CREATION);
+    setTargetLanguage(DEFAULT_TARGET_LANGUAGE);
     setTranslatedArticleMarkdown("");
     setOriginalArticleForTranslation("");
     setCurrentRequestTokens(null);
@@ -419,7 +398,7 @@ export default function ArticleForgePage() {
         combined = combined.trim();
       } else if (selectedCombineFormat === "inComments") {
         const targetLangDisplay =
-          availableLanguages.find((lang) => lang.value === targetLanguage)
+          AVAILABLE_LANGUAGES.find((lang) => lang.value === targetLanguage)
             ?.label || targetLanguage;
 
         const sourceLocale = getLocaleFromLanguageValue(detectedLanguage);
@@ -516,8 +495,8 @@ export default function ArticleForgePage() {
     setInitialWorkflow("aiCreate");
     setPrompt("");
     setArticleMarkdown("");
-    setTargetLanguage(availableLanguages[0].value);
-    setSourceLanguageForCreation("English");
+    setTargetLanguage(DEFAULT_TARGET_LANGUAGE);
+    setSourceLanguageForCreation(DEFAULT_SOURCE_LANGUAGE_CREATION);
     setTranslatedArticleMarkdown("");
     setOriginalArticleForTranslation("");
     setCurrentOperationMessage(null);
@@ -621,7 +600,7 @@ export default function ArticleForgePage() {
             <TranslateArticleCard
               targetLanguage={targetLanguage}
               onTargetLanguageChange={setTargetLanguage}
-              availableLanguages={availableLanguages}
+              availableLanguages={AVAILABLE_LANGUAGES} // Usar la constante importada
               detectedLanguage={detectedLanguage}
               onTranslateArticle={handleTranslateArticle}
               isLoading={isLoading}
