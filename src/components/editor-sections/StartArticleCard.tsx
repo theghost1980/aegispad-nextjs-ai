@@ -190,15 +190,16 @@ const StartArticleCard: FC<StartArticleCardProps> = ({
                 id="generateMainImage"
                 checked={generateMainImage}
                 onCheckedChange={onGenerateMainImageChange}
-                disabled={isLoading}
+                disabled={true}
                 aria-label={t("generateImageLabel")}
+                title="Soon to be implemented | Implementado proximamente"
               />
               <Label
                 htmlFor="generateMainImage"
                 className="text-base font-normal cursor-pointer"
               >
                 <ImageIcon className="inline-block mr-2 h-5 w-5 align-text-bottom" />
-                {t("generateImageLabel")}
+                {t("generateImageLabel")} COMMING SOON
               </Label>
             </div>
           </>

@@ -150,11 +150,53 @@ export default function ArticleForgePage() {
     setDetailedTokenUsage(null);
     setFinalCombinedOutput("");
     setDetectedLanguage(null);
+    // let generatedImageUrl: string | null = null; // Temporalmente desactivado
 
     startProcessingTransition(async () => {
       try {
         // Construir el prompt mejorado
         const enhancedPrompt = `You are an expert article writer. Write an article of approximately 1000 words in ${sourceLanguageForCreation} in Markdown format based on the following prompt:\n\nPrompt: ${prompt}`;
+
+        /////
+        // --- Paso 1: Generar Imagen (si está habilitado) ---
+        // if (generateMainImage) { // Lógica de generación de imagen temporalmente desactivada
+        //   setCurrentOperationMessage(t("startArticleCard.generatingImageMessage"));
+        //   try {
+        //     const imageResponse = await authenticatedFetch(
+        //       "/api/ai/generate-image",
+        //       {
+        //         method: "POST",
+        //         headers: { "Content-Type": "application/json" },
+        //         body: JSON.stringify({ prompt: prompt }),
+        //       }
+        //     );
+
+        //     if (!imageResponse.ok) {
+        //       const errorData = await imageResponse.json();
+        //       // Lanzar un error aquí podría ser mejor para que el usuario sepa que falló
+        //       // y no solo continuar. O manejarlo con un toast más específico.
+        //       console.warn("Image generation failed:", errorData.message || imageResponse.status);
+        //       toast({
+        //         title: t("toastMessages.warningTitle"),
+        //         description: t("toastMessages.imageGenerationFailedWarning", { error: errorData.message || `Status: ${imageResponse.status}` }),
+        //         variant: "warning",
+        //       });
+        //       generatedImageUrl = null;
+        //     } else {
+        //       const imageData = await imageResponse.json();
+        //       generatedImageUrl = imageData.imageUrl;
+        //     }
+        //   } catch (imageError: any) {
+        //     console.error("Error calling image generation API:", imageError);
+        //     toast({ title: t("toastMessages.errorTitle"), description: t("toastMessages.imageGenerationFailedError", { error: imageError.message }), variant: "destructive" });
+        //     generatedImageUrl = null;
+        //   }
+        // }
+        /////
+
+        /////
+        // --- Paso 2: Crear Artículo ---
+        /////
 
         // Usar authenticatedFetch para la llamada a la API protegida
         const response = await authenticatedFetch("/api/ai/generate-content", {
@@ -179,7 +221,13 @@ export default function ArticleForgePage() {
         }
 
         const result = await response.json();
-        setArticleMarkdown(result.generatedText);
+        let finalArticleMarkdown = result.generatedText;
+
+        // --- Paso 3: Combinar Imagen y Texto (Temporalmente desactivado) ---
+        // if (generatedImageUrl) {
+        //   finalArticleMarkdown = `!Generated Image\n\n${finalArticleMarkdown}`;
+        // }
+        setArticleMarkdown(finalArticleMarkdown); // <--- ESTA LÍNEA FALTABA
 
         // TODO: Actualizar handleTokenUpdate si el backend devuelve uso de tokens
         // La ruta /api/ai/generate-content actualmente no devuelve el uso de tokens.
@@ -279,7 +327,7 @@ export default function ArticleForgePage() {
         toast({
           title: t("toastMessages.successTitle"),
           description: t("toastMessages.articleRevisedSuccess"),
-        }); // Mantener el toast de éxito
+        });
       } catch (error) {
         console.error("Error revising article:", error);
         toast({
@@ -326,7 +374,6 @@ export default function ArticleForgePage() {
         );
         setOriginalArticleForTranslation(currentArticleContent);
 
-        // Usar authenticatedFetch para la llamada a la nueva API protegida
         const response = await authenticatedFetch("/api/ai/translate-article", {
           method: "POST",
           headers: {
@@ -391,10 +438,6 @@ export default function ArticleForgePage() {
       const originalContent = originalArticleForTranslation;
       const translatedContent = translatedArticleMarkdown;
 
-      console.log("Original Content before combine:", originalContent); //TODO REM
-      console.log("Translated Content before combine:", translatedContent); //TODO REM
-      console.log("Selected Combine Format:", selectedCombineFormat); //TODO REM
-
       if (selectedCombineFormat === "simple") {
         combined = `${originalContent}\n\n<hr />\n\n## Translation (${targetLanguage})\n\n${translatedContent}`;
       } else if (selectedCombineFormat === "detailsTag") {
@@ -420,7 +463,6 @@ export default function ArticleForgePage() {
         combined = combined.trim();
       } else if (selectedCombineFormat === "inComments") {
         const targetLangDisplay =
-          // @ts-ignore
           AVAILABLE_LANGUAGES.find((lang) => lang.value === targetLanguage)
             ?.label || targetLanguage;
 
@@ -440,7 +482,7 @@ export default function ArticleForgePage() {
         combined = `${originalContent}\n\n${fullTranslationNote}\n\n---\n**${forPublishingText}**\n---\n**${startCopyText}**\n---\n${translatedContent}\n---\n**${endCopyText}**\n---`;
       }
       setFinalCombinedOutput(combined);
-      localStorage.setItem(FINAL_REVIEW_ARTICLE_STORAGE_KEY, combined); // Guardar en localStorage
+      localStorage.setItem(FINAL_REVIEW_ARTICLE_STORAGE_KEY, combined);
       setCurrentOperationMessage(null);
       toast({
         title: t("toastMessages.successTitle"),
