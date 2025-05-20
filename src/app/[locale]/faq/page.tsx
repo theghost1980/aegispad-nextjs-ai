@@ -6,32 +6,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { faqData } from "@/constants/constants";
 import { useTranslations } from "next-intl";
 
-interface FaqItem {
+export interface FaqItem {
   id: string;
   questionKey: keyof IntlMessages["FaqPage"];
   answerKey: keyof IntlMessages["FaqPage"];
 }
-
-const faqData: FaqItem[] = [
-  {
-    id: "q1",
-    questionKey: "sampleQ1Title",
-    answerKey: "sampleQ1Content",
-  },
-  {
-    id: "q2",
-    questionKey: "sampleQ2Title",
-    answerKey: "sampleQ2Content",
-  },
-  {
-    id: "q3",
-    questionKey: "sampleQ3Title",
-    answerKey: "sampleQ3Content",
-  },
-  // Puedes añadir más preguntas aquí en el futuro
-];
 
 export default function FaqPage() {
   const t = useTranslations("FaqPage");

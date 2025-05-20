@@ -1,3 +1,5 @@
+import { FaqItem } from "@/app/[locale]/faq/page";
+
 export const GEMINI_API_KEY_LOCAL_STORAGE_KEY =
   "aegispad_gemini_api_key_encrypted";
 export const KEYCHAIN_ENCRYPTION_TEST_MESSAGE =
@@ -68,3 +70,62 @@ export const AVAILABLE_LANGUAGES = [
 export const ESTIMATED_INITIAL_SESSION_TOKENS = 100000;
 export const DEFAULT_TARGET_LANGUAGE = AVAILABLE_LANGUAGES[0].value;
 export const DEFAULT_SOURCE_LANGUAGE_CREATION = "English";
+export const FINAL_REVIEW_ARTICLE_STORAGE_KEY = "hivePad_finalReviewArticle";
+
+export const faqData: FaqItem[] = [
+  {
+    id: "q1",
+    questionKey: "sampleQ1Title",
+    answerKey: "sampleQ1Content",
+  },
+  {
+    id: "q2",
+    questionKey: "sampleQ2Title",
+    answerKey: "sampleQ2Content",
+  },
+  {
+    id: "q3",
+    questionKey: "sampleQ3Title",
+    answerKey: "sampleQ3Content",
+  },
+  {
+    id: "q4",
+    questionKey: "geminiApiUsageQuestion",
+    answerKey: "geminiApiUsageAnswer",
+  },
+  {
+    id: "q5",
+    questionKey: "supportedLanguagesQuestion",
+    answerKey: "supportedLanguagesAnswer",
+  },
+  {
+    id: "q6",
+    questionKey: "articleRevisionProcessQuestion",
+    answerKey: "articleRevisionProcessAnswer",
+  },
+  {
+    id: "q7",
+    questionKey: "workSavingQuestion",
+    answerKey: "workSavingAnswer",
+  },
+  {
+    id: "q8",
+    questionKey: "hivePublishingQuestion",
+    answerKey: "hivePublishingAnswer",
+  },
+  {
+    id: "q9",
+    questionKey: "betaFeedbackQuestion",
+    answerKey: "betaFeedbackAnswer",
+  },
+  {
+    id: "q10",
+    questionKey: "betaVersionMeaningQuestion",
+    answerKey: "betaVersionMeaningAnswer",
+  },
+  {
+    id: "q11",
+    questionKey: "dataPrivacyQuestion",
+    answerKey: "dataPrivacyAnswer",
+  },
+];

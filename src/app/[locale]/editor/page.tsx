@@ -1,25 +1,10 @@
 "use client";
 
-// import {
-//   createArticle, // Ya no se usa directamente aquí
-//   CreateArticleInput,
-//   CreateArticleOutput,
-// } from "@/ai/flows/create-article";
-import {
-  detectLanguage,
-  DetectLanguageInput,
-  DetectLanguageOutput,
-} from "@/ai/flows/detect-language-flow";
-import {
-  reviseArticle,
-  ReviseArticleInput,
-  ReviseArticleOutput,
-} from "@/ai/flows/revise-article";
-import {
-  translateArticle,
-  TranslateArticleInput,
-  TranslateArticleOutput,
-} from "@/ai/flows/translate-article";
+// import { // Eliminamos la importación del flow local de traducción
+//   translateArticle,
+//   TranslateArticleInput,
+//   TranslateArticleOutput,
+// } from "@/ai/flows/translate-article";
 import DetectedLanguageInfo from "@/components/editor-sections/DetectedLanguageInfo";
 import EditAndRefineCard from "@/components/editor-sections/EditAndRefineCard";
 import EditorTokenUsage from "@/components/editor-sections/EditorTokenUsage";
@@ -32,6 +17,14 @@ import TranslateArticleCard from "@/components/editor-sections/TranslateArticleC
 import TranslationResultView from "@/components/editor-sections/TranslationResultView";
 import GlobalLoader from "@/components/global-loader";
 import LoadingSpinner from "@/components/loading-spinner";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   AVAILABLE_LANGUAGES,
   COMMENT_NOTES_BY_LOCALE,
@@ -48,6 +41,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
 type InitialWorkflow = "aiCreate" | "userWrite";
+const FINAL_REVIEW_ARTICLE_STORAGE_KEY = "hivePad_finalReviewArticle"; // Definir la clave
 
 export default function ArticleForgePage() {
   const t = useTranslations("ArticleForgePage");
@@ -245,18 +239,47 @@ export default function ArticleForgePage() {
     setFinalCombinedOutput("");
     startProcessingTransition(async () => {
       try {
-        const input: ReviseArticleInput = { article: articleMarkdown };
-        const result: ReviseArticleOutput = await reviseArticle(input);
-        setArticleMarkdown(result.revisedArticle);
-        handleTokenUpdate(result.tokenUsage.totalTokens, {
-          text: result.tokenUsage.totalTokens,
-        });
+        // Usar authenticatedFetch para la llamada a la nueva API protegida
+        const response = await authenticatedFetch(
+          "/api/ai/revise-article-input",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              // El header de Authorization lo añade authenticatedFetch
+            },
+            body: JSON.stringify({
+              articleContent: articleMarkdown, // Enviar el contenido del artículo
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message ||
+              `Failed to revise article. Server responded with ${response.status}`
+          );
+        }
+
+        const result = await response.json();
+        setArticleMarkdown(result.revisedText); // Usar revisedText del backend
+
+        // TODO: Actualizar handleTokenUpdate si el backend devuelve uso de tokens
+        // La ruta /api/ai/revise-article-input actualmente no devuelve el uso de tokens.
+        // handleTokenUpdate(result.tokenUsage.totalTokens, { // Comentado temporalmente
+        // text: result.tokenUsage.totalTokens,
+        // });
+        // Por ahora, asumimos un uso estimado o lo dejamos sin actualizar hasta que el backend lo reporte
+        // handleTokenUpdate(estimatedTokensForRevision, { // Ejemplo: usar un estimado
+        //   text: result.tokenUsage.totalTokens, // Comentado hasta que el backend devuelva tokens
+        // });
         setTranslatedArticleMarkdown("");
         setOriginalArticleForTranslation("");
         toast({
           title: t("toastMessages.successTitle"),
           description: t("toastMessages.articleRevisedSuccess"),
-        });
+        }); // Mantener el toast de éxito
       } catch (error) {
         console.error("Error revising article:", error);
         toast({
@@ -293,49 +316,44 @@ export default function ArticleForgePage() {
     setFinalCombinedOutput("");
 
     startProcessingTransition(async () => {
-      let totalTokensForOperation = 0;
-      let operationDetails = { text: 0, image: 0 };
-      let currentArticleContent = articleMarkdown;
-      let sourceLanguage = detectedLanguage;
+      // let totalTokensForOperation = 0; // Comentado temporalmente
+      // let operationDetails = { text: 0, image: 0 }; // Comentado temporalmente
+      const currentArticleContent = articleMarkdown;
 
       try {
-        if (!sourceLanguage && currentArticleContent.trim()) {
-          setCurrentOperationMessage(
-            t("detectLanguageCard.detectingLanguageMessage")
-          );
-          const detectInput: DetectLanguageInput = {
-            text: currentArticleContent,
-          };
-          const detectResult: DetectLanguageOutput = await detectLanguage(
-            detectInput
-          );
-          setDetectedLanguage(detectResult.language);
-          sourceLanguage = detectResult.language;
-          totalTokensForOperation += detectResult.tokenUsage.totalTokens;
-          operationDetails.text += detectResult.tokenUsage.totalTokens;
-          toast({
-            title: t("toastMessages.successTitle"),
-            description: t("toastMessages.languageDetectedSuccess", {
-              language: sourceLanguage,
-            }),
-          });
-        }
-
         setCurrentOperationMessage(
           t("translateArticleCard.translatingArticleMessage")
         );
         setOriginalArticleForTranslation(currentArticleContent);
-        const input: TranslateArticleInput = {
-          article: currentArticleContent,
-          targetLanguage,
-        };
-        const result: TranslateArticleOutput = await translateArticle(input);
-        setTranslatedArticleMarkdown(result.translatedArticle);
 
-        totalTokensForOperation += result.tokenUsage.totalTokens;
-        operationDetails.text += result.tokenUsage.totalTokens;
+        // Usar authenticatedFetch para la llamada a la nueva API protegida
+        const response = await authenticatedFetch("/api/ai/translate-article", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            articleContent: currentArticleContent,
+            targetLanguage: targetLanguage,
+          }),
+        });
 
-        handleTokenUpdate(totalTokensForOperation, operationDetails);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message ||
+              `Failed to translate article. Server responded with ${response.status}`
+          );
+        }
+
+        const result = await response.json();
+        setTranslatedArticleMarkdown(result.translatedText);
+
+        // TODO: Actualizar handleTokenUpdate si el backend devuelve uso de tokens
+        // La ruta /api/ai/translate-article actualmente no devuelve el uso de tokens.
+        // totalTokensForOperation += result.tokenUsage.totalTokens; // Asumiendo que el backend devuelve esto
+        // operationDetails.text += result.tokenUsage.totalTokens; // Asumiendo que el backend devuelve esto
+        // handleTokenUpdate(totalTokensForOperation, operationDetails);
         toast({
           title: t("toastMessages.successTitle"),
           description: t("toastMessages.articleTranslatedSuccess", {
@@ -373,6 +391,10 @@ export default function ArticleForgePage() {
       const originalContent = originalArticleForTranslation;
       const translatedContent = translatedArticleMarkdown;
 
+      console.log("Original Content before combine:", originalContent); //TODO REM
+      console.log("Translated Content before combine:", translatedContent); //TODO REM
+      console.log("Selected Combine Format:", selectedCombineFormat); //TODO REM
+
       if (selectedCombineFormat === "simple") {
         combined = `${originalContent}\n\n<hr />\n\n## Translation (${targetLanguage})\n\n${translatedContent}`;
       } else if (selectedCombineFormat === "detailsTag") {
@@ -398,6 +420,7 @@ export default function ArticleForgePage() {
         combined = combined.trim();
       } else if (selectedCombineFormat === "inComments") {
         const targetLangDisplay =
+          // @ts-ignore
           AVAILABLE_LANGUAGES.find((lang) => lang.value === targetLanguage)
             ?.label || targetLanguage;
 
@@ -417,6 +440,7 @@ export default function ArticleForgePage() {
         combined = `${originalContent}\n\n${fullTranslationNote}\n\n---\n**${forPublishingText}**\n---\n**${startCopyText}**\n---\n${translatedContent}\n---\n**${endCopyText}**\n---`;
       }
       setFinalCombinedOutput(combined);
+      localStorage.setItem(FINAL_REVIEW_ARTICLE_STORAGE_KEY, combined); // Guardar en localStorage
       setCurrentOperationMessage(null);
       toast({
         title: t("toastMessages.successTitle"),
@@ -648,6 +672,25 @@ export default function ArticleForgePage() {
               currentOperationMessage={currentOperationMessage}
               t={(key, values) => t(`sessionSummaryCard.${key}`, values)}
             />
+          )}
+
+          {finalCombinedOutput && (
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle>{t("proceedToReviewCard.title")}</CardTitle>
+                <CardDescription>
+                  {t("proceedToReviewCard.description")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={() => router.push("/final-review")}
+                  className="w-full md:w-auto"
+                >
+                  {t("proceedToReviewCard.buttonText")}
+                </Button>
+              </CardContent>
+            </Card>
           )}
         </>
       ) : clientLoaded && !isLoadingHiveAuth ? (

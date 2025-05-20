@@ -7,7 +7,9 @@
     "navHome": "Home",
     "navEditor": "Editor",
     "navTestings": "Keychain Tests",
-    "navFaq": "FAQ"
+    "navFaq": "FAQ",
+    "navFeedback": "Feedback",
+    "feedbackButtonAriaLabel": "Submit Feedback"
   },
   "LanguageSwitcher": {
     "selectLanguage": "Language",
@@ -130,7 +132,12 @@
     },
     "onboardingRequiredTitle": "Setup Required",
     "onboardingRequiredDescription": "To use the AegisPad editor, you need to complete a quick setup. This includes logging in with your HIVE account and providing your Gemini API key.",
-    "startSetupButton": "Start Setup Assistant"
+    "startSetupButton": "Start Setup Assistant",
+    "proceedToReviewCard": {
+      "title": "Ready for Final Check?",
+      "description": "Your combined article is ready. Proceed to the final review page to make any last-minute adjustments before publishing or exporting.",
+      "buttonText": "Go to Final Review"
+    }
   },
   "ArticleEditor": {
     "markdownEditorTitle": "Markdown Editor",
@@ -224,7 +231,23 @@
     "sampleQ2Title": "How do I get a Gemini API Key?",
     "sampleQ2Content": "You can get a Gemini API Key for free from Google AI Studio. AegisPad uses this key to power its AI features. The free tier offers a generous amount of tokens for content creation.",
     "sampleQ3Title": "How is my Gemini API key stored?",
-    "sampleQ3Content": "Your Gemini API key, once provided, is encrypted using your Hive Keychain account (specifically, your Posting key) and stored locally in your browser's local storage. It is decrypted only when needed to interact with the Gemini API and is never sent to our servers unencrypted."
+    "sampleQ3Content": "Your Gemini API key, once provided, is encrypted using your Hive Keychain account (specifically, your Posting key) and stored locally in your browser's local storage. It is decrypted only when needed to interact with the Gemini API and is never sent to our servers unencrypted.",
+    "geminiApiUsageQuestion": "How are tokens or the cost of using AI handled?",
+    "geminiApiUsageAnswer": "Using AI features consumes tokens from your Gemini API key, and any associated costs are based on Google's pricing policy for the Gemini API. AegisPad attempts to display token usage to help you monitor this, but the ultimate responsibility for managing your API key usage and costs lies with you.",
+    "supportedLanguagesQuestion": "In what languages can I generate, revise, and translate articles?",
+    "supportedLanguagesAnswer": "Article generation and revision can be performed in multiple languages, depending on Gemini's capabilities. For translation, you can select a target language from a provided list to translate your content into.",
+    "articleRevisionProcessQuestion": "How does article revision work?",
+    "articleRevisionProcessAnswer": "The AI reviews your article for grammar, style, clarity, and flow. It aims to provide an improved version while attempting to maintain the original Markdown formatting.",
+    "workSavingQuestion": "Is my work saved automatically?",
+    "workSavingAnswer": "Currently, on the 'Final Review' page, you can use the 'Save for Later' option, which saves your article to your browser's local storage. Please note this is temporary. Saving articles to the cloud or a database for more permanent storage is a planned future feature.",
+    "hivePublishingQuestion": "Can I publish directly to Hive from AegisPad?",
+    "hivePublishingAnswer": "The 'Publish to Hive' feature is planned and under development. For now, it serves as a placeholder, and direct publishing to Hive is not yet enabled.",
+    "betaFeedbackQuestion": "This is a Beta version, how can I provide feedback or report bugs?",
+    "betaFeedbackAnswer": "We highly value your input! You can share your thoughts, suggestions, or report any issues you encounter by visiting our Feedback page. You'll find a link to it in the website header.",
+    "betaVersionMeaningQuestion": "What does it mean that the application is in Beta?",
+    "betaVersionMeaningAnswer": "Being in Beta means AegisPad is in an early stage of release. You might encounter some bugs or find that some features are not yet fully implemented. Your feedback during this phase is crucial for us to improve the application.",
+    "dataPrivacyQuestion": "Where are my articles and API key stored?",
+    "dataPrivacyAnswer": "Your Gemini API key is encrypted using your HIVE account credentials and stored in our secure database, linked to your profile. If you use the 'Save for Later' feature on the 'Final Review' page, your article content is temporarily stored in your browser's local storage."
   },
   "OnboardingAssistant": {
     "loadingAssistant": "Loading assistant...",
@@ -375,5 +398,55 @@
     "anErrorOccurred": "An error occurred. Please try again.",
     "redirecting": "You are already logged in. Redirecting to your profile...",
     "loadingPage": "Loading login page..."
+  },
+  "FinalReviewPage": {
+    "title": "Final Review",
+    "pageDescription": "Review your finalized article before publishing or exporting.",
+    "panel1Title": "Editable Article",
+    "panel2Title": "Live Preview",
+    "collapsePanel": "Collapse Panel",
+    "expandPanel": "Expand Panel",
+    "noArticleContent": "No article content available for review.",
+    "loadingPage": "Loading Final Review...",
+    "redirectingToLogin": "Redirecting to login...",
+    "accessDenied": "Access Denied. Please log in to view this page.",
+    "loginButton": "Go to Login",
+    "loadingArticle": "Loading article content...",
+    "leaveConfirmationMessage": "You have unsaved changes. Are you sure you want to leave? Your work will be lost if you don't save a copy.",
+    "actionsTitle": "Final Actions",
+    "saveButton": "Save for Later",
+    "discardButton": "Discard Article",
+    "saveSuccessToastTitle": "Saved Locally",
+    "saveSuccessToastDescription": "Your article has been saved to your browser's local storage. You can access it later from your profile (feature coming soon).",
+    "discardDialogTitle": "Discard Article?",
+    "discardDialogDescription": "Are you sure you want to discard this article? This action cannot be undone, and your current work will be lost.",
+    "discardDialogCancel": "Cancel",
+    "discardDialogConfirm": "Discard",
+    "discardSuccessToastTitle": "Article Discarded",
+    "discardSuccessToastDescription": "The article has been removed from local storage.",
+    "publishButton": "Publish to Hive"
+  },
+  "FeedbackPage": {
+    "title": "Share Your Feedback",
+    "description": "Help us improve AegisPad! Your feedback is invaluable for future development.",
+    "loadingPage": "Loading feedback form...",
+    "accessDenied": "Access Denied",
+    "accessDeniedMessage": "You must be logged in to submit feedback. Please log in and try again.",
+    "loginButton": "Go to Login",
+    "overallRatingLabel": "1. How would you rate your overall experience with AegisPad? (1=Poor, 5=Excellent)",
+    "ratingPoor": "Poor",
+    "ratingFair": "Fair",
+    "ratingGood": "Good",
+    "ratingVeryGood": "Very Good",
+    "ratingExcellent": "Excellent",
+    "mostUsefulFeatureLabel": "2. What feature of AegisPad did you find most useful or valuable?",
+    "newFeatureSuggestionLabel": "3. If you could add one new feature or improve an existing one, what would it be?",
+    "generalCommentsLabel": "4. Please share any additional comments, suggestions, or if you encountered any bugs or issues:",
+    "submitButton": "Submit Feedback",
+    "submittingFeedback": "Submitting feedback...",
+    "feedbackSubmittedTitle": "Feedback Submitted!",
+    "feedbackSubmittedDescription": "Thank you for your feedback. We appreciate you taking the time to help us improve AegisPad.",
+    "feedbackFailedTitle": "Submission Failed",
+    "feedbackFailedDescription": "Sorry, we couldn't submit your feedback at this time. Please try again later."
   }
 }

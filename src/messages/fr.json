@@ -7,7 +7,9 @@
     "navHome": "Accueil",
     "navEditor": "Éditeur",
     "navTestings": "Tests Keychain",
-    "navFaq": "FAQ"
+    "navFaq": "FAQ",
+    "navFeedback": "Commentaires",
+    "feedbackButtonAriaLabel": "Envoyer des commentaires"
   },
   "LanguageSwitcher": {
     "selectLanguage": "Langue",
@@ -130,7 +132,12 @@
     },
     "onboardingRequiredTitle": "Configuration Requise",
     "onboardingRequiredDescription": "Pour utiliser l'éditeur AegisPad, vous devez effectuer une configuration rapide. Cela inclut la connexion avec votre compte HIVE et la fourniture de votre clé API Gemini.",
-    "startSetupButton": "Démarrer l'Assistant de Configuration"
+    "startSetupButton": "Démarrer l'Assistant de Configuration",
+    "proceedToReviewCard": {
+      "title": "Prêt pour la révision finale ?",
+      "description": "Votre article combiné est prêt. Passez à la page de révision finale pour effectuer les derniers ajustements avant de le publier ou de l'exporter.",
+      "buttonText": "Aller à la révision finale"
+    }
   },
   "ArticleEditor": {
     "markdownEditorTitle": "Éditeur Markdown",
@@ -224,7 +231,23 @@
     "sampleQ2Title": "Comment obtenir une clé API Gemini ?",
     "sampleQ2Content": "Vous pouvez obtenir une clé API Gemini gratuitement sur Google AI Studio. AegisPad utilise cette clé pour alimenter ses fonctionnalités d'IA. Le niveau gratuit offre une quantité généreuse de jetons pour la création de contenu.",
     "sampleQ3Title": "Comment ma clé API Gemini est-elle stockée ?",
-    "sampleQ3Content": "Votre clé API Gemini, une fois fournie, est chiffrée à l'aide de votre compte Hive Keychain (spécifiquement, votre clé de publication) et stockée localement dans le stockage local de votre navigateur. Elle n'est déchiffrée que lorsque cela est nécessaire pour interagir avec l'API Gemini et n'est jamais envoyée à nos serveurs non chiffrée."
+    "sampleQ3Content": "Votre clé API Gemini, une fois fournie, est chiffrée à l'aide de votre compte Hive Keychain (spécifiquement, votre clé de publication) et stockée localement dans le stockage local de votre navigateur. Elle n'est déchiffrée que lorsque cela est nécessaire pour interagir avec l'API Gemini et n'est jamais envoyée à nos serveurs non chiffrée.",
+    "geminiApiUsageQuestion": "Comment les tokens ou le coût d'utilisation de l'IA sont-ils gérés ?",
+    "geminiApiUsageAnswer": "L'utilisation des fonctionnalités d'IA consomme des tokens de votre clé API Gemini, et tous les coûts associés sont basés sur la politique de tarification de Google pour l'API Gemini. AegisPad tente d'afficher l'utilisation des tokens pour vous aider à la surveiller, mais la responsabilité finale de la gestion de l'utilisation et des coûts de votre clé API vous incombe.",
+    "supportedLanguagesQuestion": "Dans quelles langues puis-je générer, réviser et traduire des articles ?",
+    "supportedLanguagesAnswer": "La génération et la révision d'articles peuvent être effectuées dans plusieurs langues, en fonction des capacités de Gemini. Pour la traduction, vous pouvez sélectionner une langue cible dans une liste fournie pour traduire votre contenu.",
+    "articleRevisionProcessQuestion": "Comment fonctionne la révision d'articles ?",
+    "articleRevisionProcessAnswer": "L'IA examine votre article en termes de grammaire, de style, de clarté et de fluidité. Son objectif est de fournir une version améliorée tout en essayant de conserver le format Markdown original.",
+    "workSavingQuestion": "Mon travail est-il sauvegardé automatiquement ?",
+    "workSavingAnswer": "Actuellement, sur la page 'Révision Finale', vous pouvez utiliser l'option 'Enregistrer pour plus tard', qui sauvegarde votre article dans le stockage local de votre navigateur. Veuillez noter que ceci est temporaire. La sauvegarde des articles dans le cloud ou une base de données pour un stockage plus permanent est une fonctionnalité future prévue.",
+    "hivePublishingQuestion": "Puis-je publier directement sur Hive depuis AegisPad ?",
+    "hivePublishingAnswer": "La fonctionnalité 'Publier sur Hive' est planifiée et en cours de développement. Pour l'instant, elle sert de placeholder, et la publication directe sur Hive n'est pas encore activée.",
+    "betaFeedbackQuestion": "Ceci est une version Beta, comment puis-je fournir des commentaires ou signaler des bugs ?",
+    "betaFeedbackAnswer": "Nous accordons une grande importance à votre avis ! Vous pouvez partager vos réflexions, suggestions ou signaler tout problème que vous rencontrez en visitant notre page de commentaires. Vous trouverez un lien vers celle-ci dans l'en-tête du site web.",
+    "betaVersionMeaningQuestion": "Que signifie que l'application est en Beta ?",
+    "betaVersionMeaningAnswer": "Être en Beta signifie qu'AegisPad est à un stade précoce de publication. Vous pourriez rencontrer des bugs ou constater que certaines fonctionnalités ne sont pas encore entièrement implémentées. Vos commentaires pendant cette phase sont cruciaux pour nous aider à améliorer l'application.",
+    "dataPrivacyQuestion": "Où sont stockés mes articles et ma clé API ?",
+    "dataPrivacyAnswer": "Votre clé API Gemini est chiffrée à l'aide des identifiants de votre compte HIVE et stockée dans notre base de données sécurisée, liée à votre profil. Si vous utilisez la fonction 'Enregistrer pour plus tard' sur la page 'Révision Finale', le contenu de votre article est temporairement stocké dans le stockage local de votre navigateur."
   },
   "OnboardingAssistant": {
     "loadingAssistant": "Chargement de l'assistant...",
@@ -375,5 +398,55 @@
     "anErrorOccurred": "Une erreur s'est produite. Veuillez réessayer.",
     "redirecting": "Vous êtes déjà connecté. Redirection vers votre profil...",
     "loadingPage": "Chargement de la page de connexion..."
+  },
+  "FinalReviewPage": {
+    "title": "Révision Finale",
+    "pageDescription": "Vérifiez votre article finalisé avant de publier ou d'exporter.",
+    "panel1Title": "Article Modifiable",
+    "panel2Title": "Aperçu en Direct",
+    "collapsePanel": "Réduire le panneau",
+    "expandPanel": "Étendre le panneau",
+    "noArticleContent": "Aucun contenu d'article disponible pour révision.",
+    "loadingPage": "Chargement de la révision finale...",
+    "redirectingToLogin": "Redirection vers la connexion...",
+    "accessDenied": "Accès Refusé. Veuillez vous connecter pour consulter cette page.",
+    "loginButton": "Aller à la connexion",
+    "loadingArticle": "Chargement du contenu de l'article...",
+    "leaveConfirmationMessage": "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ? Votre travail sera perdu si vous n'enregistrez pas une copie.",
+    "actionsTitle": "Actions Finales",
+    "saveButton": "Enregistrer pour plus tard",
+    "discardButton": "Jeter l'article",
+    "saveSuccessToastTitle": "Enregistré localement",
+    "saveSuccessToastDescription": "Votre article a été enregistré dans le stockage local de votre navigateur. Vous pourrez y accéder plus tard depuis votre profil (fonctionnalité à venir).",
+    "discardDialogTitle": "Jeter l'article ?",
+    "discardDialogDescription": "Êtes-vous sûr de vouloir jeter cet article ? Cette action est irréversible et votre travail actuel sera perdu.",
+    "discardDialogCancel": "Annuler",
+    "discardDialogConfirm": "Jeter",
+    "discardSuccessToastTitle": "Article Jeté",
+    "discardSuccessToastDescription": "L'article a été supprimé du stockage local.",
+    "publishButton": "Publier sur Hive"
+  },
+  "FeedbackPage": {
+    "title": "Partagez Vos Commentaires",
+    "description": "Aidez-nous à améliorer AegisPad ! Vos commentaires sont inestimables pour le développement futur.",
+    "loadingPage": "Chargement du formulaire de commentaires...",
+    "accessDenied": "Accès Refusé",
+    "accessDeniedMessage": "Vous devez être connecté pour soumettre des commentaires. Veuillez vous connecter et réessayer.",
+    "loginButton": "Aller à la connexion",
+    "overallRatingLabel": "1. Comment évalueriez-vous votre expérience globale avec AegisPad ? (1=Médiocre, 5=Excellent)",
+    "ratingPoor": "Médiocre",
+    "ratingFair": "Passable",
+    "ratingGood": "Bonne",
+    "ratingVeryGood": "Très Bonne",
+    "ratingExcellent": "Excellent",
+    "mostUsefulFeatureLabel": "2. Quelle fonctionnalité d'AegisPad avez-vous trouvée la plus utile ou précieuse ?",
+    "newFeatureSuggestionLabel": "3. Si vous pouviez ajouter une nouvelle fonctionnalité ou en améliorer une existante, quelle serait-elle ?",
+    "generalCommentsLabel": "4. Veuillez partager tout commentaire supplémentaire, suggestion, ou si vous avez rencontré des bugs ou des problèmes :",
+    "submitButton": "Soumettre les commentaires",
+    "submittingFeedback": "Soumission des commentaires...",
+    "feedbackSubmittedTitle": "Commentaires Soumis !",
+    "feedbackSubmittedDescription": "Merci pour vos commentaires. Nous apprécions le temps que vous avez pris pour nous aider à améliorer AegisPad.",
+    "feedbackFailedTitle": "Échec de la soumission",
+    "feedbackFailedDescription": "Désolé, nous n'avons pas pu soumettre vos commentaires pour le moment. Veuillez réessayer plus tard."
   }
 }

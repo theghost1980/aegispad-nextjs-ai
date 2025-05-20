@@ -14,6 +14,7 @@ To add to all content:
   - Referencia: README de `@google/generative-ai` que indica la depreciación y la existencia de un nuevo SDK.
   - Fecha límite de soporte del SDK antiguo: 31 de agosto de 2025.
 
+- [ ] **Implementar conteo de tokens para llamadas a la API de IA:** Añadir lógica para contar los tokens utilizados en cada llamada a la API de Gemini (tanto para la generación como para la revisión de contenido) dentro de las rutas API correspondientes. Esto podría ser útil para el seguimiento del uso, la gestión de cuotas y la optimización de costos.
 - manejo de estado de la app? zustand?
 - https://posthog.com/ para Product Analytics? https://plausible.io/#pricing
 - implementar formulario de datos para el lanzamiento beta.
