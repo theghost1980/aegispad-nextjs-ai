@@ -1,19 +1,14 @@
+import { JWT_SECRET } from "@/config/server-config";
+import {
+  JWT_ACCESS_TOKEN_EXPIRES_IN,
+  JWT_REFRESH_TOKEN_EXPIRES_IN,
+} from "@/constants/constants";
 import { getHiveAccount } from "@/lib/hive/server-utils"; // Nuestra nueva utilidad
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { Signature } from "@hiveio/dhive";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_ACCESS_TOKEN_EXPIRES_IN = "15m";
-const JWT_REFRESH_TOKEN_EXPIRES_IN = "7d";
-
-if (!JWT_SECRET) {
-  throw new Error(
-    "JWT_SECRET is not defined. Please set it in your environment variables."
-  );
-}
 
 const ADMIN_USERNAMES = process.env.ADMIN_USERNAMES?.split(",") || [];
 

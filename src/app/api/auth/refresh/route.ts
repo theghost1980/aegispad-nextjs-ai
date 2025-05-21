@@ -1,17 +1,11 @@
+import { JWT_SECRET } from "@/config/server-config";
+import {
+  JWT_ACCESS_TOKEN_EXPIRES_IN,
+  JWT_REFRESH_TOKEN_EXPIRES_IN,
+} from "@/constants/constants";
 import jwt from "jsonwebtoken";
 import ms from "ms"; // Importar la librería ms
 import { NextRequest, NextResponse } from "next/server";
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_REFRESH_TOKEN_EXPIRES_IN =
-  process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || "7d"; // Ejemplo: 7 días
-const JWT_ACCESS_TOKEN_EXPIRES_IN = "15m";
-
-if (!JWT_SECRET) {
-  throw new Error(
-    "JWT_SECRET is not defined. Please set it in your environment variables."
-  );
-}
 
 interface RefreshTokenPayload {
   sub: string; // profile.id

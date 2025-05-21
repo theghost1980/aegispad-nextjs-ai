@@ -5,13 +5,7 @@ import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET;
 const IMAGE_GENERATION_MODEL_NAME = "imagen-3.0";
-
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET is not defined in environment variables.");
-}
-
 interface ImageGenerativeModel extends GenerativeModel {
   generateImage: (
     prompt: string

@@ -2,12 +2,6 @@ import { getProfileIdFromAuth } from "@/lib/auth/server.utils";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET is not defined in environment variables.");
-}
-
 export async function POST(request: NextRequest) {
   const profileId = await getProfileIdFromAuth(request);
   if (!profileId) {

@@ -98,7 +98,6 @@ const EditorTokenUsage: FC<EditorTokenUsageProps> = ({
         type="single"
         collapsible
         className="w-full bg-card text-card-foreground shadow-xl rounded-lg border"
-        defaultValue="token-stats"
       >
         <AccordionItem value="token-stats" className="border-b-0 rounded-lg">
           <AccordionTrigger className="flex w-full items-center justify-between rounded-t-lg p-4 text-left hover:no-underline data-[state=open]:rounded-b-none data-[state=open]:border-b">

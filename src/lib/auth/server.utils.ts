@@ -1,3 +1,4 @@
+import { JWT_SECRET } from "@/config/server-config";
 import jwt from "jsonwebtoken";
 import { NextRequest } from "next/server";
 
@@ -6,8 +7,6 @@ export interface AuthenticatedRequestPayload {
   username: string;
   role?: string;
 }
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function getProfileIdFromAuth(
   request: NextRequest
