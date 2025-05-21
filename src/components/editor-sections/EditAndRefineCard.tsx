@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { countWords } from "@/utils/text"; // Importar la utilidad
 import { Edit3 } from "lucide-react";
 import type { FC } from "react";
 
@@ -50,23 +51,29 @@ const EditAndRefineCard: FC<EditAndRefineCardProps> = ({
           isLoading={isLoading}
         />
       </CardContent>
-      <CardFooter>
-        <Button
-          onClick={onReviseArticle}
-          disabled={isLoading || !articleMarkdown.trim()}
-          className="w-full md:w-auto"
-        >
-          {isLoading &&
-          currentOperationMessage === t("revisingArticleMessage") ? (
-            <LoadingSpinner className="mr-2" size={16} />
-          ) : (
-            <Edit3 className="mr-2 h-4 w-4" />
-          )}
-          {t("reviseButton")}
-        </Button>
+      <CardFooter className="flex justify-between items-center">
+        <div>
+          <span className="text-sm text-muted-foreground">
+            w: {countWords(articleMarkdown)}
+          </span>
+        </div>
+        <div>
+          <Button
+            onClick={onReviseArticle}
+            disabled={isLoading || !articleMarkdown.trim()}
+            className="w-full md:w-auto"
+          >
+            {isLoading &&
+            currentOperationMessage === t("revisingArticleMessage") ? (
+              <LoadingSpinner className="mr-2" size={16} />
+            ) : (
+              <Edit3 className="mr-2 h-4 w-4" />
+            )}
+            {t("reviseButton")}
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
 };
-
 export default EditAndRefineCard;

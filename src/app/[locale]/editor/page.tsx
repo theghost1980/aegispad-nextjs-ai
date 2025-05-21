@@ -36,6 +36,7 @@ import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
 import { getLocaleFromLanguageValue } from "@/utils/language";
 import { splitMarkdownIntoParagraphs } from "@/utils/markdown";
+import { countWords } from "@/utils/text"; // Importar countWords
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -95,6 +96,10 @@ export default function ArticleForgePage() {
   const [isProcessing, startProcessingTransition] = useTransition();
 
   const [clientLoaded, setClientLoaded] = useState(false);
+  const [translationProgress, setTranslationProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
 
   const { toast } = useToast();
 
@@ -394,6 +399,7 @@ export default function ArticleForgePage() {
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput("");
+    setTranslationProgress(null);
 
     startProcessingTransition(async () => {
       // let totalTokensForOperation = 0; // Comentado temporalmente
@@ -401,38 +407,86 @@ export default function ArticleForgePage() {
       const currentArticleContent = articleMarkdown;
 
       try {
-        setCurrentOperationMessage(
-          t("translateArticleCard.translatingArticleMessage")
-        );
         setOriginalArticleForTranslation(currentArticleContent);
 
-        const response = await authenticatedFetch("/api/ai/translate-article", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            articleContent: currentArticleContent,
-            targetLanguage: targetLanguage,
-          }),
-        });
+        // --- Lógica de Chunking ---
+        const MAX_WORDS_PER_CHUNK = 330;
+        const paragraphs = splitMarkdownIntoParagraphs(currentArticleContent);
+        const chunks: string[] = [];
+        let currentChunk = "";
+        let currentChunkWordCount = 0;
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message ||
-              `Failed to translate article. Server responded with ${response.status}`
-          );
+        for (const paragraph of paragraphs) {
+          const paragraphWordCount = countWords(paragraph);
+          if (
+            currentChunkWordCount + paragraphWordCount <= MAX_WORDS_PER_CHUNK &&
+            currentChunk.length + paragraph.length < 8000
+          ) {
+            // 8000 es un límite de caracteres conservador por chunk para evitar problemas de payload
+            currentChunk += (currentChunk ? "\n\n" : "") + paragraph;
+            currentChunkWordCount += paragraphWordCount;
+          } else {
+            // Si el chunk actual tiene contenido, añadirlo
+            if (currentChunk.trim()) {
+              chunks.push(currentChunk);
+            }
+            // Empezar un nuevo chunk con el párrafo actual
+            // Si el párrafo en sí mismo excede el límite, se enviará solo
+            currentChunk = paragraph;
+            currentChunkWordCount = paragraphWordCount;
+          }
+        }
+        // Añadir el último chunk si tiene contenido
+        if (currentChunk.trim()) {
+          chunks.push(currentChunk);
         }
 
-        const result = await response.json();
-        setTranslatedArticleMarkdown(result.translatedText);
+        if (chunks.length === 0 && currentArticleContent.trim()) {
+          // Si el artículo no está vacío pero no se generaron chunks (ej. un solo párrafo muy largo)
+          chunks.push(currentArticleContent);
+        }
 
-        // TODO: Actualizar handleTokenUpdate si el backend devuelve uso de tokens
-        // La ruta /api/ai/translate-article actualmente no devuelve el uso de tokens.
-        // totalTokensForOperation += result.tokenUsage.totalTokens; // Asumiendo que el backend devuelve esto
-        // operationDetails.text += result.tokenUsage.totalTokens; // Asumiendo que el backend devuelve esto
-        // handleTokenUpdate(totalTokensForOperation, operationDetails);
+        let finalTranslatedText = "";
+        setTranslationProgress({ current: 0, total: chunks.length });
+
+        for (let i = 0; i < chunks.length; i++) {
+          const chunkToTranslate = chunks[i];
+          setCurrentOperationMessage(
+            t("translateArticleCard.translatingChunkMessage", {
+              current: i + 1,
+              total: chunks.length,
+            })
+          );
+          setTranslationProgress({ current: i + 1, total: chunks.length });
+
+          const response = await authenticatedFetch(
+            "/api/ai/translate-article",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                articleContent: chunkToTranslate,
+                targetLanguage: targetLanguage,
+              }),
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+              errorData.message ||
+                `Failed to translate chunk ${i + 1}. Server responded with ${
+                  response.status
+                }`
+            );
+          }
+          const result = await response.json();
+          finalTranslatedText +=
+            (finalTranslatedText ? "\n\n" : "") + result.translatedText;
+          // Aquí podrías llamar a handleTokenUpdate si tu backend devolviera el uso de tokens por chunk
+        }
+
+        setTranslatedArticleMarkdown(finalTranslatedText);
         toast({
           title: t("toastMessages.successTitle"),
           description: t("toastMessages.articleTranslatedSuccess", {
@@ -448,6 +502,7 @@ export default function ArticleForgePage() {
         });
       } finally {
         setCurrentOperationMessage(null);
+        setTranslationProgress(null);
       }
     });
   };
@@ -707,6 +762,7 @@ export default function ArticleForgePage() {
               detectedLanguage={detectedLanguage}
               onTranslateArticle={handleTranslateArticle}
               isLoading={isLoading}
+              translationProgress={translationProgress} // Pasar el progreso
               currentOperationMessage={currentOperationMessage}
               articleMarkdown={articleMarkdown}
               t={(key, values) => t(`translateArticleCard.${key}`, values)}

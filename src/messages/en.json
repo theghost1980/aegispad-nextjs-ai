@@ -63,7 +63,8 @@
       "targetLanguageLabel": "Target Language",
       "selectLanguagePlaceholder": "Select a language",
       "translateButton": "Translate Article",
-      "translatingArticleMessage": "Translating article..."
+      "translatingArticleMessage": "Translating article...",
+      "translatingChunkMessage": "Translating chunk {current} of {total}..."
     },
     "translationResultCard": {
       "title": "Translation Result",
