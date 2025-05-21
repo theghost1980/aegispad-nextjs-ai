@@ -422,7 +422,19 @@
     "discardDialogConfirm": "Discard",
     "discardSuccessToastTitle": "Article Discarded",
     "discardSuccessToastDescription": "The article has been removed from local storage.",
-    "publishButton": "Publish to Hive"
+    "publishButton": "Publish to Hive",
+    "tagsTitle": "Tags",
+    "tagsDescription": "Add up to 10 tags. The first tag is your main category.",
+    "titleLabel": "Article Title",
+    "titlePlaceholder": "Enter your article title here...",
+    "publishErrorTitle": "Publishing Error",
+    "publishErrorNoAuthor": "Could not determine the author for publishing.",
+    "publishErrorEmptyTitle": "Article title cannot be empty.",
+    "publishErrorMinTags": "At least {minTags} tag is required for publishing (as the main category).",
+    "publishErrorEmptyContent": "Article content cannot be empty.",
+    "publishErrorUnknown": "An unknown error occurred during publication.",
+    "publishSuccessTitle": "Published!",
+    "publishSuccessDescription": "Your article has been successfully published to Hive."
   },
   "FeedbackPage": {
     "title": "Share Your Feedback",
@@ -446,5 +458,15 @@
     "feedbackSubmittedDescription": "Thank you for your feedback. We appreciate you taking the time to help us improve AegisPad.",
     "feedbackFailedTitle": "Submission Failed",
     "feedbackFailedDescription": "Sorry, we couldn't submit your feedback at this time. Please try again later."
+  },
+  "TagInput": {
+    "addTagsPlaceholder": "Add tags...",
+    "removeTagAriaLabel": "Remove tag {tag}",
+    "maxTagsReachedErrorTitle": "Tag Limit Reached",
+    "maxTagsReachedErrorDescription": "You can only add up to {maxTags} tags.",
+    "invalidTagErrorTitle": "Invalid Tag",
+    "invalidTagErrorDescription": "Tag \"{tag}\" is not valid. Tags must be {minLength}-{maxLength} chars, lowercase letters, numbers, and single hyphens (not at start/end or consecutive).",
+    "tagAlreadyExistsErrorTitle": "Duplicate Tag",
+    "tagAlreadyExistsErrorDescription": "Tag \"{tag}\" has already been added."
   }
 }

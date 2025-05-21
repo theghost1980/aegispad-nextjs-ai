@@ -422,7 +422,19 @@
     "discardDialogConfirm": "Descartar",
     "discardSuccessToastTitle": "Artigo Descartado",
     "discardSuccessToastDescription": "O artigo foi removido do armazenamento local.",
-    "publishButton": "Publicar no Hive"
+    "publishButton": "Publicar no Hive",
+    "tagsTitle": "Tags",
+    "tagsDescription": "Adicione até 10 tags. A primeira tag é sua categoria principal.",
+    "titleLabel": "Título do Artigo",
+    "titlePlaceholder": "Digite o título do seu artigo aqui...",
+    "publishErrorTitle": "Erro de Publicação",
+    "publishErrorNoAuthor": "Não foi possível determinar o autor para a publicação.",
+    "publishErrorEmptyTitle": "O título do artigo não pode estar vazio.",
+    "publishErrorMinTags": "Pelo menos {minTags} tag é necessária para a publicação (como categoria principal).",
+    "publishErrorEmptyContent": "O conteúdo do artigo não pode estar vazio.",
+    "publishErrorUnknown": "Ocorreu um erro desconhecido durante a publicação.",
+    "publishSuccessTitle": "Publicado!",
+    "publishSuccessDescription": "Seu artigo foi publicado com sucesso no Hive."
   },
   "FeedbackPage": {
     "title": "Compartilhe Seu Feedback",
@@ -446,5 +458,15 @@
     "feedbackSubmittedDescription": "Obrigado pelo seu feedback. Agradecemos por dedicar seu tempo para nos ajudar a melhorar o AegisPad.",
     "feedbackFailedTitle": "Envio Falhou",
     "feedbackFailedDescription": "Desculpe, não conseguimos enviar seu feedback neste momento. Por favor, tente novamente mais tarde."
+  },
+  "TagInput": {
+    "addTagsPlaceholder": "Adicionar tags...",
+    "removeTagAriaLabel": "Remover tag {tag}",
+    "maxTagsReachedErrorTitle": "Limite de Tags Atingido",
+    "maxTagsReachedErrorDescription": "Você pode adicionar apenas até {maxTags} tags.",
+    "invalidTagErrorTitle": "Tag Inválida",
+    "invalidTagErrorDescription": "A tag \"{tag}\" não é válida. Tags devem ter {minLength}-{maxLength} caracteres, letras minúsculas, números e hífens simples (não no início/fim ou consecutivos).",
+    "tagAlreadyExistsErrorTitle": "Tag Duplicada",
+    "tagAlreadyExistsErrorDescription": "A tag \"{tag}\" já foi adicionada."
   }
 }

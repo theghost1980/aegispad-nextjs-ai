@@ -422,7 +422,19 @@
     "discardDialogConfirm": "Descartar",
     "discardSuccessToastTitle": "Artículo Descartado",
     "discardSuccessToastDescription": "El artículo ha sido eliminado del almacenamiento local.",
-    "publishButton": "Publicar en Hive"
+    "publishButton": "Publicar en Hive",
+    "tagsTitle": "Etiquetas",
+    "tagsDescription": "Añada hasta 10 etiquetas. La primera etiqueta es su categoría principal.",
+    "titleLabel": "Título del Artículo",
+    "titlePlaceholder": "Introduzca aquí el título de su artículo...",
+    "publishErrorTitle": "Error de Publicación",
+    "publishErrorNoAuthor": "No se pudo determinar el autor para la publicación.",
+    "publishErrorEmptyTitle": "El título del artículo no puede estar vacío.",
+    "publishErrorMinTags": "Se requiere al menos {minTags} etiqueta para la publicación (como categoría principal).",
+    "publishErrorEmptyContent": "El contenido del artículo no puede estar vacío.",
+    "publishErrorUnknown": "Ocurrió un error desconocido durante la publicación.",
+    "publishSuccessTitle": "¡Publicado!",
+    "publishSuccessDescription": "Su artículo ha sido publicado exitosamente en Hive."
   },
   "FeedbackPage": {
     "title": "Comparte tus Comentarios",
@@ -446,5 +458,15 @@
     "feedbackSubmittedDescription": "Gracias por tus comentarios. Agradecemos que te hayas tomado el tiempo para ayudarnos a mejorar AegisPad.",
     "feedbackFailedTitle": "Envío Fallido",
     "feedbackFailedDescription": "Lo sentimos, no pudimos enviar tus comentarios en este momento. Por favor, inténtalo de nuevo más tarde."
+  },
+  "TagInput": {
+    "addTagsPlaceholder": "Añadir etiquetas...",
+    "removeTagAriaLabel": "Eliminar etiqueta {tag}",
+    "maxTagsReachedErrorTitle": "Límite de Etiquetas Alcanzado",
+    "maxTagsReachedErrorDescription": "Solo puede añadir hasta {maxTags} etiquetas.",
+    "invalidTagErrorTitle": "Etiqueta No Válida",
+    "invalidTagErrorDescription": "La etiqueta \"{tag}\" no es válida. Las etiquetas deben tener {minLength}-{maxLength} caracteres, letras minúsculas, números y guiones simples (no al principio/final ni consecutivos).",
+    "tagAlreadyExistsErrorTitle": "Etiqueta Duplicada",
+    "tagAlreadyExistsErrorDescription": "La etiqueta \"{tag}\" ya ha sido añadida."
   }
 }

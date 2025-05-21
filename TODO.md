@@ -16,6 +16,7 @@ To add to all content:
 
 - [ ] **Implementar conteo de tokens para llamadas a la API de IA:** Añadir lógica para contar los tokens utilizados en cada llamada a la API de Gemini (tanto para la generación como para la revisión de contenido) dentro de las rutas API correspondientes. Esto podría ser útil para el seguimiento del uso, la gestión de cuotas y la optimización de costos.
 - [ ] **Implementar Generación de Imágenes con Vertex AI:** Migrar la ruta `/api/ai/generate-image` para usar el SDK de Vertex AI (`@google-cloud/aiplatform`) y la autenticación de cuenta de servicio de Google Cloud. Esto incluye configurar las credenciales (`GOOGLE_APPLICATION_CREDENTIALS`, `GCP_PROJECT_ID`) y ajustar la lógica de llamada al modelo "Imagen" específico.
+- add pexels? https://www.pexels.com/api/documentation/#client_libraries
 - manejo de estado de la app? zustand?
 - https://posthog.com/ para Product Analytics? https://plausible.io/#pricing
 - implementar formulario de datos para el lanzamiento beta.

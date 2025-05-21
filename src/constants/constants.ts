@@ -132,3 +132,9 @@ export const faqData: FaqItem[] = [
 
 export const JWT_ACCESS_TOKEN_EXPIRES_IN = "15m";
 export const JWT_REFRESH_TOKEN_EXPIRES_IN = "7d";
+export const AEGISPAD_DEFAULT_TAG = "aegispad";
+export const MAX_HIVE_TAGS = 10;
+export const MIN_HIVE_TAG_LENGTH = 3;
+export const MAX_HIVE_TAG_LENGTH = 24;
+export const APP_NAME = "aegispad";
+export const APP_VERSION = "1.0.0";

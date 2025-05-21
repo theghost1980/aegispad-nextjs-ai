@@ -422,7 +422,19 @@
     "discardDialogConfirm": "Jeter",
     "discardSuccessToastTitle": "Article Jeté",
     "discardSuccessToastDescription": "L'article a été supprimé du stockage local.",
-    "publishButton": "Publier sur Hive"
+    "publishButton": "Publier sur Hive",
+    "tagsTitle": "Balises",
+    "tagsDescription": "Ajoutez jusqu'à 10 balises. La première balise est votre catégorie principale.",
+    "titleLabel": "Titre de l'Article",
+    "titlePlaceholder": "Saisissez le titre de votre article ici...",
+    "publishErrorTitle": "Erreur de Publication",
+    "publishErrorNoAuthor": "Impossible de déterminer l'auteur pour la publication.",
+    "publishErrorEmptyTitle": "Le titre de l'article ne peut pas être vide.",
+    "publishErrorMinTags": "Au moins {minTags} balise est requise pour la publication (en tant que catégorie principale).",
+    "publishErrorEmptyContent": "Le contenu de l'article ne peut pas être vide.",
+    "publishErrorUnknown": "Une erreur inconnue est survenue lors de la publication.",
+    "publishSuccessTitle": "Publié !",
+    "publishSuccessDescription": "Votre article a été publié avec succès sur Hive."
   },
   "FeedbackPage": {
     "title": "Partagez Vos Commentaires",
@@ -446,5 +458,15 @@
     "feedbackSubmittedDescription": "Merci pour vos commentaires. Nous apprécions le temps que vous avez pris pour nous aider à améliorer AegisPad.",
     "feedbackFailedTitle": "Échec de l'Envoi",
     "feedbackFailedDescription": "Désolé, nous n'avons pas pu soumettre vos commentaires pour le moment. Veuillez réessayer plus tard."
+  },
+  "TagInput": {
+    "addTagsPlaceholder": "Ajouter des balises...",
+    "removeTagAriaLabel": "Supprimer la balise {tag}",
+    "maxTagsReachedErrorTitle": "Limite de Balises Atteinte",
+    "maxTagsReachedErrorDescription": "Vous ne pouvez ajouter que jusqu'à {maxTags} balises.",
+    "invalidTagErrorTitle": "Balise Invalide",
+    "invalidTagErrorDescription": "La balise \"{tag}\" n'est pas valide. Les balises doivent avoir {minLength}-{maxLength} caractères, des lettres minuscules, des chiffres et des tirets simples (pas au début/fin ou consécutifs).",
+    "tagAlreadyExistsErrorTitle": "Balise Dupliquée",
+    "tagAlreadyExistsErrorDescription": "La balise \"{tag}\" a déjà été ajoutée."
   }
 }
