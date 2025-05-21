@@ -7,6 +7,7 @@ import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { Terminal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { FormEvent, useEffect, useState } from "react";
 
 export default function LoginPage() {
@@ -15,10 +16,12 @@ export default function LoginPage() {
   const {
     login,
     isAuthenticated,
-    isLoading: isAuthLoading, // Loading general de autenticación
+    isLoading: isAuthLoading,
     isKeychainAvailable,
     isLoadingKeychain,
-    error: authError, // Error general de autenticación
+    hiveUsername,
+    error: authError,
+    userRole,
   } = useHiveAuth();
 
   const [usernameInput, setUsernameInput] = useState("");
@@ -28,13 +31,21 @@ export default function LoginPage() {
     null
   );
 
-  // Redirigir si ya está autenticado
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
+      const finalUsername = hiveUsername || usernameInput;
+      posthog.capture("login_success", { username: finalUsername });
+      if (finalUsername) {
+        posthog.identify(finalUsername, {
+          username: finalUsername,
+          user_role: userRole,
+        });
+      }
+
       setLoginSuccessMessage(t("redirecting"));
-      setTimeout(() => router.push("/profile"), 1500); // Redirigir a perfil o dashboard
+      setTimeout(() => router.push("/profile"), 1500);
     }
-  }, [isAuthenticated, isAuthLoading, router, t]);
+  }, [isAuthenticated, isAuthLoading, router, t, usernameInput, hiveUsername]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

@@ -1,6 +1,7 @@
 import Header from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import { AppProvider } from "@/context/app-context";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -87,18 +88,20 @@ export default async function RootLayout({
       <body
         className={`${inter.variable} ${robotoMono.variable} antialiased flex flex-col min-h-screen`}
       >
-        <AppProvider>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <Header />
-            <main className="flex-grow container mx-auto px-4 py-8">
-              {children}
-            </main>
-            <Toaster />
-            <footer className="bg-card border-t border-border py-4 text-center text-sm text-muted-foreground">
-              {t("footerCopyright", { year: new Date().getFullYear() })}
-            </footer>
-          </NextIntlClientProvider>
-        </AppProvider>
+        <PostHogProvider>
+          <AppProvider>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <Header />
+              <main className="flex-grow container mx-auto px-4 py-8">
+                {children}
+              </main>
+              <Toaster />
+              <footer className="bg-card border-t border-border py-4 text-center text-sm text-muted-foreground">
+                {t("footerCopyright", { year: new Date().getFullYear() })}
+              </footer>
+            </NextIntlClientProvider>
+          </AppProvider>
+        </PostHogProvider>
       </body>
     </html>
   );

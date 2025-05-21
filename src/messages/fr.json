@@ -358,7 +358,7 @@
     "formTitleUpdate": "Mettre à jour votre Clé API Gemini",
     "formTitleAdd": "Ajouter votre Clé API Gemini",
     "newApiKeyLabel": "Nouvelle Clé API Gemini",
-    "apiKeyPlaceholder": "Entrez votre clé API ici",
+    "apiKeyPlaceholder": "Entrez votre Clé API ici",
     "showApiKey": "Afficher la clé",
     "hideApiKey": "Masquer la clé",
     "apiKeySecurityNoteForm": "Votre clé sera envoyée en toute sécurité et stockée chiffrée.",

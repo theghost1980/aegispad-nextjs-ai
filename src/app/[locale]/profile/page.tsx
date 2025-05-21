@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import posthog from "posthog-js"; // Importar posthog-js
+import { FormEvent, useCallback, useEffect, useState } from "react";
 
 interface GeminiApiKeyResponse {
   encryptedApiKey: string | null;
@@ -28,6 +29,7 @@ export default function ProfilePage() {
     isLoading: isAuthLoading,
     hiveUsername,
     userRole, // Obtenemos el rol del usuario
+    authenticatedFetch, // <-- ¡Añadir authenticatedFetch aquí!
   } = useHiveAuth();
   const [isGeminiKeyConfigured, setIsGeminiKeyConfigured] =
     useState<boolean>(false);
@@ -67,13 +69,7 @@ export default function ProfilePage() {
     }
   }, [isAuthLoading, isAuthenticated, router]);
 
-  useEffect(() => {
-    if (isAuthenticated && hiveUsername) {
-      fetchGeminiApiKey();
-    }
-  }, [isAuthenticated, hiveUsername, t, authToken]);
-
-  const fetchGeminiApiKey = async () => {
+  const fetchGeminiApiKey = useCallback(async () => {
     if (!hiveUsername) {
       setIsGeminiKeyConfigured(false);
       return;
@@ -87,18 +83,19 @@ export default function ProfilePage() {
     setIsApiKeyLoading(true);
     setApiKeyError(null);
     try {
-      const response = await fetch("/api/user/gemini-key", {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
+      // Usar authenticatedFetch que maneja la refresco del token automáticamente
+      const response = await authenticatedFetch("/api/user/gemini-key");
+
       if (!response.ok) {
+        // authenticatedFetch ya lanza un error si la respuesta no es ok después de intentar refrescar
+        // Si llega aquí, es un error 401/403 después del refresco, o cualquier otro error HTTP
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: t("errorFetchingApiKey") }));
+        // Si el status es 404, significa que la clave no existe, no es un error de auth
         if (response.status === 404) {
           setIsGeminiKeyConfigured(false);
         } else {
-          const errorData = await response
-            .json()
-            .catch(() => ({ message: t("errorFetchingApiKey") }));
           throw new Error(errorData.message || t("errorFetchingApiKey"));
         }
       } else {
@@ -114,7 +111,13 @@ export default function ProfilePage() {
     } finally {
       setIsApiKeyLoading(false);
     }
-  };
+  }, [hiveUsername, authenticatedFetch, t]); // Actualizar dependencias
+
+  useEffect(() => {
+    if (isAuthenticated && hiveUsername) {
+      fetchGeminiApiKey();
+    }
+  }, [isAuthenticated, hiveUsername, fetchGeminiApiKey]);
 
   const handleTestApiKey = async () => {
     if (!newApiKeyInput.trim()) {
@@ -219,6 +222,10 @@ export default function ProfilePage() {
         setTestApiKeyResult(null);
         await fetchGeminiApiKey();
         setEncryptedClientPreview(null);
+
+        if (hiveUsername) {
+          posthog.capture("gemini_api_key_saved", { username: hiveUsername });
+        }
       } else {
         setSaveApiKeyError(t("saveApiKeyFailedGeneric"));
       }
