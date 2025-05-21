@@ -30,7 +30,7 @@
   "ArticleForgePage": {
     "startArticleCard": {
       "title": "Start Your Article",
-      "description": "Choose your starting point: let AI craft a draft based on your ideas, or begin writing from scratch yourself.",
+      "description": "Put your hands to work!",
       "workflowTitle": "How would you like to start?",
       "aiCreateLabel": "Let AI create the content",
       "userWriteLabel": "I'll write the content myself",
@@ -124,7 +124,8 @@
       "detectLanguageFailedError": "Failed to detect language. Please try again.",
       "copySummaryFailedError": "Failed to copy summary. Please try again or copy manually.",
       "allClearedMessage": "All fields and session data have been cleared.",
-      "userWritingStartedMessage": "Editor ready! You can start writing your article."
+      "userWritingStartedMessage": "Editor ready! You can start writing your article.",
+      "adminActionRequired": "This action requires administrator privileges."
     },
     "loadingSpinnerClient": "Loading AegisPad...",
     "userWriting": {
@@ -155,31 +156,27 @@
     "noContentToDisplay": "No content to display."
   },
   "HomePage": {
-    "heroTitle": "AegisPad: Your Intelligent Article Forge",
-    "heroSubtitle": "Create, refine, and translate content with the power of Gemini AI. Unleash your creativity without limits and take your ideas to the next level.",
+    "heroTitle": "AegisPad: Your Intelligent Markdown Editor & Tools",
+    "heroSubtitle": "Refine, translate, and prepare your content for publishing on HIVE with smart tools.",
     "heroCtaButton": "Get Started Now",
-    "featuresTitle": "Everything You Need to Create Impactful Content",
-    "feature1Title": "AI-Assisted Creation",
-    "feature1Description": "Transform your ideas into complete articles. Just provide a topic and let our AI generate an initial draft, even with a main image!",
+    "featuresTitle": "Tools to Enhance and Publish Your Content",
     "feature2Title": "Smart Revision",
     "feature2Description": "Perfect your texts. Our AI can review and enhance your existing articles, suggesting improvements and polishing your message.",
     "feature3Title": "Global Translation",
     "feature3Description": "Break language barriers. Translate your articles into multiple languages quickly and accurately, expanding your reach.",
     "geminiApiTitle": "Powered by Gemini: Free and Easy Access",
     "geminiApiIntro": "AegisPad utilizes Google's powerful Gemini API for its artificial intelligence features, offering you cutting-edge results.",
-    "geminiApiGetFree": "To get started, you'll need your own Gemini API Key. You can get one for free from <link>Google AI Studio</link>.",
-    "geminiApiFreeTier": "Great news! With Gemini's free tier, you get approximately 1 million tokens per month at no cost, enough for a vast amount of content creation!",
+    "geminiApiGetFree": "To use the AI features, you'll need your own Gemini API Key. You can get one for free from <link>Google AI Studio</link>.",
+    "geminiApiFreeTier": "Great news! With Gemini's free tier, you get approximately 1 million tokens per month at no cost, enough for a vast amount of content enhancement!",
     "tokenEstimationTitle": "Token Usage Estimation",
     "tokenEstimationIntro": "Understanding token consumption helps you manage your free quota and plan your work efficiently.",
-    "tokenEstimationCreateTitle": "Article Creation (500 words)",
-    "tokenEstimationCreateDesc": "~2,000 - 5,000 tokens",
     "tokenEstimationReviseTitle": "Article Revision (500 words)",
     "tokenEstimationReviseDesc": "~1,500 - 4,000 tokens",
     "tokenEstimationTranslateTitle": "Article Translation (500 words)",
     "tokenEstimationTranslateDesc": "~1,000 - 3,000 tokens",
     "tokenEstimationImageTitle": "Image Generation",
     "tokenEstimationImageDesc": "~250 - 1,000 tokens (varies by complexity)",
-    "tokenEstimationMonthly": "With 1 million free tokens per month, you could, for example, create over 200 short articles or perform hundreds of revisions and translations.",
+    "tokenEstimationMonthly": "With 1 million free tokens per month, you could, for example, perform hundreds of revisions and translations.",
     "tokenEstimationNote": "Note: These are estimates. Actual usage may vary based on content complexity, length, and the specific Gemini model used.",
     "secondaryCtaButton": "Probar el Editor Ahora"
   },
@@ -226,16 +223,16 @@
   },
   "FaqPage": {
     "title": "Frequently Asked Questions",
-    "sampleQ1Title": "What is AegisPad?",
-    "sampleQ1Content": "AegisPad is an intelligent article forge that helps you create, refine, and translate content using the power of Gemini AI and secure your Gemini API key with Hive Keychain.",
+    "sampleQ1Title": "What is AegisPad now?",
+    "sampleQ1Content": "AegisPad is an intelligent tool that helps you refine and translate content, and prepare it for publishing on HIVE, using the power of Gemini AI and securing your Gemini API key with Hive Keychain.",
     "sampleQ2Title": "How do I get a Gemini API Key?",
-    "sampleQ2Content": "You can get a Gemini API Key for free from Google AI Studio. AegisPad uses this key to power its AI features. The free tier offers a generous amount of tokens for content creation.",
+    "sampleQ2Content": "You can get a Gemini API Key for free from Google AI Studio. AegisPad uses this key to power its AI features. The free tier offers a generous amount of tokens for content revision and translations.",
     "sampleQ3Title": "How is my Gemini API key stored?",
     "sampleQ3Content": "Your Gemini API key, once provided, is encrypted using your Hive Keychain account (specifically, your Posting key) and stored locally in your browser's local storage. It is decrypted only when needed to interact with the Gemini API and is never sent to our servers unencrypted.",
     "geminiApiUsageQuestion": "How are tokens or the cost of using AI handled?",
     "geminiApiUsageAnswer": "Using AI features consumes tokens from your Gemini API key, and any associated costs are based on Google's pricing policy for the Gemini API. AegisPad attempts to display token usage to help you monitor this, but the ultimate responsibility for managing your API key usage and costs lies with you.",
-    "supportedLanguagesQuestion": "In what languages can I generate, revise, and translate articles?",
-    "supportedLanguagesAnswer": "Article generation and revision can be performed in multiple languages, depending on Gemini's capabilities. For translation, you can select a target language from a provided list to translate your content into.",
+    "supportedLanguagesQuestion": "In what languages can I revise, and translate articles?",
+    "supportedLanguagesAnswer": "Article revision and translation can be performed in multiple languages, depending on Gemini's capabilities.",
     "articleRevisionProcessQuestion": "How does article revision work?",
     "articleRevisionProcessAnswer": "The AI reviews your article for grammar, style, clarity, and flow. It aims to provide an improved version while attempting to maintain the original Markdown formatting.",
     "workSavingQuestion": "Is my work saved automatically?",
@@ -382,7 +379,8 @@
     "encryptedPreviewLabel": "Encrypted preview (client):",
     "viewStoredKeyButton": "View Stored Key (Encrypted)",
     "hideStoredKeyButton": "Hide Stored Key",
-    "storedEncryptedKeyLabel": "Stored Key (Server Encrypted):"
+    "storedEncryptedKeyLabel": "Stored Key (Server Encrypted):",
+    "adminUserTooltip": "Administrator Account"
   },
   "LoginPage": {
     "title": "Login to AegisPad",

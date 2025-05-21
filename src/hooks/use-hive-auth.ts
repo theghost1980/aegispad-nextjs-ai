@@ -36,6 +36,7 @@ export function useHiveAuth() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
 
   const router = useRouter();
@@ -52,30 +53,33 @@ export function useHiveAuth() {
           "currentUserHiveUsername"
         );
         const storedAccessToken = await getItem<string>("accessToken");
+        const storedUserRole = await getItem<string>("currentUserRole");
 
-        if (storedUsernameFromDB && storedAccessToken) {
+        if (storedUsernameFromDB && storedAccessToken && storedUserRole) {
           setHiveUsername(storedUsernameFromDB);
           setIsAuthenticated(true);
           setAuthToken(storedAccessToken);
+          setUserRole(storedUserRole);
         } else {
           await clearUserSessionData();
           setHiveUsername(null);
           setIsAuthenticated(false);
           setAuthToken(null);
+          setUserRole(null);
         }
       } catch (e) {
         console.error("Error loading auth status from IndexedDB", e);
         setHiveUsername(null);
         setIsAuthenticated(false);
         setAuthToken(null);
+        setUserRole(null);
       } finally {
         setIsLoading(false);
       }
     };
     checkAuthStatus();
-  }, [hiveUsername]);
+  }, [setHiveUsername, hiveUsername]);
 
-  // Estado y promesa para manejar refrescos concurrentes
   const [isRefreshingToken, setIsRefreshingToken] = useState(false);
   const [refreshPromise, setRefreshPromise] = useState<Promise<
     string | null
@@ -90,6 +94,7 @@ export function useHiveAuth() {
       setHiveUsername(null);
       setIsAuthenticated(false);
       setAuthToken(null);
+      setUserRole(null);
       if (refreshPromise) {
         setRefreshPromise(null);
       }
@@ -102,12 +107,13 @@ export function useHiveAuth() {
   }, [
     setHiveUsername,
     router,
-    refreshPromise, // state
-    setRefreshPromise, // setter
-    setIsLoading, // setter
-    setError, // setter
-    setIsAuthenticated, // setter
-    setAuthToken, // setter
+    refreshPromise,
+    setRefreshPromise,
+    setIsLoading,
+    setError,
+    setIsAuthenticated,
+    setAuthToken,
+    setUserRole,
   ]);
 
   // Función para refrescar el token de acceso usando el refresh token
@@ -119,7 +125,7 @@ export function useHiveAuth() {
     }
 
     setIsRefreshingToken(true);
-    setError(null); // Limpiar errores previos relacionados con auth
+    setError(null);
 
     const promise = (async () => {
       try {
@@ -129,7 +135,7 @@ export function useHiveAuth() {
           console.error(
             "No refresh token found in storage during refresh attempt."
           );
-          await logout(); // Forzar logout y redirigir
+          await logout();
           return null;
         }
 
@@ -147,8 +153,11 @@ export function useHiveAuth() {
           return null;
         }
 
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-          await response.json();
+        const {
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+          // user: refreshedUser, // Si el endpoint de refresh devolviera el usuario
+        } = await response.json();
 
         if (!newAccessToken || !newRefreshToken) {
           console.error("Refresh endpoint did not return new tokens.");
@@ -162,6 +171,11 @@ export function useHiveAuth() {
         await setItem("accessToken", newAccessToken);
         await setItem("refreshToken", newRefreshToken);
         setAuthToken(newAccessToken);
+        // Si el endpoint /api/auth/refresh devolviera el objeto user con el rol:
+        // if (refreshedUser && refreshedUser.role) {
+        //   await setItem("currentUserRole", refreshedUser.role);
+        //   setUserRole(refreshedUser.role);
+        // }
 
         return newAccessToken;
       } catch (e: any) {
@@ -362,10 +376,12 @@ export function useHiveAuth() {
         await setItem("accessToken", accessToken);
         await setItem("refreshToken", newRefreshToken);
         await setItem("currentUserHiveUsername", user.username);
+        await setItem("currentUserRole", user.role);
         await setItem("lastLoginTimestamp", Date.now());
 
         setAuthToken(accessToken);
         setHiveUsername(user.username);
+        setUserRole(user.role);
         setIsAuthenticated(true);
         setIsLoading(false);
         return true;
@@ -378,11 +394,11 @@ export function useHiveAuth() {
     [
       isKeychainAvailable,
       setHiveUsername,
-      isAuthenticated,
       setIsLoading,
       setError,
       setAuthToken,
       setIsAuthenticated,
+      setUserRole,
     ]
   );
 
@@ -393,6 +409,7 @@ export function useHiveAuth() {
     logout,
     authToken,
     hiveUsername,
+    userRole, // Exponer el rol del usuario
     isLoading,
     error,
     isAuthenticated,

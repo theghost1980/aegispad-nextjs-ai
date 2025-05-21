@@ -33,7 +33,7 @@ type InitialWorkflowType = "aiCreate" | "userWrite";
 
 interface StartArticleCardProps {
   initialWorkflow: InitialWorkflowType;
-  onInitialWorkflowChange: (value: InitialWorkflowType) => void;
+  onInitialWorkflowChange?: (value: InitialWorkflowType) => void;
   prompt: string;
   onPromptChange: (value: string) => void;
   generateMainImage: boolean;
@@ -45,6 +45,7 @@ interface StartArticleCardProps {
   isLoading: boolean;
   currentOperationMessage: string | null;
   // availableLanguages: LanguageOption[]; // Podrías pasar esto como prop
+  isAdmin: boolean;
   t: (
     key: keyof IntlMessages["ArticleForgePage"]["startArticleCard"],
     values?: Record<string, any>
@@ -65,6 +66,7 @@ const StartArticleCard: FC<StartArticleCardProps> = ({
   isLoading,
   currentOperationMessage,
   t,
+  isAdmin, // <-- Recibir la prop
 }) => {
   // Si availableLanguages no se pasa como prop, puedes definirla aquí
   // o importarla si la tienes en un archivo de constantes.
@@ -80,10 +82,11 @@ const StartArticleCard: FC<StartArticleCardProps> = ({
     { value: "Italian", label: "Italian" },
     { value: "Korean", label: "Korean" },
     { value: "Arabic", label: "Arabic" },
-    { value: "English", label: "English" }, // Asegúrate que el valor por defecto esté aquí
+    { value: "English", label: "English" },
   ];
+
   const mainActionButtonText =
-    initialWorkflow === "aiCreate"
+    initialWorkflow === "aiCreate" && isAdmin
       ? t("aiCreateButtonText")
       : t("userWriteButtonText");
 
@@ -95,8 +98,8 @@ const StartArticleCard: FC<StartArticleCardProps> = ({
     );
 
   const isMainButtonDisabled =
-    initialWorkflow === "aiCreate"
-      ? isLoading || !prompt.trim() || !sourceLanguageForCreation.trim() // Deshabilitar si no hay idioma fuente
+    initialWorkflow === "aiCreate" && isAdmin
+      ? isLoading || !prompt.trim() || !sourceLanguageForCreation.trim()
       : isLoading;
 
   const currentLoadingMessageForButton =
@@ -120,30 +123,32 @@ const StartArticleCard: FC<StartArticleCardProps> = ({
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div>
-          <Label className="text-lg font-medium">{t("workflowTitle")}</Label>
-          <RadioGroup
-            value={initialWorkflow}
-            onValueChange={onInitialWorkflowChange}
-            className="mt-2 space-y-2"
-            disabled={isLoading}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="aiCreate" id="workflow-ai-create" />
-              <Label htmlFor="workflow-ai-create" className="font-normal">
-                {t("aiCreateLabel")}
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="userWrite" id="workflow-user-write" />
-              <Label htmlFor="workflow-user-write" className="font-normal">
-                {t("userWriteLabel")}
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
+        {isAdmin && onInitialWorkflowChange && (
+          <div>
+            <Label className="text-lg font-medium">{t("workflowTitle")}</Label>
+            <RadioGroup
+              value={initialWorkflow}
+              onValueChange={onInitialWorkflowChange}
+              className="mt-2 space-y-2"
+              disabled={isLoading}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="aiCreate" id="workflow-ai-create" />
+                <Label htmlFor="workflow-ai-create" className="font-normal">
+                  {t("aiCreateLabel")}
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="userWrite" id="workflow-user-write" />
+                <Label htmlFor="workflow-user-write" className="font-normal">
+                  {t("userWriteLabel")}
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        )}
 
-        {initialWorkflow === "aiCreate" && (
+        {isAdmin && initialWorkflow === "aiCreate" && (
           <>
             <div className="space-y-1.5">
               <Label htmlFor="sourceLanguage" className="text-lg font-medium">

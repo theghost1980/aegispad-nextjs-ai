@@ -7,7 +7,8 @@ export type IndexedDBKey =
   | "lastLoginTimestamp"
   | "sessionTokensUsed"
   | "refreshToken"
-  | "accessToken";
+  | "accessToken"
+  | "currentUserRole";
 
 interface StoredItem {
   key: IndexedDBKey;
@@ -101,6 +102,7 @@ export async function clearUserSessionData(): Promise<void> {
     "sessionTokensUsed",
     "refreshToken",
     "accessToken",
+    "currentUserRole",
   ];
   for (const key of keysToClear) {
     await removeItem(key);

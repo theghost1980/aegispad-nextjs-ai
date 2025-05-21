@@ -9,6 +9,7 @@ import {
   EyeOff,
   KeyRound,
   Loader2,
+  Shield, // Importamos un icono para el admin
   ShieldCheck,
   ShieldX,
 } from "lucide-react";
@@ -26,6 +27,7 @@ export default function ProfilePage() {
     isAuthenticated,
     isLoading: isAuthLoading,
     hiveUsername,
+    userRole, // Obtenemos el rol del usuario
   } = useHiveAuth();
   const [isGeminiKeyConfigured, setIsGeminiKeyConfigured] =
     useState<boolean>(false);
@@ -254,9 +256,17 @@ export default function ProfilePage() {
       <div>
         <h1 className="text-2xl font-bold mb-4">{t("title")}</h1>
         {hiveUsername ? (
-          <p className="text-lg">
-            {t("welcomeMessage", { username: hiveUsername })}
-          </p>
+          <div className="flex items-center gap-2 text-lg">
+            <span>{t("welcomeMessage", { username: hiveUsername })}</span>
+            {userRole === "admin" && (
+              <span
+                title={t("adminUserTooltip")}
+                className="flex items-center text-blue-600"
+              >
+                <Shield className="h-5 w-5" />
+              </span>
+            )}
+          </div>
         ) : (
           <p>{t("loadingUserData")}</p>
         )}

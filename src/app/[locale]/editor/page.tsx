@@ -52,6 +52,7 @@ export default function ArticleForgePage() {
     isAuthenticated: isHiveLoggedIn,
     isLoading: isLoadingHiveAuth,
     authenticatedFetch,
+    userRole, // <-- Obtener el userRole desde el hook
   } = useHiveAuth();
 
   const [prompt, setPrompt] = useState<string>("");
@@ -104,10 +105,33 @@ export default function ArticleForgePage() {
   }, []);
 
   useEffect(() => {
-    if (clientLoaded && !isLoadingHiveAuth && !isHiveLoggedIn) {
-      router.push("/login");
+    if (clientLoaded && !isLoadingHiveAuth) {
+      if (!isHiveLoggedIn) {
+        router.push("/login");
+      } else {
+        // Usuario está logueado, verificar rol
+        if (userRole !== "admin") {
+          // Si no es admin, forzar el flujo a 'userWrite'
+          // y limpiar campos relacionados con la IA.
+          setInitialWorkflow("userWrite");
+          setPrompt("");
+          setGenerateMainImage(false);
+          // Opcional: resetear sourceLanguageForCreation si solo es relevante para IA
+          // setSourceLanguageForCreation(DEFAULT_SOURCE_LANGUAGE_CREATION);
+        }
+        // Si es admin, initialWorkflow mantiene su valor actual (default 'aiCreate' o lo que haya seleccionado)
+      }
     }
-  }, [clientLoaded, isLoadingHiveAuth, isHiveLoggedIn, router]);
+  }, [
+    clientLoaded,
+    isLoadingHiveAuth,
+    isHiveLoggedIn,
+    userRole,
+    router,
+    setInitialWorkflow,
+    setPrompt,
+    setGenerateMainImage,
+  ]);
 
   const canUseEditor = isHiveLoggedIn;
 
@@ -133,6 +157,14 @@ export default function ArticleForgePage() {
   };
 
   const handleCreateArticle = async () => {
+    if (userRole !== "admin") {
+      toast({
+        title: t("toastMessages.errorTitle"),
+        description: t("toastMessages.adminActionRequired"),
+        variant: "destructive",
+      });
+      return;
+    }
     if (!prompt.trim()) {
       toast({
         title: t("toastMessages.errorTitle"),
@@ -624,13 +656,17 @@ export default function ArticleForgePage() {
 
           <StartArticleCard
             initialWorkflow={initialWorkflow}
-            onInitialWorkflowChange={(value: InitialWorkflow) => {
-              setInitialWorkflow(value);
-              if (value === "userWrite") {
-                setPrompt("");
-                setGenerateMainImage(false);
-              }
-            }}
+            onInitialWorkflowChange={
+              userRole === "admin"
+                ? (value: InitialWorkflow) => {
+                    setInitialWorkflow(value);
+                    if (value === "userWrite") {
+                      setPrompt("");
+                      setGenerateMainImage(false);
+                    }
+                  }
+                : undefined
+            }
             prompt={prompt}
             onPromptChange={setPrompt}
             generateMainImage={generateMainImage}
@@ -642,6 +678,7 @@ export default function ArticleForgePage() {
             isLoading={isLoading}
             currentOperationMessage={currentOperationMessage}
             t={(key, values) => t(`startArticleCard.${key}`, values)}
+            isAdmin={userRole === "admin"}
           />
 
           {detectedLanguage && articleMarkdown && (

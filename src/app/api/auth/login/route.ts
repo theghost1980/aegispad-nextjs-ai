@@ -5,10 +5,9 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 
-// Asegúrate de tener estas variables en tu .env.local y en tu hosting
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_ACCESS_TOKEN_EXPIRES_IN = "15m";
-const JWT_REFRESH_TOKEN_EXPIRES_IN = "7d"; // 7 días
+const JWT_REFRESH_TOKEN_EXPIRES_IN = "7d";
 
 if (!JWT_SECRET) {
   throw new Error(
@@ -166,7 +165,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       accessToken,
       refreshToken,
-      user: { username: profile.hive_username, id: profile.id },
+      user: {
+        username: profile.hive_username,
+        id: profile.id,
+        role: profile.user_role,
+      },
     });
   } catch (error: any) {
     console.error("Login API error:", error);

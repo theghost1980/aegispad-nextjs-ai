@@ -79,10 +79,28 @@ export async function POST(request: NextRequest) {
       model: GEMINI_AI_MODEL_NAME,
     });
 
-    // Definimos el prompt para la traducción del artículo
-    const translationPrompt = `Translate the following article text into ${targetLanguage}. Provide only the translated text in your response, without any additional commentary or formatting like markdown code blocks.
+    const translationPrompt = `Translate the following article, which is in Markdown format, into ${targetLanguage}.
 
- Article Text:
+**Important Instructions:**
+1.  **Preserve all original Markdown formatting and syntax.** This includes, but is not limited to:
+    *   Headings (e.g., # Title, ## Subtitle, ### Sub-subtitle)
+    *   Bold text (**text** or __text__)
+    *   Italic text (*text* or _text_)
+    *   Strikethrough text (~~text~~)
+    *   Links (link text)
+    *   Images (!alt text)
+    *   Unordered lists (*, -, +)
+    *   Ordered lists (1., 2.)
+    *   Blockquotes (> quote)
+    *   Code blocks (indented or fenced with \`\`\`)
+    *   Inline code (\`code\`)
+    *   Horizontal rules (---, ***, ___)
+    *   Tables
+2.  Translate only the textual content found within the Markdown structure. Do not translate Markdown syntax characters themselves.
+3.  Your response must be *only* the translated Markdown content. Do not add any introductory phrases, concluding remarks, or explanations.
+4.  Do not wrap the entire output in an additional Markdown code block unless the original input itself was a single, complete code block.
+
+Original Markdown Article Text:
 
  ${articleContent}`;
 

@@ -1,13 +1,6 @@
 import CustomButton from "@/components/custom-button"; // Importar el nuevo CustomButton
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Button ya no se usa aquí
-import {
-  BarChart3,
-  Edit3,
-  KeyRound,
-  Languages,
-  Wand2,
-  Zap,
-} from "lucide-react";
+import { BarChart3, Edit3, KeyRound, Languages, Zap } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 export default async function HomePage({
@@ -19,11 +12,6 @@ export default async function HomePage({
   const t = await getTranslations({ locale, namespace: "HomePage" });
 
   const features = [
-    {
-      icon: <Wand2 className="h-10 w-10 text-primary mb-4" />,
-      title: t("feature1Title"),
-      description: t("feature1Description"),
-    },
     {
       icon: <Edit3 className="h-10 w-10 text-primary mb-4" />,
       title: t("feature2Title"),
@@ -38,29 +26,23 @@ export default async function HomePage({
 
   return (
     <div className="space-y-16 md:space-y-24">
-      {/* Hero Section */}
       <section className="text-center pt-12 md:pt-16 pb-12 md:pb-16 bg-black/50 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center bg-no-repeat text-white relative overflow-hidden">
         {" "}
-        {/* Fondo por defecto o explícito */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
           {t("heroTitle")}
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
           {t("heroSubtitle")}
         </p>{" "}
-        {/* Usar CustomButton para el CTA principal */}
         <CustomButton href="/editor">{t("heroCtaButton")}</CustomButton>
       </section>
 
-      {/* Features Section */}
       <section className="py-16 md:py-20 bg-muted/50">
         {" "}
-        {/* Fondo sutil para esta sección */}
-        {/* Fondo sutil para esta sección */}
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
           {t("featuresTitle")}
         </h2>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {features.map((feature) => (
             <Card
               key={feature.title}
@@ -78,10 +60,8 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Gemini API Key Section */}
       <section className="bg-card py-16 md:py-20 rounded-lg shadow-lg">
         {" "}
-        {/* Usamos bg-card para diferenciar */}
         <div className="container mx-auto text-center">
           <KeyRound className="h-12 w-12 text-primary mx-auto mb-6" />
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -113,19 +93,14 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* Secondary Call to Action Section */}
       <section className="text-center py-12">
-        {/* Usar CustomButton para el CTA secundario con variante outline */}
         <CustomButton href="/editor" variant="outline">
           {t("secondaryCtaButton")}
         </CustomButton>
       </section>
 
-      {/* Token Usage Estimation Section */}
       <section className="py-12 md:py-16 bg-background">
         {" "}
-        {/* Volvemos al fondo por defecto */}
-        {/* Volvemos al fondo por defecto */}
         <div className="container mx-auto text-center">
           <BarChart3 className="h-12 w-12 text-primary mx-auto mb-6" />
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -134,19 +109,7 @@ export default async function HomePage({
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
             {t("tokenEstimationIntro")}
           </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto text-left">
-            <Card className="bg-card">
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  {t("tokenEstimationCreateTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {t("tokenEstimationCreateDesc")}
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-4xl mx-auto text-left">
             <Card className="bg-card">
               <CardHeader>
                 <CardTitle className="text-lg">
