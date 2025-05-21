@@ -1,7 +1,32 @@
 {
-  "name": "nextn",
-  "version": "0.1.0",
+  "name": "aegispad",
+  "version": "1.0.0",
   "private": true,
+  "description": "AegisPad is an intelligent Markdown editor with AI-powered tools for content revision, translation, and seamless publishing to the HIVE blockchain.",
+  "keywords": [
+    "nextjs",
+    "react",
+    "typescript",
+    "hive",
+    "blockchain",
+    "markdown",
+    "ai",
+    "gemini",
+    "editor",
+    "content creation",
+    "translation",
+    "aegispad"
+  ],
+  "author": "Saturno Mangieri @theghost1980",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theghost1980/aegispad-nextjs-ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/theghost1980/aegispad-nextjs-ai/issues"
+  },
+  "homepage": "https://aegispad.com",
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
@@ -10,6 +35,10 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.8.0",
