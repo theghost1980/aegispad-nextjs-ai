@@ -216,7 +216,6 @@ export default function ProfilePage() {
       );
       if (success) {
         setSaveApiKeySuccess(t("saveApiKeySuccess"));
-        setIsGeminiKeyConfigured(true);
         setShowApiKeyForm(false);
         setNewApiKeyInput("");
         setTestApiKeyResult(null);
