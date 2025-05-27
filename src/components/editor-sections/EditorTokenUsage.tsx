@@ -93,11 +93,14 @@ const EditorTokenUsage: FC<EditorTokenUsageProps> = ({
   );
 
   return (
-    <div className="fixed top-[calc(3.5rem+1rem)] md:top-[calc(3.5rem+1.5rem)] right-4 md:right-6 z-50 w-[calc(100%-2rem)] md:w-auto max-w-xs md:max-w-sm">
+    <div className="w-full max-w-xs">
+      {" "}
+      {/* Ajustado para Popover, sin márgenes externos */}
+      {/* Ajustado para el flujo del documento */}
       <Accordion
         type="single"
         collapsible
-        className="w-full bg-card text-card-foreground shadow-xl rounded-lg border"
+        className="w-full bg-card text-card-foreground shadow-lg rounded-lg border"
       >
         <AccordionItem value="token-stats" className="border-b-0 rounded-lg">
           <AccordionTrigger className="flex w-full items-center justify-between rounded-t-lg p-4 text-left hover:no-underline data-[state=open]:rounded-b-none data-[state=open]:border-b">

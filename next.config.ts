@@ -24,9 +24,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "picsum.photos",
-        port: "",
-        pathname: "/**",
+        hostname: "*",
+        // Al no especificar 'port' y usar un comodín para 'pathname',
+        // se aceptarán todas las imágenes de este hostname.
+        pathname: "/**", // Esto actúa como un comodín para cualquier ruta
       },
     ],
   },

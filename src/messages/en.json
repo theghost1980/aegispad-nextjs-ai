@@ -54,6 +54,7 @@
       "title": "Edit & Refine Article",
       "description": "Your article content is below. You can edit the Markdown directly or use AI to help revise it.",
       "reviseButton": "Revise Article with AI",
+      "reviseConfirm": "Confirm to revise the current article content using AI.",
       "revisingArticleMessage": "Revising article..."
     },
     "translateArticleCard": {
@@ -64,7 +65,8 @@
       "selectLanguagePlaceholder": "Select a language",
       "translateButton": "Translate Article",
       "translatingArticleMessage": "Translating article...",
-      "translatingChunkMessage": "Translating chunk {current} of {total}..."
+      "translatingChunkMessage": "Translating chunk {current} of {total}...",
+      "translationResultTitle": "Translation ({language})"
     },
     "translationResultCard": {
       "title": "Translation Result",
@@ -81,6 +83,7 @@
       "formatSimpleLabel": "Simple (Original then Translation with separator)",
       "formatDetailsLabel": "Details Tag (Translation expandable under original)",
       "formatInlineLabel": "Between Lines (Original > Translated)",
+      "formatDetailsTag": "Details Tag (Collapsible Translation)",
       "generateCombinedButton": "Generate Combined Output",
       "generatingCombinedMessage": "Generating combined article format...",
       "combinedOutputTitle": "Combined Article Output:",
@@ -126,7 +129,8 @@
       "copySummaryFailedError": "Failed to copy summary. Please try again or copy manually.",
       "allClearedMessage": "All fields and session data have been cleared.",
       "userWritingStartedMessage": "Editor ready! You can start writing your article.",
-      "adminActionRequired": "This action requires administrator privileges."
+      "adminActionRequired": "This action requires administrator privileges.",
+      "revisionUndoneSuccess": "Revision undone successfully."
     },
     "loadingSpinnerClient": "Loading AegisPad...",
     "userWriting": {
@@ -137,8 +141,62 @@
     "startSetupButton": "Start Setup Assistant",
     "proceedToReviewCard": {
       "title": "Ready for Final Check?",
+      "defaultTitle": "Generated Article",
       "description": "Your combined article is ready. Proceed to the final review page to make any last-minute adjustments before publishing or exporting.",
       "buttonText": "Go to Final Review"
+    },
+    "actions": {
+      "revise": "Revise Content",
+      "translate": "Translate",
+      "combine": "Combine Formats",
+      "showPreview": "Show Preview",
+      "hidePreview": "Hide Preview",
+      "copySummary": "Copy Summary",
+      "clearAll": "Clear All",
+      "undoRevision": "Undo Revision"
+    },
+    "markdownPreview": {
+      "title": "Markdown Preview"
+    },
+    "mainEditor": {
+      "placeholder": "Start writing your article here in Markdown..."
+    },
+    "toolbar": {
+      "boldPlaceholder": "bold text",
+      "italicPlaceholder": "italic text",
+      "strikethroughPlaceholder": "strikethrough",
+      "linkPrompt": "Enter link URL:",
+      "linkTextPlaceholder": "link text",
+      "headingPlaceholder": "Heading",
+      "listItemPlaceholder": "List item",
+      "quotePlaceholder": "Quote",
+      "codeBlockPlaceholder": "code",
+      "imageAltTextPlaceholder": "image description",
+      "imageCreditLinkText": "source",
+      "imageUrlPrompt": "Enter image URL:",
+      "imageAltTextPrompt": "Enter image alt text (optional):",
+      "imageAltTextDefault": "image description"
+    },
+    "imageSearchAndInsert": {
+      "modalTitle": "Search and Add Images from Hivelens",
+      "placeholderText": "Search images in Hivelens...",
+      "insertButtonText": "Insert selected",
+      "searchButtonText": "Search"
+    },
+    "revisionOptionsPanel": {
+      "title": "Revision Options",
+      "optionFullAI": "Full AI Revision (with Undo)",
+      "optionSelective": "Let me decide what to apply (Show Diff)",
+      "applyButton": "Apply Revision"
+    },
+    "lineReviewer": {
+      "title": "Review AI Revisions Line by Line",
+      "description": "Apply (+) or remove (-) suggested lines from the AI revision. Changes will affect the main editor.",
+      "applyLineButtonTitle": "Apply this line",
+      "removeLineButtonTitle": "Remove this line from this review",
+      "applyAllVisibleButtonText": "Apply All Visible & Close",
+      "closeButtonText": "Close",
+      "noLinesToReviewText": "No lines to review or all lines have been removed from this view."
     }
   },
   "ArticleEditor": {
@@ -154,7 +212,8 @@
   },
   "MarkdownPreview": {
     "defaultAriaLabel": "Markdown content preview",
-    "noContentToDisplay": "No content to display."
+    "noContentToDisplay": "No content to display.",
+    "title": "Markdown Preview"
   },
   "HomePage": {
     "heroTitle": "AegisPad: Your Intelligent Markdown Editor & Tools",

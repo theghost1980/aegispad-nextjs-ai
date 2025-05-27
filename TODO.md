@@ -4,8 +4,16 @@ To add to all content:
 
 - from now on we are using MEMO to encode/decode apikey.
 - posting will be used only to login and to post/comment:
+
   - this way we can suggest to the user to set MEMO sign on this site as frecuent to avoid
     the annoying resuests to decode the key on any use of gemini ai!
+
+- investigar para usar apis de:
+
+  - https://unsplash.com/
+  - https://www.pexels.com/
+
+- podemos incluir videos desde youtube y una funcion para buscar?
 
 # AegisPad Project TODOs
 

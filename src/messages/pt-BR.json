@@ -54,6 +54,7 @@
       "title": "Editar e Refinar Artigo",
       "description": "O conteúdo do seu artigo está abaixo. Você pode editar o Markdown diretamente ou usar a IA para ajudar a revisá-lo.",
       "reviseButton": "Revisar Artigo com IA",
+      "reviseConfirm": "Confirme para revisar o conteúdo atual do artigo usando IA.",
       "revisingArticleMessage": "Revisando artigo..."
     },
     "translateArticleCard": {
@@ -72,7 +73,8 @@
       "originalArticleTitle": "Artigo Original",
       "translatedArticleTitle": "Traduzido para {targetLanguage}",
       "originalArticleAriaLabel": "Conteúdo do artigo original antes da tradução (Markdown)",
-      "translatedPreviewAriaLabel": "Artigo traduzido para {targetLanguage}"
+      "translatedPreviewAriaLabel": "Artigo traduzido para {targetLanguage}",
+      "translationResultTitle": "Tradução ({language})"
     },
     "refineFormatCard": {
       "title": "Refinar Formato Final",
@@ -81,6 +83,7 @@
       "formatSimpleLabel": "Simples (Original e depois Tradução com separador)",
       "formatDetailsLabel": "Tag Details (Tradução expansível sob o original)",
       "formatInlineLabel": "Entre Linhas (Original > Traduzido)",
+      "formatDetailsTag": "Tag Details (Tradução Recolhível)",
       "generateCombinedButton": "Gerar Saída Combinada",
       "generatingCombinedMessage": "Gerando formato de artigo combinado...",
       "combinedOutputTitle": "Saída do Artigo Combinado:",
@@ -126,7 +129,8 @@
       "copySummaryFailedError": "Falha ao copiar o resumo. Por favor, tente novamente ou copie manualmente.",
       "allClearedMessage": "Todos os campos e dados da sessão foram limpos.",
       "userWritingStartedMessage": "Editor pronto! Você pode começar a escrever seu artigo.",
-      "adminActionRequired": "Esta ação requer privilégios de administrador."
+      "adminActionRequired": "Esta ação requer privilégios de administrador.",
+      "revisionUndoneSuccess": "Revisão desfeita com sucesso."
     },
     "loadingSpinnerClient": "Carregando AegisPad...",
     "userWriting": {
@@ -137,8 +141,62 @@
     "startSetupButton": "Iniciar Assistente de Configuração",
     "proceedToReviewCard": {
       "title": "Pronto para a Verificação Final?",
+      "defaultTitle": "Artigo Gerado",
       "description": "Seu artigo combinado está pronto. Prossiga para a página de revisão final para fazer quaisquer ajustes de última hora antes de publicar ou exportar.",
       "buttonText": "Ir para Revisão Final"
+    },
+    "actions": {
+      "revise": "Revisar Conteúdo",
+      "translate": "Traduzir",
+      "combine": "Combinar Formatos",
+      "showPreview": "Mostrar Prévia",
+      "hidePreview": "Ocultar Prévia",
+      "copySummary": "Copiar Resumo",
+      "clearAll": "Limpar Tudo",
+      "undoRevision": "Desfazer Revisão"
+    },
+    "markdownPreview": {
+      "title": "Pré-visualização de Markdown"
+    },
+    "mainEditor": {
+      "placeholder": "Comece a escrever seu artigo aqui em Markdown..."
+    },
+    "toolbar": {
+      "boldPlaceholder": "texto em negrito",
+      "italicPlaceholder": "texto em itálico",
+      "strikethroughPlaceholder": "riscado",
+      "linkPrompt": "Digite a URL do link:",
+      "linkTextPlaceholder": "texto do link",
+      "headingPlaceholder": "Título",
+      "listItemPlaceholder": "Item da lista",
+      "quotePlaceholder": "Citação",
+      "codeBlockPlaceholder": "código",
+      "imageAltTextPlaceholder": "descrição da imagem",
+      "imageCreditLinkText": "fonte",
+      "imageUrlPrompt": "Digite a URL da imagem:",
+      "imageAltTextPrompt": "Digite o texto alternativo da imagem (opcional):",
+      "imageAltTextDefault": "descrição da imagem"
+    },
+    "imageSearchAndInsert": {
+      "modalTitle": "Pesquisar e inserir imagens do Hivelens",
+      "placeholderText": "Pesquisar imagens no Hivelens...",
+      "insertButtonText": "Inserir selecionados",
+      "searchButtonText": "Pesquisar"
+    },
+    "revisionOptionsPanel": {
+      "title": "Opções de Revisão",
+      "optionFullAI": "Revisão Completa por IA (com Desfazer)",
+      "optionSelective": "Deixe-me decidir o que aplicar (Mostrar Diferenças)",
+      "applyButton": "Aplicar Revisão"
+    },
+    "lineReviewer": {
+      "title": "Revisar Revisões de IA Linha por Linha",
+      "description": "Aplique (+) ou remova (-) linhas sugeridas da revisão de IA. As alterações afetarão o editor principal.",
+      "applyLineButtonTitle": "Aplicar esta linha",
+      "removeLineButtonTitle": "Remover esta linha desta revisão",
+      "applyAllVisibleButtonText": "Aplicar Tudo Visível e Fechar",
+      "closeButtonText": "Fechar",
+      "noLinesToReviewText": "Nenhuma linha para revisar ou todas as linhas foram removidas desta visualização."
     }
   },
   "ArticleEditor": {
@@ -154,7 +212,8 @@
   },
   "MarkdownPreview": {
     "defaultAriaLabel": "Pré-visualização do conteúdo Markdown",
-    "noContentToDisplay": "Nenhum conteúdo para exibir."
+    "noContentToDisplay": "Nenhum conteúdo para exibir.",
+    "title": "Pré-visualização de Markdown"
   },
   "HomePage": {
     "heroTitle": "AegisPad: Seu Editor e Ferramentas Markdown Inteligentes",

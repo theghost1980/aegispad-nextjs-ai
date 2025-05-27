@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Definimos el prompt para la revisión del artículo
-    const revisionPrompt = `You are an expert editor. Please revise the following article text for clarity, grammar, spelling, punctuation, and style. Ensure the revised text flows well and is easy to read. Maintain the original language of the article. Provide only the revised text in your response, without any additional commentary or formatting like markdown code blocks.
+    const revisionPrompt = `You are an expert editor. Please revise the following article text for clarity, grammar, spelling, punctuation, and style. Ensure the revised text flows well and is easy to read. Maintain the original language of the article. **Crucially, preserve all original Markdown formatting (like headers, lists, bold, italics, links, images, etc.).** Provide only the revised text in your response, without any additional commentary.
 
  Article Text:
 
