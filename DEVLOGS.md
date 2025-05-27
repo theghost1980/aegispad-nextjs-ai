@@ -1,6 +1,63 @@
-# Cambios hechos sesion 26/05/25
+# Cambios y Planificación - Sesión del 27/05/2024
 
-todos los cambios hechos aca....
+## Mejoras y Correcciones en `LineReviewer.tsx`
+
+- **Estilo y Fondo:**
+  - Se ajustó el color de fondo del componente `LineReviewer` a un amarillo claro (`bg-yellow-50`) para hacerlo más llamativo.
+  - El área de contenido de las líneas dentro del `ScrollArea` se configuró con un fondo blanco (`bg-white`) para mejorar el contraste.
+- **Scroll:**
+  - Se solucionaron problemas persistentes con el scroll vertical asegurando la correcta aplicación de clases Flexbox (`flex-1 min-h-0`) en el `ScrollArea` y `overflow-hidden` en sus contenedores padres (`Rnd` y `DialogContent`).
+  - Se añadió `overflow-y-auto` directamente al `ScrollArea` para forzar la barra de scroll vertical cuando sea necesario.
+- **Limpieza:** Se eliminaron todos los comentarios del código fuente de `LineReviewer.tsx`.
+
+## Refactorización de `page.tsx` y Tipado de Traducciones
+
+- **Extracción de Componentes:** Se refactorizó `page.tsx` extrayendo varias secciones de UI a componentes dedicados en `src/components/editor-page/`:
+  - `RevisionOptionsPanelComponent.tsx`
+  - `EditorActionsMenuComponent.tsx`
+  - `MarkdownPreviewComponent.tsx`
+  - `TranslationPanelComponent.tsx`
+  - `CombinePanelComponent.tsx`
+- **Tipado de `next-intl`:**
+  - Se abordaron errores de TypeScript relacionados con la prop `t` (función de traducción) en los nuevos componentes.
+  - Se creó y configuró `src/types/translation-types.ts` para definir tipos específicos para las funciones de traducción de cada namespace de primer nivel (ej. `ArticleForgePageTranslations`, `TokenUsageTranslations`), utilizando `ReturnType<typeof useTranslations<"NamespaceName">>>`.
+  - Se verificó la estructura de los archivos de mensajes (`en.json`, `es.json`, `pt-BR.json`, `fr.json`) para confirmar los namespaces de primer nivel y asegurar la correcta definición de los tipos.
+  - Se aplicaron estos tipos de traducción específicos a las props `t` en todos los componentes relevantes, tanto los nuevos como los existentes en `src/components/editor-sections/`.
+
+## Mejoras en la Vista Previa de Markdown (`MarkdownPreviewComponent.tsx`)
+
+- **Renderizado de Encabezados:** Se solucionó un problema donde los encabezados Markdown (ej. `## Título`) no se renderizaban visualmente como títulos.
+  - Se confirmó que el HTML generado era correcto (`<h1>`, `<h2>`, etc.).
+  - Se identificó que los estilos por defecto de la clase `prose` (de `@tailwindcss/typography`) eran la causa.
+- **Estilos de `@tailwindcss/typography`:**
+  - Se instaló el plugin `@tailwindcss/typography`.
+  - Se modificó `tailwind.config.ts` para personalizar los estilos de `prose`, definiendo explícitamente `fontSize`, `fontWeight`, márgenes y colores para encabezados (`h1`-`h4`), párrafos (`p`), y tablas (`table`, `thead`, `th`, `tbody`, `tr`, `td`), incluyendo consideraciones para el modo oscuro (`dark:prose-invert`).
+- **Soporte para Tablas GFM:** Se añadió el plugin `remark-gfm` a `ReactMarkdown` para permitir el correcto parseo y renderizado de tablas con sintaxis GitHub Flavored Markdown.
+- **Espaciado entre Párrafos:** Se redujo el margen vertical entre párrafos (`<p>`) dentro de la vista previa modificando la configuración de `prose` en `tailwind.config.ts`.
+
+## Interfaz de Usuario del Editor (`page.tsx` y componentes relacionados)
+
+- **Panel de "Revisión Final":**
+  - Se movió la tarjeta "¿Listo para la Revisión Final?" para que aparezca como un panel de acción (similar a "Traducir", "Combinar") cuando `activeAction === "finalReview"`.
+  - Se añadió un nuevo botón "Revisión Final" al `EditorActionsMenuComponent.tsx`.
+  - Se actualizó `page.tsx` para manejar este nuevo estado y renderizar el panel condicionalmente.
+  - Se aplicó un fondo blanco sutil (`bg-background`) al panel de "Revisión Final" y se ajustó para que se muestre en una sola línea, mejorando la consistencia visual.
+- **Botón "Copiar Resumen":**
+  - Se modificó la lógica para habilitar el botón "Copiar Resumen" en `EditorActionsMenuComponent.tsx` para que dependa únicamente de si `finalCombinedOutput` tiene contenido (eliminando la dependencia del uso de tokens).
+  - Se añadió el `username` del usuario (obtenido del contexto `useHiveAuth`) y la fecha/hora actual al texto del resumen que se copia.
+
+## Planificación y Documentación
+
+- **Conteo de Tokens (API):** Se actualizó el `TODO` en la ruta `api/ai/translate-article/route.ts` con un plan detallado y de alta prioridad para implementar el conteo de tokens (extracción de `usageMetadata`, inclusión en respuesta JSON, y futura función de registro en backend).
+- **Implementación de Modo Oscuro (Dark Mode):**
+  - Se discutió y planificó la implementación del modo oscuro: configuración de `darkMode: "class"` en Tailwind, definición de variables CSS para modo oscuro, creación de un `ThemeProvider` y un componente `ThemeToggle`.
+  - Se integró el `ThemeToggle` dentro del `UserAvatarDropdown.tsx`.
+- **Refactor a Clave Maestra de API (TODO.md):**
+  - Se añadió una nueva sección de alta prioridad al inicio de `TODO.md` detallando el plan para la transición de claves de API por usuario a una única clave maestra gestionada por el servidor. Esto incluye los cambios necesarios en el backend, frontend, `useHiveAuth`, UI, y consideraciones de seguridad y costos.
+
+---
+
+# Cambios hechos sesion 26/05/25
 
 ## Mejoras Generales del Editor (page.tsx)
 
@@ -96,6 +153,4 @@ todos los cambios hechos aca....
 - Se corrigió la ubicación de las funciones `handleApplyLineFromReviewer` y `handleApplyAllVisibleChangesFromReviewer` moviéndolas al ámbito de `ArticleForgePage`.
 - Se ajustó el `dragHandleClassName` para `react-rnd` para permitir el arrastre del panel flotante.
 
-```
-
-```
+---

@@ -105,7 +105,9 @@
       "finalCombinedArticleLabel": "Final Combined Article (Read-only)",
       "noFinalCombinedArticleMessage": "No final combined article was generated in this session.",
       "copySummaryButton": "Copy Full Summary & Output",
-      "preparingSummaryMessage": "Preparing summary for copy..."
+      "preparingSummaryMessage": "Preparing summary for copy...",
+      "userLabel": "Utilisateur :",
+      "dateTimeLabel": "Date/Heure :"
     },
     "toastMessages": {
       "errorTitle": "Error",
@@ -153,7 +155,8 @@
       "hidePreview": "Hide Preview",
       "copySummary": "Copy Summary",
       "clearAll": "Clear All",
-      "undoRevision": "Undo Revision"
+      "undoRevision": "Undo Revision",
+      "finalReview": "Final Review"
     },
     "markdownPreview": {
       "title": "Markdown Preview"

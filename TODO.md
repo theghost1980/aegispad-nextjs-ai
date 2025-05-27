@@ -1,6 +1,36 @@
 Importante: //TODO
 
+## Refactor: Centralized Master API Key for AI Services [HIGH PRIORITY]
+
+**Objective:** Transition from per-user API keys to a single, server-managed master API key for all AI service requests (e.g., Gemini) to simplify user experience.
+
+- **Master Key Storage:**
+  - Store the master API key securely as a server-side environment variable (e.g., `MASTER_GEMINI_API_KEY`).
+- **Backend API Route Modifications (e.g., `/api/ai/*`):**
+  - Remove logic for fetching/using individual user API keys.
+  - Read the master API key from `process.env`.
+  - Initialize AI SDKs (e.g., `GoogleGenerativeAI`) with the master key.
+  - Continue to authenticate users to obtain `profileId` for token tracking and authorization.
+- **`useHiveAuth` Hook Refactor:**
+  - Remove all state and functions related to managing individual user API keys (e.g., `geminiApiKey`, `isGeminiKeyValid`, `fetchUserApiKey`, `saveUserApiKey`).
+  - Retain core user authentication logic (`isAuthenticated`, `user`, `userRole`, `authenticatedFetch` to backend).
+- **User Interface (UI) Changes:**
+  - Eliminate all UI components where users would input, manage, or validate their personal API keys (e.g., from Profile page, specific modals).
+  - Remove any conditional rendering or feature enablement based on a user's API key validity.
+  - Update error messages related to AI service failures to be generic (e.g., "AI service unavailable" instead of "Invalid API key").
+- **Database (Supabase):**
+  - Fields in the `profiles` table (or similar) related to individual user API keys (e.g., `gemini_api_key`) will no longer be actively used (read from or written to).
+  - No immediate schema changes required, but these fields become obsolete.
+- **Token Tracking (Existing TODO):**
+  - The existing TODO for implementing token counting per user becomes even more critical for cost management and monitoring.
+- **Security & Cost Management:**
+  - Emphasize the security of the master API key.
+  - Acknowledge that all AI API costs will be centralized to the application owner.
+  - Consider implementing server-side rate limiting per user to protect the master key and manage usage.
+
 To add to all content:
+
+- Add tokens counts from gemini requests watch: C:\Users\saturno\Downloads\HIVE-Projects\hive-markdown\TODO-ADD-AEGISPAD\TODO Tokens.txt
 
 - from now on we are using MEMO to encode/decode apikey.
 - posting will be used only to login and to post/comment:
@@ -14,6 +44,19 @@ To add to all content:
   - https://www.pexels.com/
 
 - podemos incluir videos desde youtube y una funcion para buscar?
+
+- agregar funciones de compartir con:
+
+  - fb, instagram, telegram, twitter, linkedin
+  - discord en canales preconfigurados
+  - en este punto debemos mirar en que usamos la IA para modificar los contenidos, formatos etc.
+
+- //TODO admins:
+  - can create: C:\Users\saturno\Downloads\HIVE-Projects\hive-markdown\TODO-ADD-AEGISPAD
+  - add a new panel like revise/translate only with admins
+  - admin dashboards, etc
+
+## Clean this up MAN!! too many comments we must be "professionals YO"
 
 # AegisPad Project TODOs
 

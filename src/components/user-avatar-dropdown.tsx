@@ -1,6 +1,7 @@
 "use client";
 
 import CustomButton from "@/components/custom-button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -72,6 +73,8 @@ export function UserAvatarDropdown() {
             </p>
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <ThemeToggle />
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="cursor-pointer">
           <CustomButton href="/profile">

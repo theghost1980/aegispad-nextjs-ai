@@ -12,14 +12,9 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { CombineFormatType } from "@/types/general.types";
 import { CheckSquare, Layers } from "lucide-react";
 import type { FC } from "react";
-
-export type CombineFormatType =
-  | "simple"
-  | "detailsTag"
-  | "inline"
-  | "inComments";
 
 interface RefineCombinedFormatCardProps {
   selectedCombineFormat: CombineFormatType;

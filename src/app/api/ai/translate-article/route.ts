@@ -102,10 +102,19 @@ Original Markdown Article Text:
     const response = result.response;
     const translatedText = response.text();
 
-    // TODO: Considerar el conteo de tokens y el manejo de cuotas aquí
+    // TODO: [HIGH PRIORITY] Implement token counting and usage tracking:
+    // 1. Extract promptTokenCount and candidatesTokenCount from `response.usageMetadata`.
+    // 2. Calculate totalTokenCount for this request.
+    // 3. Include these token counts (prompt, completion, total) in the JSON response.
+    // 4. (Future) Implement a reusable backend function `recordTokenUsage(profileId, service, promptTokens, completionTokens, totalTokens)`
+    //    to log usage to Supabase (e.g., 'token_usage_logs' table) and potentially update user's aggregate token counters.
+    //    Consider error handling for `usageMetadata` if not present.
 
     // Devolvemos el texto traducido
-    return NextResponse.json({ translatedText: translatedText });
+    return NextResponse.json({
+      translatedText: translatedText,
+      // tokenUsage: { promptTokens: ..., completionTokens: ..., totalTokens: ... } // Placeholder for when implemented
+    });
   } catch (e: any) {
     console.error("Error translating content with user's Gemini key:", e);
     return NextResponse.json(

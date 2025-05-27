@@ -161,16 +161,7 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
       </div>
 
       {/* ScrollArea should take available space */}
-      <ScrollArea
-        className={`border rounded-md bg-muted/20 ${
-          isFloatingPanel ? "flex-1 min-h-0" : "flex-1 min-h-0" // Flex sizing for both modes now
-        }`}
-        style={{
-          // Let flexbox handle height in both modal and RND container
-          // height: isFloatingPanel ? "100%" : undefined, // RND will control parent height
-          height: isFloatingPanel ? "auto" : undefined, // 'auto' for floating to fill RND, undefined for modal
-        }}
-      >
+      <ScrollArea className="border rounded-md bg-white flex-1 min-h-0 overflow-y-auto">
         <div className="font-mono text-sm p-2">
           {displayLines.map((line) => (
             <div
@@ -249,7 +240,7 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
         minHeight={300}
         bounds="window" // Restringir el arrastre a la ventana del navegador
         enableResizing // Habilitar todas las manijas de redimensionamiento
-        className="bg-background border shadow-xl rounded-lg p-6 flex flex-col z-50 overflow-hidden" // overflow-hidden para que el contenido no se salga del Rnd
+        className="bg-yellow-50 border border-yellow-200 shadow-xl rounded-lg p-6 flex flex-col z-50 overflow-hidden"
         dragHandleClassName="line-reviewer-drag-handle" // Clase para el área de arrastre (opcional, pero útil)
       >
         {reviewerContent(true)}
@@ -259,9 +250,7 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-[70vw] md:max-w-[60vw] lg:max-w-[50vw] w-full flex flex-col max-h-[85vh] gap-4" // Asegurar flex-col, max-h, y gap
-      >
+      <DialogContent className="sm:max-w-[70vw] md:max-w-[60vw] lg:max-w-[50vw] w-full flex flex-col max-h-[85vh] gap-4 bg-yellow-50 border-yellow-200 overflow-hidden">
         {" "}
         {/* El padding p-6 ya está aplicado por DialogContent */}
         {reviewerContent(false)}

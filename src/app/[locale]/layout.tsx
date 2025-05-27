@@ -1,7 +1,8 @@
 import Header from "@/components/header";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { AppProvider } from "@/context/app-context";
-import { PostHogProvider } from "@/components/PostHogProvider";
+import { ThemeProvider } from "@/context/theme-context";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -34,7 +35,6 @@ export async function generateMetadata({
 
   if (!locales.includes(locale as any)) {
     notFound();
-    // Esta función lanza un error, por lo que no se debería llegar más allá si se llama.
   }
 
   return {
@@ -89,18 +89,20 @@ export default async function RootLayout({
         className={`${inter.variable} ${robotoMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <PostHogProvider>
-          <AppProvider>
-            <NextIntlClientProvider locale={locale} messages={messages}>
-              <Header />
-              <main className="flex-grow container mx-auto px-4 py-8">
-                {children}
-              </main>
-              <Toaster />
-              <footer className="bg-card border-t border-border py-4 text-center text-sm text-muted-foreground">
-                {t("footerCopyright", { year: new Date().getFullYear() })}
-              </footer>
-            </NextIntlClientProvider>
-          </AppProvider>
+          <ThemeProvider defaultTheme={"system"} storageKey={"aegispad-theme"}>
+            <AppProvider>
+              <NextIntlClientProvider locale={locale} messages={messages}>
+                <Header />
+                <main className="flex-grow container mx-auto px-4 py-8">
+                  {children}
+                </main>
+                <Toaster />
+                <footer className="bg-card border-t border-border py-4 text-center text-sm text-muted-foreground">
+                  {t("footerCopyright", { year: new Date().getFullYear() })}
+                </footer>
+              </NextIntlClientProvider>
+            </AppProvider>
+          </ThemeProvider>
         </PostHogProvider>
       </body>
     </html>
