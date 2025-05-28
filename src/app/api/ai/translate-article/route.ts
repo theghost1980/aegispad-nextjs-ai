@@ -1,7 +1,7 @@
+import { MASTER_GEMINI_API_KEY } from "@/config/server-config";
 import { GEMINI_AI_MODEL_NAME } from "@/constants/constants";
 import { getProfileIdFromAuth } from "@/lib/auth/server.utils";
-import { decodeEncryptedApiKey } from "@/lib/encryption/server-encryption";
-import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
+import { recordApiUsage } from "@/lib/supabase/api-usage";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
   let targetLanguage;
   try {
     const body = await request.json();
-    // Esperamos que el cuerpo contenga el contenido del artículo y el idioma destino
     articleContent = body.articleContent;
     targetLanguage = body.targetLanguage;
   } catch (e) {
@@ -36,39 +35,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const supabase = createSupabaseServiceRoleClient();
-  const { data: profileData, error: profileError } = await supabase
-    .from("profiles")
-    .select("encrypted_gemini_api_key")
-    .eq("id", profileId)
-    .single();
-
-  if (profileError || !profileData || !profileData.encrypted_gemini_api_key) {
-    return NextResponse.json(
-      {
-        message:
-          "Gemini API key not configured for this user. Please configure it in your profile.",
-      },
-      { status: 400 }
+  if (!MASTER_GEMINI_API_KEY) {
+    console.error(
+      "MASTER_GEMINI_API_KEY is not available. Check server configuration."
     );
-  }
-
-  const userGeminiApiKey = decodeEncryptedApiKey(
-    profileData.encrypted_gemini_api_key
-  );
-
-  if (!userGeminiApiKey) {
     return NextResponse.json(
       {
-        message:
-          "Failed to decode Gemini API key. It might be corrupted or the server configuration is incorrect.",
+        message: "AI service is not configured correctly on the server.",
       },
       { status: 500 }
     );
   }
-
   try {
-    const genAI = new GoogleGenerativeAI(userGeminiApiKey);
+    const genAI = new GoogleGenerativeAI(MASTER_GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
       model: GEMINI_AI_MODEL_NAME,
     });
@@ -88,7 +67,7 @@ export async function POST(request: NextRequest) {
     *   Blockquotes (> quote)
     *   Code blocks (indented or fenced with \`\`\`)
     *   Inline code (\`code\`)
-    *   Horizontal rules (---, ***, ___)
+    *   Horizontal rules (---, ***, ___, &lt;hr /&gt;, &lt;hr/&gt;)
     *   Tables
 2.  Translate only the textual content found within the Markdown structure. Do not translate Markdown syntax characters themselves.
 3.  Your response must be *only* the translated Markdown content. Do not add any introductory phrases, concluding remarks, or explanations.
@@ -102,21 +81,32 @@ Original Markdown Article Text:
     const response = result.response;
     const translatedText = response.text();
 
-    // TODO: [HIGH PRIORITY] Implement token counting and usage tracking:
-    // 1. Extract promptTokenCount and candidatesTokenCount from `response.usageMetadata`.
-    // 2. Calculate totalTokenCount for this request.
-    // 3. Include these token counts (prompt, completion, total) in the JSON response.
-    // 4. (Future) Implement a reusable backend function `recordTokenUsage(profileId, service, promptTokens, completionTokens, totalTokens)`
-    //    to log usage to Supabase (e.g., 'token_usage_logs' table) and potentially update user's aggregate token counters.
-    //    Consider error handling for `usageMetadata` if not present.
+    // Extract token usage from the response metadata
+    const usageMetadata = response.usageMetadata;
+    const promptTokens = usageMetadata?.promptTokenCount;
+    const completionTokens = usageMetadata?.candidatesTokenCount;
+    const totalTokens = usageMetadata?.totalTokenCount;
+
+    // Record the usage in the database
+    if (profileId) {
+      // Ensure profileId is available
+      await recordApiUsage({
+        profileId: profileId,
+        operationType: "ai_translate_article", // Specific identifier for this operation
+        modelUsed: GEMINI_AI_MODEL_NAME,
+        textTokensUsed: totalTokens, // Using totalTokens for text_tokens_used
+        detailsJson: usageMetadata, // Store the full metadata for details
+      });
+    }
 
     // Devolvemos el texto traducido
     return NextResponse.json({
       translatedText: translatedText,
-      // tokenUsage: { promptTokens: ..., completionTokens: ..., totalTokens: ... } // Placeholder for when implemented
+      // Optionally include token usage in the response to the client
+      tokenUsage: usageMetadata,
     });
   } catch (e: any) {
-    console.error("Error translating content with user's Gemini key:", e);
+    console.error("Error translating content with master Gemini key:", e);
     return NextResponse.json(
       { message: "Error translating content: " + e.message },
       { status: 500 }

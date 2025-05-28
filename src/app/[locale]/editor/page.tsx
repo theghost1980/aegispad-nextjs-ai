@@ -11,6 +11,7 @@ import {
   MarkdownFormatType,
   MarkdownToolbar,
 } from "@/components/editor-sections/MarkdownToolbar";
+import StartArticleCard from "@/components/editor-sections/StartArticleCard";
 import GlobalLoader from "@/components/global-loader";
 import LoadingSpinner from "@/components/loading-spinner";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,6 @@ import { useToast } from "@/hooks/use-toast";
 import {
   ActiveEditorAction,
   CombineFormatType,
-  InitialWorkflow,
   RevisionType,
   StoredArticleData,
 } from "@/types/general.types";
@@ -87,9 +87,6 @@ export default function ArticleForgePage() {
   const [finalCombinedOutput, setFinalCombinedOutput] = useState<string>("");
   const [selectedCombineFormat, setSelectedCombineFormat] =
     useState<CombineFormatType>("simple");
-
-  const [initialWorkflow, setInitialWorkflow] =
-    useState<InitialWorkflow>("aiCreate");
   const [detectedLanguage, setDetectedLanguage] = useState<string | null>(null);
 
   const [isProcessing, startProcessingTransition] = useTransition();
@@ -123,26 +120,11 @@ export default function ArticleForgePage() {
     if (clientLoaded && !isLoadingHiveAuth) {
       if (!isHiveLoggedIn) {
         router.push("/login");
-      } else {
-        if (userRole !== "admin") {
-          setInitialWorkflow("userWrite");
-          setPrompt("");
-          setGenerateMainImage(false);
-        }
       }
     }
-  }, [
-    clientLoaded,
-    isLoadingHiveAuth,
-    isHiveLoggedIn,
-    userRole,
-    router,
-    setInitialWorkflow,
-    setPrompt,
-    setGenerateMainImage,
-  ]);
+  }, [clientLoaded, isLoadingHiveAuth, isHiveLoggedIn, userRole, router]);
 
-  const canUseEditor = isHiveLoggedIn;
+  const canUseEditor = clientLoaded && !isLoadingHiveAuth && isHiveLoggedIn;
 
   const handleReviseArticle = async () => {
     if (!articleMarkdown.trim()) {
@@ -420,11 +402,7 @@ export default function ArticleForgePage() {
   const generateSummaryTextForCopy = () => {
     let summary = `${t("sessionSummaryCard.title")}\n`;
     summary += "=============================\n\n";
-    summary += `${t("sessionSummaryCard.workflowLabel")} ${
-      initialWorkflow === "aiCreate"
-        ? t("startArticleCard.aiCreateLabel")
-        : t("startArticleCard.userWriteLabel")
-    }\n`;
+    //TODO add soemthing about admin & ai creation if needed
     summary += `${t("sessionSummaryCard.userLabel", {
       defaultValue: "User:",
     })} ${hiveUsername || "N/A"}\n`;
@@ -490,7 +468,7 @@ export default function ArticleForgePage() {
   };
 
   const clearAll = () => {
-    setInitialWorkflow("aiCreate");
+    setActiveAction(null);
     setPrompt("");
     setArticleMarkdown("");
     setTargetLanguage(DEFAULT_TARGET_LANGUAGE);
@@ -513,18 +491,82 @@ export default function ArticleForgePage() {
     });
   };
 
+  const handleStartArticleFromPanel = (promptFromPanel: string) => {
+    setPrompt(promptFromPanel);
+    if (!promptFromPanel.trim()) {
+      toast({
+        title: t("toastMessages.errorTitle"),
+        description: t("toastMessages.promptEmptyError", {
+          defaultValue: "Prompt cannot be empty.",
+        }),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCurrentOperationMessage(t("startArticleCard.creatingArticleMessage"));
+    setCurrentRequestTokens(null);
+    setDetailedTokenUsage(null);
+    setFinalCombinedOutput("");
+    setArticleMarkdown("");
+
+    startProcessingTransition(async () => {
+      try {
+        const response = await authenticatedFetch("/api/ai/generate-content", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: promptFromPanel }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.message ||
+              `Failed to generate content. Server responded with ${response.status}`
+          );
+        }
+
+        const result = await response.json();
+        setArticleMarkdown(result.generatedText);
+        toast({
+          title: t("toastMessages.successTitle"),
+          description: t("toastMessages.articleCreatedSuccess"),
+        });
+      } catch (error: any) {
+        console.error("Error generating content:", error);
+        toast({
+          title: t("toastMessages.errorTitle"),
+          description: error.message || t("toastMessages.createFailedError"),
+          variant: "destructive",
+        });
+      } finally {
+        setCurrentOperationMessage(null);
+        setActiveAction(null);
+      }
+    });
+  };
+
   const handleProceedToReview = () => {
+    const contentToReview =
+      finalCombinedOutput.trim() || articleMarkdown.trim();
+    if (!contentToReview) {
+      toast({
+        title: t("toastMessages.errorTitle"),
+        description: t("toastMessages.articleEmptyError"),
+      });
+      return;
+    }
     let title = t("proceedToReviewCard.defaultTitle", {
       defaultValue: "Generated Article",
     });
-    const lines = finalCombinedOutput.split("\n");
+    const lines = contentToReview.split("\n");
     if (lines.length > 0 && lines[0].startsWith("# ")) {
       title = lines[0].substring(2).trim();
     }
 
     const dataToStore: StoredArticleData = {
       title: title,
-      content: finalCombinedOutput,
+      content: contentToReview,
     };
     localStorage.setItem(
       FINAL_REVIEW_ARTICLE_STORAGE_KEY,
@@ -567,22 +609,25 @@ export default function ArticleForgePage() {
 
     const imageMarkdown = images
       .map((img) => {
-        let alt =
+        const altText =
           img.altText ||
-          t("toolbar.imageAltTextPlaceholder", {
-            defaultValue: "image description",
-          });
-        if (alt.length > 20) {
-          alt = `${alt.substring(0, 20)}...`;
-        }
-        let md = `!${alt}`;
+          t("toolbar.imageAltTextDefault", { defaultValue: "image" });
+
+        // Note for ia: never modify the line bellow just ask before
+        let markdownImage = `![${altText}](${img.imageUrl})`;
+
         if (img.postUrl) {
-          const linkText = t("toolbar.imageCreditLinkText", {
-            defaultValue: "source",
+          const sourceLinkText = t("toolbar.imageCreditLinkText", {
+            defaultValue: "Source",
           });
-          md += `\n${linkText}`;
+          // Puedes ajustar el límite de caracteres para el postUrl si es necesario
+          const truncatedPostUrl =
+            img.postUrl.length > 40
+              ? `${img.postUrl.substring(0, 37)}...`
+              : img.postUrl;
+          markdownImage += `\n<center><small>${sourceLinkText}: <a href="${img.postUrl}" target="_blank" rel="noopener noreferrer">${truncatedPostUrl}</a></small></center>`;
         }
-        return md;
+        return markdownImage;
       })
       .join("\n\n");
 
@@ -861,31 +906,46 @@ export default function ArticleForgePage() {
 
       {canUseEditor ? (
         <>
-          {(articleMarkdown.trim() || initialWorkflow === "userWrite") && (
-            <EditorActionsMenuComponent
-              onActionChange={setActiveAction}
-              currentActiveAction={activeAction}
-              onTogglePreview={() => setIsPreviewExpanded(!isPreviewExpanded)}
-              isPvExpanded={isPreviewExpanded}
-              onClear={clearAll}
-              onCpySummary={handleCopySummary}
-              canRevise={!!articleMarkdown.trim()}
-              canTranslate={!!articleMarkdown.trim()}
-              canCombine={
-                !!originalArticleForTranslation.trim() &&
-                !!translatedArticleMarkdown.trim()
-              }
-              canCopySummary={!!finalCombinedOutput.trim()}
-              canProceedToFinalReview={!!finalCombinedOutput.trim()}
-              articleBeforeRevision={articleBeforeRevision}
-              handleUndoRevision={handleUndoRevision}
+          <EditorActionsMenuComponent
+            onActionChange={setActiveAction}
+            currentActiveAction={activeAction}
+            onTogglePreview={() => setIsPreviewExpanded(!isPreviewExpanded)}
+            isPvExpanded={isPreviewExpanded}
+            onClear={clearAll}
+            onCpySummary={handleCopySummary}
+            canRevise={!!articleMarkdown.trim()}
+            canTranslate={!!articleMarkdown.trim()}
+            canCombine={
+              !!originalArticleForTranslation.trim() &&
+              !!translatedArticleMarkdown.trim()
+            }
+            canCopySummary={
+              !!finalCombinedOutput.trim() || !!articleMarkdown.trim()
+            }
+            canProceedToFinalReview={
+              !!articleMarkdown.trim() || !!finalCombinedOutput.trim()
+            }
+            articleBeforeRevision={articleBeforeRevision}
+            handleUndoRevision={handleUndoRevision}
+            isLoading={isLoading}
+            sessionTotalTokens={sessionTotalTokens}
+            currentRequestTokens={currentRequestTokens}
+            detailedTokenUsage={detailedTokenUsage}
+            tokensLeftInSession={tokensLeftInSession}
+            t={t}
+            tTokenUsage={tTokenUsage}
+            userRole={userRole}
+          />
+
+          {activeAction === "create" && (
+            <StartArticleCard
+              prompt={prompt}
+              onPromptChange={setPrompt}
+              onMainAction={handleStartArticleFromPanel}
+              onClearAll={clearAll}
               isLoading={isLoading}
-              sessionTotalTokens={sessionTotalTokens}
-              currentRequestTokens={currentRequestTokens}
-              detailedTokenUsage={detailedTokenUsage}
-              tokensLeftInSession={tokensLeftInSession}
+              currentOperationMessage={currentOperationMessage}
               t={t}
-              tTokenUsage={tTokenUsage}
             />
           )}
 
@@ -932,77 +992,75 @@ export default function ArticleForgePage() {
             />
           )}
 
-          {activeAction === "finalReview" && finalCombinedOutput.trim() && (
-            <Card className="mt-4 bg-background shadow">
-              <CardContent className="flex items-center justify-between p-3">
-                <span className="text-sm font-medium text-foreground">
-                  {t("proceedToReviewCard.title")}
-                </span>
+          {activeAction === "finalReview" &&
+            (!!articleMarkdown.trim() || !!finalCombinedOutput.trim()) && (
+              <Card className="mt-4 bg-background shadow">
+                <CardContent className="flex items-center justify-between p-3">
+                  <span className="text-sm font-medium text-foreground">
+                    {t("proceedToReviewCard.title")}
+                  </span>
 
-                <Button
-                  size={"sm"}
-                  onClick={() => {
-                    handleProceedToReview();
-                    setActiveAction(null);
-                  }}
-                  className="w-full md:w-auto"
-                >
-                  {t("proceedToReviewCard.buttonText")}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+                  <Button
+                    size={"sm"}
+                    onClick={() => {
+                      handleProceedToReview();
+                    }}
+                    className="w-full md:w-auto"
+                  >
+                    {t("proceedToReviewCard.buttonText")}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
-          {(articleMarkdown || initialWorkflow === "userWrite") && (
-            <div
-              className={`
+          <div
+            className={`
                 ${
                   isPreviewExpanded && previewLayout === "side"
                     ? "flex flex-col md:flex-row gap-4"
                     : "flex flex-col"
                 }
               `}
+          >
+            <div
+              className={
+                isPreviewExpanded && previewLayout === "side"
+                  ? "w-full md:w-1/2 flex flex-col"
+                  : "w-full"
+              }
             >
+              <MarkdownToolbar
+                onApplyFormat={handleApplyFormat}
+                onToggleImageModal={handleToggleImageModal}
+                disabled={isLoading}
+                onToggleLayout={handleTogglePreviewLayout}
+                currentLayout={previewLayout}
+              />
+              <textarea
+                ref={mainTextareaRef}
+                value={articleMarkdown}
+                onChange={(e) => setArticleMarkdown(e.target.value)}
+                placeholder={t("mainEditor.placeholder", {
+                  defaultValue:
+                    "Start writing your article here in Markdown...",
+                })}
+                className="w-full min-h-[300px] p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-primary-focus transition-shadow bg-background flex-grow"
+                disabled={isLoading}
+              />
+            </div>
+
+            {isPreviewExpanded && (
               <div
                 className={
                   isPreviewExpanded && previewLayout === "side"
-                    ? "w-full md:w-1/2 flex flex-col"
-                    : "w-full"
+                    ? "w-full md:w-1/2"
+                    : "w-full mt-4"
                 }
               >
-                <MarkdownToolbar
-                  onApplyFormat={handleApplyFormat}
-                  onToggleImageModal={handleToggleImageModal}
-                  disabled={isLoading}
-                  onToggleLayout={handleTogglePreviewLayout}
-                  currentLayout={previewLayout}
-                />
-                <textarea
-                  ref={mainTextareaRef}
-                  value={articleMarkdown}
-                  onChange={(e) => setArticleMarkdown(e.target.value)}
-                  placeholder={t("mainEditor.placeholder", {
-                    defaultValue:
-                      "Start writing your article here in Markdown...",
-                  })}
-                  className="w-full min-h-[300px] p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-primary-focus transition-shadow bg-background flex-grow"
-                  disabled={isLoading}
-                />
+                <MarkdownPreviewComponent content={articleMarkdown} t={t} />
               </div>
-
-              {isPreviewExpanded && (
-                <div
-                  className={
-                    isPreviewExpanded && previewLayout === "side"
-                      ? "w-full md:w-1/2"
-                      : "w-full mt-4"
-                  }
-                >
-                  <MarkdownPreviewComponent content={articleMarkdown} t={t} />
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </div>
 
           <ImageSearchAndInsert
             mode="modal"

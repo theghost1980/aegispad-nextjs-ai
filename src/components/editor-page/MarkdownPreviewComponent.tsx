@@ -15,7 +15,6 @@ interface MarkdownPreviewComponentProps {
 export const MarkdownPreviewComponent: React.FC<
   MarkdownPreviewComponentProps
 > = ({ content, t }) => {
-  console.log("MarkdownPreview content:", JSON.stringify(content));
   return (
     <Card className="shadow h-full">
       <CardHeader>

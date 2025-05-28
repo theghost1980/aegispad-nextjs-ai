@@ -100,7 +100,9 @@ export async function POST(request: NextRequest) {
     // 4. Buscar o crear perfil en Supabase
     let { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("id, hive_username, user_role")
+      .select(
+        "id, hive_username, user_role, theme_preference, login_redirect_preference"
+      ) // Seleccionar nuevas preferencias
       .eq("hive_username", username)
       .single();
 
@@ -120,13 +122,16 @@ export async function POST(request: NextRequest) {
           hive_username: username,
           last_login_at: new Date().toISOString(),
           user_role: determinedRole,
+          theme_preference: "system",
+          login_redirect_preference: "/",
         })
-        .select("id, hive_username, user_role")
+        .select(
+          "id, hive_username, user_role, theme_preference, login_redirect_preference"
+        )
         .single();
       if (insertProfileError) throw insertProfileError;
       profile = newProfile;
     } else {
-      // Actualizar last_login_at si el perfil ya existe
       await supabase
         .from("profiles")
         .update({
@@ -136,12 +141,19 @@ export async function POST(request: NextRequest) {
         .eq("id", profile.id);
 
       profile.user_role = determinedRole;
+      profile.theme_preference = profile.theme_preference || "system";
+      profile.login_redirect_preference =
+        profile.login_redirect_preference || "/";
     }
 
     if (!profile) throw new Error("Failed to get or create user profile.");
 
     // 5. Generar JWTs
-    const tokenPayload: { sub: string; username: string; role?: string } = {
+    const tokenPayload: {
+      sub: string;
+      username: string;
+      role?: string;
+    } = {
       sub: profile.id,
       username: profile.hive_username,
       role: profile.user_role,
@@ -164,6 +176,8 @@ export async function POST(request: NextRequest) {
         username: profile.hive_username,
         id: profile.id,
         role: profile.user_role,
+        theme_preference: profile.theme_preference,
+        login_redirect_preference: profile.login_redirect_preference,
       },
     });
   } catch (error: any) {

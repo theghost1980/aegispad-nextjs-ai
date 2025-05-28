@@ -148,6 +148,7 @@
       "buttonText": "Ir a Revisión Final"
     },
     "actions": {
+      "create": "Crear",
       "revise": "Revisar Contenido",
       "translate": "Traducir",
       "combine": "Combinar Formatos",
@@ -231,17 +232,13 @@
     "geminiApiIntro": "AegisPad utiliza la potente API de Gemini de Google para sus funciones de inteligencia artificial, ofreciéndote resultados de vanguardia.",
     "geminiApiGetFree": "Para usar las funciones de IA, necesitarás tu propia clave API de Gemini. Puedes obtener una gratis en <link>Google AI Studio</link>.",
     "geminiApiFreeTier": "¡Excelentes noticias! Con el nivel gratuito de Gemini, obtienes aproximadamente 1 millón de tokens por mes sin costo, ¡suficiente para una vasta cantidad de mejora de contenido!",
-    "tokenEstimationTitle": "Estimación de Uso de Tokens",
-    "tokenEstimationIntro": "Entender el consumo de tokens te ayuda a administrar tu cuota gratuita y planificar tu trabajo de manera eficiente.",
-    "tokenEstimationReviseTitle": "Revisión de Artículo (500 palabras)",
-    "tokenEstimationReviseDesc": "~1.500 - 4.000 tokens",
-    "tokenEstimationTranslateTitle": "Traducción de Artículo (500 palabras)",
-    "tokenEstimationTranslateDesc": "~1.000 - 3.000 tokens",
-    "tokenEstimationImageTitle": "Generación de Imagen",
-    "tokenEstimationImageDesc": "~250 - 1.000 tokens (varía según la complejidad)",
-    "tokenEstimationMonthly": "Con 1 millón de tokens gratuitos por mes, podrías, por ejemplo, realizar cientos de revisiones y traducciones.",
-    "tokenEstimationNote": "Nota: Estas son estimaciones. El uso real puede variar según la complejidad del contenido, la longitud y el modelo Gemini específico utilizado.",
-    "secondaryCtaButton": "Probar el Editor Ahora"
+    "visionTitle": "Nuestra Visión: Potenciando Tu Contenido en Hive",
+    "visionIntro": "AegisPad quiere darte todas las herramientas y juntos iremos definiendo cómo hacer una relación sólida y duradera, donde lo primordial sea tu buen contenido.",
+    "visionBeneficiary": "Por ahora, la cuenta AegisPad se beneficia de tus publicaciones con un 6% de lo que generen. Esto nos ayuda a mantener y mejorar la plataforma para todos.",
+    "visionFeedbackLink": "Tu feedback es crucial para este viaje. <link>¡Comparte tus ideas!</link>",
+    "visionHiveReminder": "Publica fácilmente tus obras maestras directamente en la blockchain de Hive y conéctate con una comunidad vibrante.",
+    "secondaryCtaButton": "Probar el Editor Ahora",
+    "featuresIntro": "AegisPad está diseñado para ahorrarte tiempo y esfuerzo al unificar todo lo que un blogger necesita en un solo lugar, potenciado con asistencia de IA."
   },
   "TestingsPage": {
     "title": "Página de Prueba de Hive Keychain",
@@ -286,28 +283,33 @@
   },
   "FaqPage": {
     "title": "Preguntas Frecuentes",
-    "sampleQ1Title": "¿Qué es AegisPad ahora?",
-    "sampleQ1Content": "AegisPad es una herramienta inteligente que te ayuda a refinar y traducir contenido, y a prepararlo para su publicación en HIVE, utilizando el poder de Gemini AI y asegurando tu clave API de Gemini con Hive Keychain.",
-    "sampleQ2Title": "¿Cómo obtengo una clave API de Gemini?",
-    "sampleQ2Content": "Puedes obtener una clave API de Gemini gratis en Google AI Studio. AegisPad utiliza esta clave para potenciar sus funciones de IA. El nivel gratuito ofrece una generosa cantidad de tokens para la revisión y traducción de contenido.",
-    "sampleQ3Title": "¿Cómo se almacena mi clave API de Gemini?",
-    "sampleQ3Content": "Tu clave API de Gemini, una vez proporcionada, se encripta usando tu cuenta de Hive Keychain (específicamente, tu clave de Publicación) y se almacena localmente en el almacenamiento local de tu navegador. Se desencripta solo cuando es necesario para interactuar con la API de Gemini y nunca se envía a nuestros servidores sin encriptar.",
-    "geminiApiUsageQuestion": "¿Cómo se manejan los tokens o el costo de usar la IA?",
-    "geminiApiUsageAnswer": "El uso de las funcionalidades de IA consume tokens de tu API Key de Gemini, y cualquier costo asociado se basa en la política de precios de Google para la API de Gemini. AegisPad intenta mostrar el uso de tokens para ayudarte a monitorearlo, pero la responsabilidad final de gestionar el uso y los costos de tu API Key recae en ti.",
-    "supportedLanguagesQuestion": "¿En qué idiomas puedo revisar y traducir artículos?",
-    "supportedLanguagesAnswer": "La revisión y traducción de artículos se pueden realizar en múltiples idiomas, dependiendo de las capacidades de Gemini.",
-    "articleRevisionProcessQuestion": "¿Cómo funciona la revisión de artículos?",
-    "articleRevisionProcessAnswer": "La IA revisa tu artículo en cuanto a gramática, estilo, claridad y fluidez. Su objetivo es proporcionar una versión mejorada mientras intenta mantener el formato Markdown original.",
-    "workSavingQuestion": "¿Mi trabajo se guarda automáticamente?",
-    "workSavingAnswer": "Actualmente, en la página de 'Revisión Final', puedes usar la opción 'Guardar para Después', que guarda tu artículo en el almacenamiento local de tu navegador. Ten en cuenta que esto es temporal. Guardar artículos en la nube o en una base de datos para un almacenamiento más permanente es una característica futura planificada.",
-    "hivePublishingQuestion": "¿Puedo publicar directamente en Hive desde AegisPad?",
-    "hivePublishingAnswer": "La función 'Publicar en Hive' está planificada y en desarrollo. Por ahora, sirve como un marcador de posición, y la publicación directa en Hive aún no está habilitada.",
-    "betaFeedbackQuestion": "Esta es una versión Beta, ¿cómo puedo proporcionar comentarios o reportar errores?",
-    "betaFeedbackAnswer": "¡Valoramos mucho tu opinión! Puedes compartir tus ideas, sugerencias o reportar cualquier problema que encuentres visitando nuestra página de Comentarios. Encontrarás un enlace en el encabezado del sitio web.",
-    "betaVersionMeaningQuestion": "¿Qué significa que la aplicación está en Beta?",
-    "betaVersionMeaningAnswer": "Estar en Beta significa que AegisPad se encuentra en una etapa temprana de lanzamiento. Es posible que encuentres algunos errores o que algunas funciones aún no estén completamente implementadas. Tus comentarios durante esta fase son cruciales para que podamos mejorar la aplicación.",
-    "dataPrivacyQuestion": "¿Dónde se almacenan mis artículos y mi API Key?",
-    "dataPrivacyAnswer": "Tu API Key de Gemini se encripta utilizando las credenciales de tu cuenta de HIVE y se almacena en nuestra base de datos segura, vinculada a tu perfil. Si utilizas la función 'Guardar para Después' en la página de 'Revisión Final', el contenido de tu artículo se almacena temporalmente en el almacenamiento local de tu navegador."
+    "description": "Encuentra respuestas a preguntas comunes sobre AegisPad.",
+    "whatIsAegisPadQuestion": "¿Qué es AegisPad y para quién es?",
+    "whatIsAegisPadAnswer": "AegisPad es un editor Markdown avanzado potenciado por IA, diseñado para bloggers y creadores de contenido en la blockchain de Hive. Nuestro objetivo es unificar todas las herramientas que necesitas para crear, refinar y publicar tu contenido de manera eficiente, ahorrándote tiempo y esfuerzo.",
+    "aiAssistanceQuestion": "¿Cómo me ayuda la Inteligencia Artificial en AegisPad?",
+    "aiAssistanceAnswer": "AegisPad integra IA (actualmente Gemini de Google) para asistirte en varias tareas como la revisión de tus artículos para mejorar la gramática y el estilo, la traducción de tu contenido a múltiples idiomas, y la generación de ideas o borradores iniciales para tus posts. Todo esto está integrado para que no necesites configurar claves API externas.",
+    "hiveAccountRequirementQuestion": "¿Necesito una cuenta de Hive para usar AegisPad?",
+    "hiveAccountRequirementAnswer": "Sí, para iniciar sesión, publicar contenido en la blockchain de Hive y aprovechar al máximo las funcionalidades de AegisPad, necesitarás una cuenta de Hive y la extensión Hive Keychain instalada en tu navegador. Hive Keychain asegura que tus claves privadas nunca salgan de tu control.",
+    "beneficiaryModelQuestion": "¿Cómo funciona el modelo de beneficiario de AegisPad?",
+    "beneficiaryModelAnswer": "AegisPad es un proyecto que busca crecer con su comunidad. Para ayudar a mantener y desarrollar la plataforma, un 6% de las recompensas generadas por tus publicaciones hechas a través de AegisPad se asignan como beneficiario a la cuenta @aegispad. Esto nos permite seguir ofreciéndote herramientas innovadoras y un servicio de calidad.",
+    "supportedLanguagesQuestion": "¿Qué idiomas son compatibles con la asistencia de IA?",
+    "supportedLanguagesAnswer": "La IA de AegisPad puede ayudarte con contenido en muchos idiomas. Para la traducción, puedes traducir desde y hacia una amplia variedad de idiomas, incluyendo español, francés, alemán, japonés, chino, ruso, portugués, italiano, coreano, árabe e inglés, entre otros. Las herramientas de revisión y creación también admiten múltiples idiomas.",
+    "articleRevisionProcessQuestion": "¿Cómo funciona el proceso de revisión de artículos?",
+    "articleRevisionProcessAnswer": "Puedes enviar el texto de tu artículo a nuestra IA para su revisión. Analizará tu contenido y sugerirá mejoras en gramática, estilo, claridad y coherencia. Luego podrás revisar estas sugerencias línea por línea y decidir cuáles aplicar.",
+    "workSavingQuestion": "¿Se guarda mi trabajo automáticamente?",
+    "workSavingAnswer": "AegisPad guarda automáticamente tu trabajo en progreso (título y contenido) en el almacenamiento local de tu navegador. Esto significa que si cierras accidentalmente la pestaña o tu navegador, generalmente puedes recuperar tu trabajo cuando regreses. Sin embargo, para piezas importantes, siempre recomendamos guardar también una copia externamente.",
+    "hivePublishingQuestion": "¿Cómo funciona la publicación en Hive?",
+    "hivePublishingAnswer": "Una vez que estés satisfecho con tu artículo, puedes proceder a la página de revisión final. Allí, puedes establecer tu título, etiquetas (incluida la etiqueta principal de la comunidad) y luego publicar directamente en la blockchain de Hive utilizando Hive Keychain para una firma segura de la transacción. AegisPad ayuda a agilizar este proceso.",
+    "betaFeedbackQuestion": "¿Cómo puedo dar mi opinión durante la fase beta?",
+    "betaFeedbackAnswer": "¡Tu opinión es invaluable para nosotros! Puedes compartir tus ideas, sugerencias o informar cualquier problema a través del enlace 'Feedback' que generalmente se encuentra en el pie de página o en la navegación de la aplicación. Agradecemos tu ayuda para mejorar AegisPad.",
+    "betaVersionMeaningQuestion": "¿Qué significa que AegisPad esté en Beta?",
+    "betaVersionMeaningAnswer": "Estar en Beta significa que AegisPad está activamente en desarrollo y prueba. Aunque nos esforzamos por una experiencia estable, podrías encontrar errores ocasionales o alguna característica podría no estar completamente pulida. Estamos trabajando continuamente para mejorar y añadir nuevas funcionalidades basadas en los comentarios de los usuarios.",
+    "dataPrivacyQuestion": "¿Cómo se manejan mis datos y mi privacidad?",
+    "dataPrivacyAnswer": "Nos tomamos tu privacidad muy en serio. El contenido de tu artículo solo es procesado por servicios de IA cuando utilizas explícitamente una función de IA (como revisar o traducir). La autenticación se maneja a través de Hive Keychain, lo que significa que tus claves de Hive nunca se exponen a AegisPad. Almacenamos tu nombre de usuario de Hive y claves API encriptadas (si elegiste proporcionar una en el pasado, aunque ahora usamos una clave maestra) de forma segura. Para más detalles, consulta nuestra Política de Privacidad (enlace por añadir).",
+    "customizationQuestion": "¿Puedo personalizar mi experiencia en AegisPad?",
+    "customizationAnswer": "¡Sí! Puedes personalizar algunos aspectos de tu experiencia en AegisPad, como el tema visual (claro, oscuro o el predeterminado de tu sistema) y la página a la que eres redirigido después de iniciar sesión. Estas opciones se encuentran en tu página de perfil.",
+    "blogVsCommunityPostQuestion": "¿Qué diferencia hay entre publicar en mi blog y en una comunidad?",
+    "blogVsCommunityPostAnswer": "Cuando publicas en tu blog personal, el contenido aparece principalmente en tu perfil. Al publicar en una comunidad, tu post se asocia a ese espacio temático, aumentando su visibilidad entre los miembros interesados en ese nicho. AegisPad te permite elegir fácilmente dónde publicar, utilizando la comunidad seleccionada como la etiqueta principal (categoría) de tu post."
   },
   "OnboardingAssistant": {
     "loadingAssistant": "Cargando asistente...",
@@ -443,7 +445,45 @@
     "viewStoredKeyButton": "Ver Clave Almacenada (Cifrada)",
     "hideStoredKeyButton": "Ocultar Clave Almacenada",
     "storedEncryptedKeyLabel": "Clave Almacenada (Cifrada en el Servidor):",
-    "adminUserTooltip": "Cuenta de Administrador"
+    "adminUserTooltip": "Cuenta de Administrador",
+    "tokenUsageHistory": {
+      "title": "Historial de Uso de Tokens (Últimos 25)",
+      "loading": "Cargando historial...",
+      "error": "No se pudo cargar el historial: {error}",
+      "noHistory": "No se encontró historial de uso de tokens.",
+      "headerTimestamp": "Fecha y Hora",
+      "headerOperation": "Operación",
+      "headerModel": "Modelo",
+      "headerTextTokens": "Tokens de Texto",
+      "headerImageUnits": "Unidades de Imagen",
+      "summaryTitle": "Resumen de Uso (de los registros mostrados)",
+      "totalTextTokens": "Total de Tokens de Texto Usados",
+      "totalImageUnits": "Total de Unidades de Imagen Usadas",
+      "summaryNote": "Los totales se basan en los últimos 25 registros de uso mostrados."
+    },
+    "errors": {
+      "fetchHistoryFailed": "Error al obtener el historial de uso de tokens.",
+      "error": "Error"
+    },
+    "preferences": {
+      "title": "Preferencias de Usuario",
+      "theme": {
+        "label": "Preferencia de Tema",
+        "light": "Claro",
+        "dark": "Oscuro",
+        "system": "Predeterminado del Sistema"
+      },
+      "loginRedirect": {
+        "label": "Página después de Iniciar Sesión",
+        "home": "Página de Inicio",
+        "editor": "Editor"
+      },
+      "saveButton": "Guardar Preferencias",
+      "saving": "Guardando...",
+      "saveSuccess": "Preferencias guardadas con éxito!",
+      "saveError": "Error al guardar las preferencias.",
+      "noChanges": "No hay cambios para guardar."
+    }
   },
   "LoginPage": {
     "title": "Iniciar Sesión en AegisPad",
@@ -497,7 +537,17 @@
     "publishErrorEmptyContent": "El contenido del artículo no puede estar vacío.",
     "publishErrorUnknown": "Ocurrió un error desconocido durante la publicación.",
     "publishSuccessTitle": "¡Publicado!",
-    "publishSuccessDescription": "Su artículo ha sido publicado exitosamente en Hive."
+    "publishSuccessDescription": "Su artículo ha sido publicado exitosamente en Hive.",
+    "communitiesList": {
+      "loading": "Cargando comunidades suscritas...",
+      "errorTitle": "Error al Cargar Comunidades",
+      "errorMessage": "No se pudieron cargar tus comunidades suscritas: {error}",
+      "noCommunitiesList": "No estás suscrito a ninguna comunidad, o no se pudieron cargar.",
+      "noCommunitiesSelect": "No hay comunidades disponibles",
+      "selectCommunityPlaceholder": "Selecciona una comunidad...",
+      "listTitle": "Tus Comunidades Suscritas"
+    },
+    "postToCommunityLabel": "¿Publicar en una comunidad?"
   },
   "FeedbackPage": {
     "title": "Comparte tus Comentarios",

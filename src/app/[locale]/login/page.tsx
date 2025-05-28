@@ -1,8 +1,9 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Para mensajes
-import { Button } from "@/components/ui/button"; // Asumiendo que usas shadcn/ui Button
-import { Input } from "@/components/ui/input"; // Asumiendo que usas shadcn/ui Input
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useTheme } from "@/context/theme-context";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { Terminal } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -13,6 +14,7 @@ import { FormEvent, useEffect, useState } from "react";
 export default function LoginPage() {
   const t = useTranslations("LoginPage");
   const router = useRouter();
+  const { setTheme } = useTheme();
   const {
     login,
     isAuthenticated,
@@ -21,6 +23,7 @@ export default function LoginPage() {
     isLoadingKeychain,
     hiveUsername,
     error: authError,
+    preferences,
     userRole,
   } = useHiveAuth();
 
@@ -33,6 +36,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
+      if (preferences?.theme_preference) {
+        setTheme(preferences.theme_preference);
+      }
+
       const finalUsername = hiveUsername || usernameInput;
       posthog.capture("login_success", { username: finalUsername });
       if (finalUsername) {
@@ -43,9 +50,22 @@ export default function LoginPage() {
       }
 
       setLoginSuccessMessage(t("redirecting"));
-      setTimeout(() => router.push("/profile"), 1500);
+      const redirectPath = preferences?.login_redirect_preference || "/";
+      setTimeout(() => {
+        router.push(redirectPath);
+      }, 1500);
     }
-  }, [isAuthenticated, isAuthLoading, router, t, usernameInput, hiveUsername]);
+  }, [
+    isAuthenticated,
+    isAuthLoading,
+    router,
+    t,
+    usernameInput,
+    hiveUsername,
+    preferences,
+    userRole,
+    setTheme,
+  ]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -66,9 +86,7 @@ export default function LoginPage() {
       const success = await login(usernameInput.trim());
       if (success) {
         setLoginSuccessMessage(t("loginSuccess"));
-        // La redirección la maneja el useEffect de arriba al cambiar isAuthenticated
       } else {
-        // El error específico debería venir del hook useHiveAuth si login falla
         setFormError(authError || t("anErrorOccurred"));
       }
     } catch (e: any) {
@@ -86,7 +104,6 @@ export default function LoginPage() {
     );
   }
 
-  // Si ya está autenticado y el useEffect está por redirigir, no mostrar el form.
   if (isAuthenticated) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">

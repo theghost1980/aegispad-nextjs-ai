@@ -15,6 +15,7 @@ import {
   TokenUsageTranslations,
 } from "@/types/translation-types";
 import {
+  Bot,
   Coins,
   Combine,
   Copy,
@@ -22,7 +23,7 @@ import {
   Eye,
   EyeOff,
   Languages,
-  SendToBack, // Icono para Revisión Final
+  SendToBack,
   Trash2,
   Undo2,
 } from "lucide-react";
@@ -33,6 +34,7 @@ interface EditorActionsMenuComponentProps {
   currentActiveAction: ActiveEditorAction;
   onTogglePreview: () => void;
   isPvExpanded: boolean;
+  userRole?: string | null;
   onClear: () => void;
   onCpySummary: () => void;
   canRevise: boolean;
@@ -58,6 +60,7 @@ export const EditorActionsMenuComponent: React.FC<
   currentActiveAction,
   onTogglePreview,
   isPvExpanded,
+  userRole,
   onClear,
   onCpySummary,
   canRevise,
@@ -77,6 +80,19 @@ export const EditorActionsMenuComponent: React.FC<
 }) => (
   <Card className="mb-4 shadow">
     <CardContent className="flex flex-wrap gap-2 items-center p-2">
+      {userRole === "admin" && (
+        <Button
+          onClick={() => {
+            onActionChange(currentActiveAction === "create" ? null : "create");
+          }}
+          variant={currentActiveAction === "create" ? "default" : "outline"}
+          size="sm"
+          disabled={isLoading}
+        >
+          <Bot className="mr-2 h-4 w-4" />
+          {t("actions.create", { defaultValue: "Create" })}
+        </Button>
+      )}
       <Button
         onClick={() =>
           onActionChange(currentActiveAction === "revise" ? null : "revise")
@@ -112,7 +128,6 @@ export const EditorActionsMenuComponent: React.FC<
         <Combine className="mr-2 h-4 w-4" />
         {t("actions.combine", { defaultValue: "Combine" })}
       </Button>
-      {/* Botón para Revisión Final */}
       <Button
         onClick={() =>
           onActionChange(

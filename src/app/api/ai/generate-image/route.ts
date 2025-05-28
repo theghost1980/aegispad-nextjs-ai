@@ -1,7 +1,6 @@
+import { MASTER_GEMINI_API_KEY } from "@/config/server-config";
 import { getProfileIdFromAuth } from "@/lib/auth/server.utils";
 import { uploadBase64ToCloudinary } from "@/lib/cloudinary/server.utils";
-import { decodeEncryptedApiKey } from "@/lib/encryption/server-encryption";
-import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -37,39 +36,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const supabase = createSupabaseServiceRoleClient();
-  const { data: profileData, error: profileError } = await supabase
-    .from("profiles")
-    .select("encrypted_gemini_api_key")
-    .eq("id", profileId)
-    .single();
-
-  if (profileError || !profileData || !profileData.encrypted_gemini_api_key) {
-    return NextResponse.json(
-      {
-        message:
-          "Gemini API key not configured for this user. Please configure it in your profile.",
-      },
-      { status: 400 }
+  if (!MASTER_GEMINI_API_KEY) {
+    console.error(
+      "MASTER_GEMINI_API_KEY is not available. Check server configuration."
     );
-  }
-
-  const userGeminiApiKey = decodeEncryptedApiKey(
-    profileData.encrypted_gemini_api_key
-  );
-
-  if (!userGeminiApiKey) {
     return NextResponse.json(
       {
         message:
-          "Failed to decode Gemini API key. It might be corrupted or the server configuration is incorrect.",
+          "AI service for image generation is not configured correctly on the server.",
       },
       { status: 500 }
     );
   }
-
   try {
-    const genAI = new GoogleGenerativeAI(userGeminiApiKey);
+    const genAI = new GoogleGenerativeAI(MASTER_GEMINI_API_KEY);
     // Usamos el nombre del modelo de tu ejemplo.
     // Es importante notar que el SDK @google/generative-ai podría no tener
     // un método `generateImage` directamente en los modelos que obtiene de esta forma,
@@ -109,8 +89,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Considerar el conteo de tokens/costo para la generación de imágenes.
-    // Esto es diferente de los tokens de texto.
+    // TODO: [HIGH PRIORITY] Implement cost/usage tracking for image generation.
+    // This is different from text token counting.
+    // 1. Determine how Gemini/Imagen API reports usage for image generation (e.g., per image, dimensions, steps).
+    // 2. Include this usage information in the JSON response if available.
+    // 3. (Future) Implement a reusable backend function `recordImageGenerationUsage(profileId, modelName, count, metadata)`
+    //    to log usage to Supabase.
 
     if (uploadToCloudinary) {
       try {
@@ -129,7 +113,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ imageBase64: imageBase64 });
     }
   } catch (e: any) {
-    console.error("Error generating image with user's Gemini key:", e);
+    console.error("Error generating image with master Gemini key:", e);
     return NextResponse.json(
       { message: "Error generating image: " + e.message },
       { status: 500 }

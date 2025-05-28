@@ -1,3 +1,71 @@
+# Cambios y Mejoras - Sesión del 28/05/2024
+
+## Funcionalidad de Publicación y Comunidades en `FinalReviewPage.tsx`
+
+- **Selección de Tipo de Post (Blog vs. Comunidad):**
+  - Se añadió un `Switch` en la página de revisión final para permitir al usuario elegir si su publicación es para su blog personal o para una comunidad de Hive.
+  - Se implementaron nuevos estados (`postType`, `selectedCommunity`) para gestionar esta selección.
+- **Componente `SubscribedCommunitiesList.tsx`:**
+  - Se creó un nuevo componente reutilizable para mostrar las comunidades a las que un usuario de Hive está suscrito.
+  - El componente tiene dos modos de visualización (`displayMode`):
+    - `"full"`: Muestra una lista completa de las comunidades.
+    - `"min"`: Muestra un `<Select>` (dropdown) para elegir una comunidad.
+  - Incluye manejo de estados de carga, error y lista vacía.
+  - Se añadieron las traducciones correspondientes.
+- **Integración en `FinalReviewPage.tsx`:**
+  - Si el usuario activa el switch para "publicar en comunidad", se renderiza `SubscribedCommunitiesList` en modo `"min"`, permitiendo la selección de una comunidad.
+  - La comunidad seleccionada se guarda en el estado `selectedCommunity`.
+  - La función `handlePublishToHive` se actualizó para usar `selectedCommunity` como `parentPermlink` (categoría principal) si se trata de un post de comunidad.
+- **Carga de Comunidades Suscritas:**
+  - Se creó una nueva ruta API (`/api/user/hive-subscriptions`) que utiliza `dhive` para obtener las comunidades a las que el usuario autenticado está suscrito.
+  - La función `getUserSubscribedCommunities` en `lib/hive/server-utils.ts` fue corregida para parsear correctamente la respuesta de la API de Hive (que devuelve un array de arrays) y mapearla a la interfaz `HiveCommunity` (con `id`, `name`, `role`). Se manejó el tipado de la respuesta de `dhive` como `unknown` para mayor seguridad.
+  - `FinalReviewPage.tsx` ahora llama a esta API al montarse para cargar y mostrar las comunidades.
+
+## Mejoras en la Interfaz de Usuario (UI) y Experiencia de Usuario (UX)
+
+- **Estilos de `TagInput.tsx`:**
+  - Se ajustaron los estilos del componente de entrada de etiquetas para que sean compatibles con los temas claro y oscuro, utilizando variables de color de Tailwind CSS (`bg-background`, `text-foreground`) en lugar de colores fijos.
+- **Actualización de Contenido en `HomePage.tsx`:**
+  - Se eliminó la sección referente a la configuración individual de claves API de Gemini, ya que AegisPad ahora utiliza una clave maestra.
+  - Se añadió un nuevo mensaje clave enfatizando que AegisPad está diseñado para ahorrar tiempo y esfuerzo al unificar las herramientas que un blogger necesita.
+  - Se reemplazó la sección "Token Estimation" por una nueva sección "Nuestra Visión", que comunica:
+    - El objetivo de AegisPad de proveer herramientas y construir una relación duradera con la comunidad.
+    - La información sobre el modelo de beneficiario del 6% para la cuenta `@aegispad`.
+    - Una invitación a los usuarios para que proporcionen feedback.
+  - El botón "Probar el Editor" se hizo más grande y llamativo para incentivar su uso.
+- **Actualización de `constants.ts` (FAQ Data):**
+  - Se eliminó la pregunta y respuesta relacionada con el uso de la API de Gemini.
+  - Se reemplazaron las preguntas de ejemplo por contenido más relevante y específico sobre AegisPad, incluyendo:
+    - "¿Qué es AegisPad y para quién es?"
+    - "¿Cómo me ayuda la Inteligencia Artificial en AegisPad?"
+    - "¿Necesito una cuenta de Hive para usar AegisPad?"
+    - "¿Cómo funciona el modelo de beneficiario de AegisPad?"
+    - "¿Puedo personalizar mi experiencia en AegisPad?"
+    - "¿Qué diferencia hay entre publicar en mi blog y en una comunidad?"
+  - Se proporcionaron las traducciones correspondientes para estas nuevas entradas del FAQ.
+
+## Correcciones y Refinamientos
+
+- **Aplicación de Tema en `ProfilePage.tsx`:**
+  - Se solucionó un problema donde el cambio de tema visual (claro/oscuro) no se aplicaba inmediatamente o se revertía después de guardar las preferencias.
+  - Se ajustó la lógica del `useEffect` y de la función `handleSavePreferences` utilizando un `useRef` para asegurar que el tema se aplique correctamente y persista tras la acción del usuario y la recarga de la página.
+- **Flujo de Creación de Contenido en `ArticleForgePage.tsx`:**
+  - Se consolidó la lógica para que el `StartArticleCard.tsx` (panel de prompt) aparezca cuando la acción `"create"` esté activa.
+  - Se implementó la llamada a la API `/api/ai/generate-content` desde `handleStartArticleFromPanel` cuando el usuario envía un prompt.
+  - **Seguridad:** Se añadió una verificación de rol en el backend (`/api/ai/generate-content/route.ts`) para asegurar que solo los usuarios con rol "admin" puedan ejecutar esta acción de generación de contenido. El frontend ya muestra un `toast` si el backend devuelve un error 403 (Forbidden).
+- **Simplificación de `StartArticleCard.tsx`:**
+  - El componente se simplificó para enfocarse únicamente en presentar el `Textarea` para el prompt de creación de contenido, eliminando la selección de flujo de trabajo, idioma de creación y la opción de generar imagen principal.
+  - Se ajustó el paso de props y el uso de traducciones en consecuencia.
+- **Inserción de Imágenes en `ArticleForgePage.tsx`:**
+  - Se corrigió la función `handleInsertImagesFromModal` para que genere la sintaxis Markdown estándar y correcta para las imágenes: `!alt text`.
+
+## Próximos Pasos y Consideraciones
+
+- **Monetización y Financiamiento (Visión a Futuro):**
+  - Se añadió una frase a la visión del proyecto (para ser usada en comunicaciones) sobre la intención de, junto con la comunidad, definir un modelo de financiamiento o monetización justo para asegurar la sostenibilidad y el crecimiento de AegisPad.
+
+---
+
 # Cambios y Planificación - Sesión del 27/05/2024
 
 ## Mejoras y Correcciones en `LineReviewer.tsx`

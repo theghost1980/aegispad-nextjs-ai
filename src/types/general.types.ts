@@ -7,6 +7,7 @@ export type CombineFormatType =
 export type InitialWorkflow = "aiCreate" | "userWrite";
 export type ActiveEditorAction =
   | null
+  | "create"
   | "revise"
   | "translate"
   | "combine"
@@ -16,4 +17,16 @@ export type RevisionType = "full" | "selective";
 export interface StoredArticleData {
   title: string;
   content: string;
+}
+
+export type UserPreferences = {
+  theme_preference?: "light" | "dark" | "system";
+  login_redirect_preference?: "/" | "/editor";
+};
+
+export interface SubscribedCommunity {
+  id: string; // ej. "hive-167922"
+  name: string; // ej. "LeoFinance"
+  role: string; // ej. "guest"
+  pending_posts?: string | number;
 }

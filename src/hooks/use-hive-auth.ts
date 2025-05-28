@@ -7,6 +7,7 @@ import {
   getItem,
   setItem,
 } from "@/lib/indexed-db-service";
+import type { UserPreferences } from "@/types/general.types";
 import { KeychainHelper, KeychainHelperUtils } from "keychain-helper";
 import { useCallback, useContext, useEffect, useState } from "react";
 
@@ -38,6 +39,7 @@ export function useHiveAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
 
   const router = useRouter();
 
@@ -54,18 +56,28 @@ export function useHiveAuth() {
         );
         const storedAccessToken = await getItem<string>("accessToken");
         const storedUserRole = await getItem<string>("currentUserRole");
+        const storedPreferences = await getItem<UserPreferences>(
+          "currentUserPreferences"
+        );
 
-        if (storedUsernameFromDB && storedAccessToken && storedUserRole) {
+        if (
+          storedUsernameFromDB &&
+          storedAccessToken &&
+          storedUserRole &&
+          storedPreferences
+        ) {
           setHiveUsername(storedUsernameFromDB);
           setIsAuthenticated(true);
           setAuthToken(storedAccessToken);
           setUserRole(storedUserRole);
+          setPreferences(storedPreferences);
         } else {
           await clearUserSessionData();
           setHiveUsername(null);
           setIsAuthenticated(false);
           setAuthToken(null);
           setUserRole(null);
+          setPreferences(null);
         }
       } catch (e) {
         console.error("Error loading auth status from IndexedDB", e);
@@ -73,6 +85,7 @@ export function useHiveAuth() {
         setIsAuthenticated(false);
         setAuthToken(null);
         setUserRole(null);
+        setPreferences(null);
       } finally {
         setIsLoading(false);
       }
@@ -95,6 +108,7 @@ export function useHiveAuth() {
       setIsAuthenticated(false);
       setAuthToken(null);
       setUserRole(null);
+      setPreferences(null);
       if (refreshPromise) {
         setRefreshPromise(null);
       }
@@ -156,11 +170,10 @@ export function useHiveAuth() {
         const {
           accessToken: newAccessToken,
           refreshToken: newRefreshToken,
-          // user: refreshedUser, // Si el endpoint de refresh devolviera el usuario
+          // No esperamos 'user' o 'preferences' del endpoint de refresh
         } = await response.json();
 
         if (!newAccessToken || !newRefreshToken) {
-          console.error("Refresh endpoint did not return new tokens.");
           await logout(); // Forzar logout y redirigir
           return null;
         }
@@ -171,12 +184,7 @@ export function useHiveAuth() {
         await setItem("accessToken", newAccessToken);
         await setItem("refreshToken", newRefreshToken);
         setAuthToken(newAccessToken);
-        // Si el endpoint /api/auth/refresh devolviera el objeto user con el rol:
-        // if (refreshedUser && refreshedUser.role) {
-        //   await setItem("currentUserRole", refreshedUser.role);
-        //   setUserRole(refreshedUser.role);
-        // }
-
+        // Las preferencias no se actualizan aquí, se mantienen las cargadas desde IndexedDB
         return newAccessToken;
       } catch (e: any) {
         console.error("An unexpected error occurred during token refresh:", e);
@@ -189,8 +197,8 @@ export function useHiveAuth() {
       }
     })();
 
-    setRefreshPromise(promise); // Almacenar la promesa para evitar duplicados
-    return promise; // Devolver la promesa inmediatamente
+    setRefreshPromise(promise);
+    return promise;
   }, [
     isRefreshingToken,
     refreshPromise,
@@ -199,10 +207,8 @@ export function useHiveAuth() {
     setIsRefreshingToken,
     setError,
     setRefreshPromise,
-    // getItem y setItem son importaciones estables, no necesitan ser dependencias
   ]);
 
-  // Función wrapper para fetch que maneja el refresco de token
   const authenticatedFetch = useCallback(
     async (url: string, options: RequestInit = {}): Promise<Response> => {
       let currentToken = authToken;
@@ -241,7 +247,6 @@ export function useHiveAuth() {
           };
           response = await fetch(url, { ...options, headers: retryHeaders });
 
-          // Si el reintento falla (cualquier status no-OK), lanzar un error
           if (!response.ok) {
             console.error(
               `Retry request to ${url} failed with status ${response.status}`
@@ -263,7 +268,6 @@ export function useHiveAuth() {
         }
       }
 
-      // Si la respuesta inicial no fue 401 pero no fue OK, lanzar un error
       if (!response.ok && response.status !== 401) {
         console.error(
           `Request to ${url} failed with status ${response.status}`
@@ -379,6 +383,12 @@ export function useHiveAuth() {
         await setItem("currentUserRole", user.role);
         await setItem("lastLoginTimestamp", Date.now());
 
+        const userPreferences: UserPreferences = {
+          theme_preference: user.theme_preference,
+          login_redirect_preference: user.login_redirect_preference,
+        };
+        await setItem("currentUserPreferences", userPreferences);
+        setPreferences(userPreferences);
         setAuthToken(accessToken);
         setHiveUsername(user.username);
         setUserRole(user.role);
@@ -398,6 +408,7 @@ export function useHiveAuth() {
       setError,
       setAuthToken,
       setIsAuthenticated,
+      setPreferences,
       setUserRole,
     ]
   );
@@ -409,11 +420,12 @@ export function useHiveAuth() {
     logout,
     authToken,
     hiveUsername,
-    userRole, // Exponer el rol del usuario
+    userRole,
     isLoading,
     error,
     isAuthenticated,
     setError,
+    preferences,
     authenticatedFetch,
   };
 }

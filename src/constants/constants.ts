@@ -24,7 +24,6 @@ export const COMMENT_NOTES_BY_LOCALE: { [key: string]: string } = {
   sv: "Översättning som kommentar.",
   pl: "Tłumaczenie jako komentarz.",
   tr: "Yorum olarak çeviri.",
-  // Agrega más idiomas según sea necesario
 };
 export const LANGUAGE_TO_LOCALE_MAP: { [key: string]: string } = {
   spanish: "es",
@@ -45,10 +44,8 @@ export const LANGUAGE_TO_LOCALE_MAP: { [key: string]: string } = {
   swedish: "sv",
   polish: "pl",
   turkish: "tr",
-  // Incluir códigos de locale directamente para pasarlos si ya están en ese formato
   es: "es",
   en: "en",
-  // ... (puedes completar el resto de códigos de locale si lo ves necesario, aunque la lógica principal es para los nombres completos)
 };
 export const HIVE_USERNAME_LOCAL_STORAGE_KEY = "aegispad_hive_username";
 export const GEMINI_API_KEY_INFO_URL = "https://aistudio.google.com/app/apikey";
@@ -75,23 +72,23 @@ export const FINAL_REVIEW_ARTICLE_STORAGE_KEY = "hivePad_finalReviewArticle";
 export const faqData: FaqItem[] = [
   {
     id: "q1",
-    questionKey: "sampleQ1Title",
-    answerKey: "sampleQ1Content",
+    questionKey: "whatIsAegisPadQuestion",
+    answerKey: "whatIsAegisPadAnswer",
   },
   {
     id: "q2",
-    questionKey: "sampleQ2Title",
-    answerKey: "sampleQ2Content",
+    questionKey: "aiAssistanceQuestion",
+    answerKey: "aiAssistanceAnswer",
   },
   {
     id: "q3",
-    questionKey: "sampleQ3Title",
-    answerKey: "sampleQ3Content",
+    questionKey: "hiveAccountRequirementQuestion",
+    answerKey: "hiveAccountRequirementAnswer",
   },
   {
     id: "q4",
-    questionKey: "geminiApiUsageQuestion",
-    answerKey: "geminiApiUsageAnswer",
+    questionKey: "beneficiaryModelQuestion",
+    answerKey: "beneficiaryModelAnswer",
   },
   {
     id: "q5",
@@ -128,13 +125,32 @@ export const faqData: FaqItem[] = [
     questionKey: "dataPrivacyQuestion",
     answerKey: "dataPrivacyAnswer",
   },
+  {
+    id: "q12",
+    questionKey: "customizationQuestion",
+    answerKey: "customizationAnswer",
+  },
+  {
+    id: "q13",
+    questionKey: "blogVsCommunityPostQuestion",
+    answerKey: "blogVsCommunityPostAnswer",
+  },
 ];
 
 export const JWT_ACCESS_TOKEN_EXPIRES_IN = "15m";
 export const JWT_REFRESH_TOKEN_EXPIRES_IN = "7d";
 export const AEGISPAD_DEFAULT_TAG = "aegispad";
+export const AEGISPAD_ACCOUNT_NAME = "aegispad";
+export const AEGISPAD_ACCOUNT_BENEFITS_PERCENTAGE = 600; //6%, sería 500
 export const MAX_HIVE_TAGS = 10;
 export const MIN_HIVE_TAG_LENGTH = 3;
 export const MAX_HIVE_TAG_LENGTH = 24;
 export const APP_NAME = "aegispad";
 export const APP_VERSION = "1.0.0";
+
+export const HIVE_CLIENT_NODES = [
+  "https://api.hive.blog",
+  "https://api.deathwing.me",
+  "https://rpc.ausbit.dev",
+  "https://api.openhive.network",
+];

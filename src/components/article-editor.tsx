@@ -1,6 +1,5 @@
 "use client";
 
-import { ImageSearchAndInsert } from "@/components/custom/ImageSearchAndInsert";
 import MarkdownPreview from "@/components/markdown-preview";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -126,18 +125,7 @@ const ArticleEditor: FC<ArticleEditorProps> = ({
                 </Button>
               )}
             </CardHeader>
-            {/* TESTING images here for now */}
-            <ImageSearchAndInsert
-              onInsertImages={handleImagesForMarkdown}
-              //TODO for production "https://hivelens.duckdns.org/api/search"
-              apiEndpoint="http://localhost:9009/api/search"
-              mode="inline" // o "modal"
-              trigger={<Button>Buscar Imágenes en Hivelens</Button>}
-              maxSelectable={3}
-              // Si quisieras buscar por un tag específico por defecto o siempre:
-              // apiExtraParams={{ tags: "photography" }}
-            />
-            {/* END TESTings */}
+
             {(!collapsable || !isEditablePanelCollapsed) && (
               <CardContent className="p-0 flex-1 overflow-auto">
                 <Textarea

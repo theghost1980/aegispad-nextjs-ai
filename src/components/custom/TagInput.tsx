@@ -122,7 +122,7 @@ const TagInput: React.FC<TagInputProps> = ({
 
   return (
     <div
-      className={`flex flex-wrap items-center gap-2 p-2 border rounded-md bg-white ${className}`}
+      className={`flex flex-wrap items-center gap-2 p-2 border rounded-md bg-background text-foreground ${className}`}
     >
       {tags.map((tag) => (
         <Badge
@@ -135,7 +135,7 @@ const TagInput: React.FC<TagInputProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-4 w-4 p-0 ml-1 hover:bg-destructive/20"
+              className="h-4 w-4 p-0 ml-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               onClick={() => removeTag(tag)}
               aria-label={t("removeTagAriaLabel", { tag })}
             >
@@ -150,7 +150,7 @@ const TagInput: React.FC<TagInputProps> = ({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         placeholder={t("addTagsPlaceholder")}
-        className="flex-grow h-8 text-sm border-none shadow-none focus-visible:ring-0 px-1 min-w-[100px]"
+        className="flex-grow h-8 text-sm bg-transparent border-none shadow-none focus-visible:ring-0 px-1 min-w-[100px] placeholder:text-muted-foreground"
         disabled={tags.length >= MAX_HIVE_TAGS}
       />
     </div>

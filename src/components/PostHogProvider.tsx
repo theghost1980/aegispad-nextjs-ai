@@ -13,6 +13,16 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     if (posthogKey) {
       posthog.init(posthogKey, {
         api_host: posthogHost,
+        loaded: function (posthog) {
+          if (process.env.NODE_ENV === "development") {
+            // Opción 1: Desactivar solo en desarrollo
+            posthog.opt_out_capturing();
+            console.log(
+              "PostHog capturing disabled in development environment."
+            );
+          }
+          posthog.opt_out_capturing(); //TODO enable when ready to tests with users!
+        },
         ui_host: "https://us.posthog.com", // Or your self-hosted UI if applicable
         capture_pageview: false, // We capture pageviews manually
         capture_pageleave: true, // Enable pageleave capture
@@ -21,7 +31,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
         // 1. Deshabilitar la Grabación de Sesiones Completamente
         // Esto es lo que necesitas para detener los eventos "$snapshot".
-        disable_session_recording: true, // @default false
+        disable_session_recording: false, // @default false
 
         // 2. Deshabilitar la Captura Automática de Interacciones (clicks, cambios de input, etc.)
         // Esto es fundamental para reducir la mayoría de los eventos de "heatmap" y otros como "$autocapture".

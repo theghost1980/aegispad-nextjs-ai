@@ -1,7 +1,8 @@
 "use client";
 
 import ArticleEditor from "@/components/article-editor";
-import TagInput from "@/components/custom/TagInput"; // Importar TagInput
+import TagInput from "@/components/custom/TagInput";
+import SubscribedCommunitiesList from "@/components/editor-sections/SubscribedCommunitiesList";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,8 +16,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input"; // Importar Input para el título
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
+  AEGISPAD_ACCOUNT_BENEFITS_PERCENTAGE,
+  AEGISPAD_ACCOUNT_NAME,
   AEGISPAD_DEFAULT_TAG,
   APP_NAME,
   APP_VERSION,
@@ -24,25 +29,24 @@ import {
 } from "@/constants/constants";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { toast } from "@/hooks/use-toast";
+import { StoredArticleData, SubscribedCommunity } from "@/types/general.types";
 import { KeychainHelper } from "keychain-helper";
 import { Loader2, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import posthog from "posthog-js"; // Importar PostHog
+import posthog from "posthog-js";
 import { useEffect, useState } from "react";
-
-interface StoredArticleData {
-  title: string;
-  content: string;
-}
 
 export default function FinalReviewPage() {
   const t = useTranslations("FinalReviewPage");
+  const tCommunitiesList = useTranslations("FinalReviewPage.communitiesList"); // 't' específica para el sub-namespace
+
   const router = useRouter();
   const {
     isAuthenticated: isHiveLoggedIn,
+    authenticatedFetch,
     isLoading: isLoadingHiveAuth,
-    hiveUsername, // Necesitamos el nombre de usuario para publicar
+    hiveUsername,
   } = useHiveAuth();
 
   const [articleTitle, setArticleTitle] = useState<string>("");
@@ -57,6 +61,15 @@ export default function FinalReviewPage() {
   const [clientLoaded, setClientLoaded] = useState(false);
   const [tags, setTags] = useState<string[]>([AEGISPAD_DEFAULT_TAG]);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [subscribedCommunities, setSubscribedCommunities] = useState<
+    SubscribedCommunity[]
+  >([]);
+  const [isLoadingCommunities, setIsLoadingCommunities] = useState(true);
+  const [communitiesError, setCommunitiesError] = useState<string | null>(null);
+  const [postType, setPostType] = useState<"blog" | "community">("blog");
+  const [selectedCommunity, setSelectedCommunity] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     setClientLoaded(true);
@@ -97,6 +110,35 @@ export default function FinalReviewPage() {
     }
   }, [clientLoaded, isHiveLoggedIn]);
 
+  useEffect(() => {
+    if (clientLoaded && isHiveLoggedIn && authenticatedFetch) {
+      const fetchSubscribedCommunities = async () => {
+        setIsLoadingCommunities(true);
+        setCommunitiesError(null);
+        try {
+          const response = await authenticatedFetch(
+            "/api/user/hive/hive-subscriptions"
+          );
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+              errorData.message || "Failed to fetch subscribed communities"
+            );
+          }
+          const data: SubscribedCommunity[] = await response.json();
+          setSubscribedCommunities(data);
+          console.log({ data }); //TODO REM
+        } catch (error: any) {
+          setCommunitiesError(error.message);
+          console.error("Error fetching subscribed communities:", error);
+        } finally {
+          setIsLoadingCommunities(false);
+        }
+      };
+      fetchSubscribedCommunities();
+    }
+  }, [clientLoaded, isHiveLoggedIn, authenticatedFetch]);
+
   const isDirty =
     articleTitle !== initialTitleFromStorage ||
     articleContent !== initialContentFromStorage;
@@ -122,7 +164,7 @@ export default function FinalReviewPage() {
     if (articleTitle !== null || articleContent !== null) {
       const dataToStore: StoredArticleData = {
         title: articleTitle,
-        content: articleContent || "", // Guardar cadena vacía si el contenido es null
+        content: articleContent || "",
       };
       localStorage.setItem(
         FINAL_REVIEW_ARTICLE_STORAGE_KEY,
@@ -162,9 +204,6 @@ export default function FinalReviewPage() {
       return;
     }
     if (tags.length < 1) {
-      // Hive permite 0 etiquetas, pero generalmente se recomienda al menos 1.
-      // El ejemplo pedía al menos 2, pero la primera es la categoría principal.
-      // Ajustamos a al menos 1 para la categoría principal.
       toast({
         title: t("publishErrorTitle"),
         description: t("publishErrorMinTags", { minTags: 1 }),
@@ -186,12 +225,15 @@ export default function FinalReviewPage() {
     const permlink = articleTitle
       .toLowerCase()
       .trim()
-      .replace(/[^\w\s-]/g, "") // Eliminar caracteres no alfanuméricos excepto espacios y guiones
-      .replace(/\s+/g, "-") // Reemplazar espacios con guiones
-      .replace(/-+/g, "-") // Reemplazar múltiples guiones con uno solo
-      .slice(0, 255); // Limitar longitud del permlink
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .slice(0, 255);
 
-    const parentPermlink = tags[0]; // Usar la primera etiqueta como categoría principal
+    const parentPermlink =
+      postType === "community" && selectedCommunity
+        ? selectedCommunity
+        : tags[0];
 
     const jsonMetadata = {
       tags: tags,
@@ -201,21 +243,29 @@ export default function FinalReviewPage() {
       // image: ["URL_DE_LA_IMAGEN_PRINCIPAL"]
     };
 
-    // Para un post principal, no se necesitan comment_options complejas,
-    // pero Hive Keychain espera un objeto JSON vacío o con opciones específicas si se usan.
-    // Dejaremos las extensiones vacías por ahora.
     const commentOptions = JSON.stringify({
       author: hiveUsername,
       permlink: permlink,
-      max_accepted_payout: "1000000.000 HBD", // Valor estándar
+      max_accepted_payout: "1000000.000 HBD",
       percent_hbd: 10000, // 100% HBD (50/50 HBD/HP) - esto es 10000 para 100%
       allow_votes: true,
       allow_curation_rewards: true,
-      extensions: [],
+      extensions: [
+        [
+          0,
+          {
+            beneficiaries: [
+              {
+                account: AEGISPAD_ACCOUNT_NAME,
+                weight: AEGISPAD_ACCOUNT_BENEFITS_PERCENTAGE,
+              },
+            ],
+          },
+        ],
+      ],
     });
 
     try {
-      // Evento de intento de publicación en PostHog
       posthog.capture("publish_attempt", {
         username: hiveUsername,
         title_length: articleTitle.length,
@@ -270,11 +320,9 @@ export default function FinalReviewPage() {
         description: error.message || t("publishErrorUnknown"),
         variant: "destructive",
       });
-      // Asegurarse de capturar el fallo también si el error no vino del callback de Keychain
-      // (aunque en este flujo, la mayoría de los errores de Keychain se manejarían en el callback)
       posthog.capture("publish_failed", {
         username: hiveUsername,
-        permlink: permlink, // permlink podría no estar definido si el error es muy temprano
+        permlink: permlink,
         description: error.message || t("publishErrorUnknown"),
         variant: "destructive",
       });
@@ -298,6 +346,11 @@ export default function FinalReviewPage() {
         <p>{message}</p>
       </div>
     );
+  }
+
+  if (clientLoaded && isHiveLoggedIn && !isLoadingCommunities) {
+    console.log("Subscribed Communities:", subscribedCommunities);
+    console.log("Communities Error:", communitiesError);
   }
 
   if (!isHiveLoggedIn) {
@@ -361,6 +414,57 @@ export default function FinalReviewPage() {
             collapsable
             allowEditorHide
           />
+        </div>
+      )}
+
+      {articleContent !== null && subscribedCommunities.length > 0 && (
+        <div className="my-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold">
+                {t("communitiesList.listTitle", {
+                  defaultValue: "Your Subscribed Communities",
+                })}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="post-type-switch"
+                    checked={postType === "community"}
+                    onCheckedChange={(checked) => {
+                      setPostType(checked ? "community" : "blog");
+                      if (!checked) {
+                        setSelectedCommunity(null);
+                      } else if (
+                        subscribedCommunities.length > 0 &&
+                        !selectedCommunity
+                      ) {
+                        // Opcional: seleccionar la primera comunidad por defecto al cambiar a "community"
+                        // setSelectedCommunity(subscribedCommunities[0].name);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="post-type-switch">
+                    {t("postToCommunityLabel")}
+                  </Label>
+                </div>
+
+                {postType === "community" && (
+                  <SubscribedCommunitiesList
+                    communities={subscribedCommunities}
+                    isLoading={isLoadingCommunities}
+                    error={communitiesError}
+                    t={tCommunitiesList}
+                    displayMode={"min"}
+                    onCommunitySelect={setSelectedCommunity}
+                    selectedValue={selectedCommunity}
+                  />
+                )}
+              </CardContent>
+            </CardContent>
+          </Card>
         </div>
       )}
 

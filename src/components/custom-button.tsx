@@ -1,15 +1,15 @@
 "use client";
 
-import { cn } from "@/lib/utils"; // Para combinar clases opcionales
+import { cn } from "@/lib/utils";
 import NextLink from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
 interface CustomButtonProps
   extends Omit<ComponentProps<typeof NextLink>, "href" | "children"> {
-  href: string; // La ruta que el Link de next-intl espera (ej. "/editor")
+  href: string;
   children: ReactNode;
-  className?: string; // Para permitir clases adicionales si es necesario
-  variant?: "primary" | "outline"; // Para manejar diferentes estilos
+  className?: string;
+  variant?: "primary" | "outline";
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
@@ -20,13 +20,14 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   ...props
 }) => {
   const baseClasses = "btn";
-  const variantClasses = variant === "primary" ? "btn-primary" : "btn-outline"; // Ajusta btn-outline si tienes otra clase para outline
+  const variantClasses = variant === "primary" ? "btn-primary" : "btn-outline";
 
   return (
     <NextLink
       href={href}
-      className={cn(baseClasses, variantClasses, className)} // Aplicar clases base, de variante y opcionales
+      className={cn(baseClasses, variantClasses, className)}
       {...props}
+      suppressHydrationWarning={true}
     >
       {children}
     </NextLink>
