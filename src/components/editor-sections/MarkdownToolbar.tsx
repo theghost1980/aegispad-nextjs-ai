@@ -1,5 +1,6 @@
 "use client";
 
+import { AIImageGeneratorPanel } from "@/components/custom/AIImageGeneratorPanel";
 import GeneralIcon from "@/components/icons/GeneralIcon"; // Importa el nuevo componente general
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +18,7 @@ import {
   ListOrdered, // Añadido para tachado
   Minus, // Icono para vista apilada
   Quote,
+  Sparkles, // Import Sparkles icon
   Strikethrough, // Añadido para tachado
 } from "lucide-react";
 import React from "react";
@@ -59,6 +61,10 @@ interface MarkdownToolbarProps {
    * El diseño actual de la vista previa.
    */
   currentLayout: "side" | "bottom";
+  /**
+   * Callback for when an AI image is generated and ready to be inserted.
+   */
+  onAIImageGenerated?: (imageUrl: string, altText?: string) => void;
 }
 
 export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
@@ -67,6 +73,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
   disabled = false,
   onToggleLayout, // Añadir aquí
   currentLayout, // Añadir aquí
+  onAIImageGenerated,
 }) => {
   const commonButtonProps = {
     variant: "outline" as const, // Asegura que el tipo sea el correcto para ButtonProps
@@ -194,6 +201,17 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
       >
         <ImageIcon className="h-4 w-4" />
       </Button>
+
+      {/* AI Image Generator Button/Panel */}
+      <AIImageGeneratorPanel
+        triggerComponent={
+          <Button {...commonButtonProps} title="Generate Image with AI">
+            <Sparkles className="h-4 w-4" />
+          </Button>
+        }
+        onImageGenerated={onAIImageGenerated}
+      />
+
       <Button
         {...commonButtonProps}
         onClick={() => onApplyFormat("hr")}

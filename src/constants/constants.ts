@@ -158,3 +158,7 @@ export const HIVE_CLIENT_NODES = [
 export const HIVELENS_API_ENDPOINT_PROD =
   "https://hivelens.duckdns.org/api/search";
 export const HIVELENS_API_ENDPOINT_DEV = "http://localhost:9009/api/search";
+export const WAVESPEED_API_URL =
+  "https://api.wavespeed.ai/api/v3/wavespeed-ai/hidream-i1-dev";
+export const WAVESPEED_RESULT_API_URL_BASE =
+  "https://api.wavespeed.ai/api/v3/predictions/";

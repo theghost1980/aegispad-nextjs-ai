@@ -1,15 +1,5 @@
 Importante: //TODO
 
-To add to all content:
-
-- Add tokens counts from gemini requests watch: C:\Users\saturno\Downloads\HIVE-Projects\hive-markdown\TODO-ADD-AEGISPAD\TODO Tokens.txt
-
-- from now on we are using MEMO to encode/decode apikey.
-- posting will be used only to login and to post/comment:
-
-  - this way we can suggest to the user to set MEMO sign on this site as frecuent to avoid
-    the annoying resuests to decode the key on any use of gemini ai!
-
 - investigar para usar apis de:
 
   - https://unsplash.com/
@@ -37,7 +27,6 @@ To add to all content:
   - Referencia: README de `@google/generative-ai` que indica la depreciación y la existencia de un nuevo SDK.
   - Fecha límite de soporte del SDK antiguo: 31 de agosto de 2025.
 
-- [ ] **Implementar conteo de tokens para llamadas a la API de IA:** Añadir lógica para contar los tokens utilizados en cada llamada a la API de Gemini (tanto para la generación como para la revisión de contenido) dentro de las rutas API correspondientes. Esto podría ser útil para el seguimiento del uso, la gestión de cuotas y la optimización de costos.
 - [ ] **Implementar Generación de Imágenes con Vertex AI:** Migrar la ruta `/api/ai/generate-image` para usar el SDK de Vertex AI (`@google-cloud/aiplatform`) y la autenticación de cuenta de servicio de Google Cloud. Esto incluye configurar las credenciales (`GOOGLE_APPLICATION_CREDENTIALS`, `GCP_PROJECT_ID`) y ajustar la lógica de llamada al modelo "Imagen" específico.
 - add pexels? https://www.pexels.com/api/documentation/#client_libraries
 - manejo de estado de la app? zustand?
@@ -48,3 +37,28 @@ To add to all content:
 - implementar las notificaciones de la app al usuario (¿email?).
 - crear un modulo de sugerencias para estilos de escritura.
 - colocar el estilo de escritura opcional como parte del prompt de creacion de contenido.
+
+## Integración con Pexels API
+
+- **Objetivo:** Permitir a los usuarios buscar e insertar imágenes desde Pexels.com.
+- **Consideraciones Clave:** Gestión estricta de los límites de la API de Pexels (200 reqs/hora, 20k reqs/mes).
+
+- **Estrategias de Gestión de Límites:**
+  - **Caching Agresivo en el Servidor (Supabase):**
+    - Crear tabla `pexels_api_cache` (columnas: `search_query_hash`, `pexels_response` (JSONB), `cached_at`, `expires_at`).
+    - Revisar caché antes de llamar a Pexels.
+    - Definir política de expiración (ej. 1-6 horas).
+  - **Rate Limiting en Backend Propio (Supabase):**
+    - Crear tabla `api_usage_tracking` (columnas: `api_name`, `period_start_hour`, `hourly_requests`, `period_start_month`, `monthly_requests`).
+    - Consultar y actualizar contadores antes y después de cada llamada a Pexels.
+    - Devolver error 429 si se superan los umbrales (con margen de seguridad).
+  - **Debounce en el Frontend:**
+    - Esperar a que el usuario deje de escribir (300-500ms) antes de enviar la solicitud de búsqueda.
+  - **Optimización de Solicitudes:**
+    - Usar paginación (`per_page`).
+    - Evitar búsquedas vacías.
+  - **Interfaz de Usuario Informativa:**
+    - Mostrar mensajes amigables si se alcanzan los límites.
+- **Próximos Pasos (Diseño):**
+  - Definir esquemas detallados para las tablas `pexels_api_cache` y `api_usage_tracking` en Supabase.
+  - Diseñar la lógica del endpoint del servidor para interactuar con estas tablas y la API de Pexels.

@@ -21,6 +21,7 @@ import {
   HIVELENS_API_ENDPOINT_DEV,
   HIVELENS_API_ENDPOINT_PROD,
 } from "@/constants/constants";
+import { useHiveAuth } from "@/hooks/use-hive-auth";
 import {
   CheckCircle2,
   ImagePlus,
@@ -108,6 +109,8 @@ export function ImageSearchAndInsert({
   const [hasMore, setHasMore] = useState(false);
   const [currentLimit, setCurrentLimit] = useState<number>(20);
 
+  const { authenticatedFetch } = useHiveAuth();
+
   const apiEndpoint =
     process.env.NODE_ENV === "development"
       ? HIVELENS_API_ENDPOINT_DEV
@@ -175,7 +178,7 @@ export function ImageSearchAndInsert({
         const queryParams = new URLSearchParams(queryParamsObj);
         const fullApiUrl = `${apiEndpoint}?${queryParams.toString()}`;
 
-        const response = await fetch(fullApiUrl);
+        const response = await authenticatedFetch(fullApiUrl);
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(

@@ -55,3 +55,49 @@ export async function uploadBase64ToCloudinary(
     );
   }
 }
+
+/**
+ * Sube un archivo de imagen desde una ruta local a Cloudinary.
+ * @param filePath - La ruta local del archivo de imagen.
+ * @returns Una promesa que resuelve con la URL segura de la imagen subida.
+ * @throws Error si la subida falla o si las credenciales no están configuradas.
+ */
+export async function uploadFileToCloudinary(
+  filePath: string
+): Promise<string> {
+  if (
+    !process.env.NEXT_PUBLIC_CLOUD_NAME ||
+    !process.env.API_KEY ||
+    !process.env.API_SECRET
+  ) {
+    console.error(
+      "Cloudinary credentials are not fully configured in environment variables."
+    );
+    throw new Error("Cloudinary credentials are not configured.");
+  }
+
+  if (!filePath) {
+    throw new Error("No file path provided for upload.");
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: "aegispad-uploads",
+      resource_type: "image",
+      tags: ["aegispad", "ai-generated"],
+    });
+
+    if (!result || !result.secure_url) {
+      console.error("Cloudinary upload result missing secure_url:", result);
+      throw new Error(
+        "Cloudinary upload failed: Missing secure URL in response."
+      );
+    }
+    return result.secure_url;
+  } catch (error: any) {
+    console.error("Error uploading file to Cloudinary:", error);
+    throw new Error(
+      `Failed to upload file to Cloudinary: ${error.message || "Unknown error"}`
+    );
+  }
+}

@@ -611,7 +611,7 @@ export default function ArticleForgePage() {
       .map((img) => {
         const altText =
           img.altText ||
-          t("toolbar.imageAltTextDefault", { defaultValue: "image" });
+          t("toolbar.aiImageAltTextDefault", { defaultValue: "image" });
 
         // Note for ia: never modify the line bellow just ask before
         let markdownImage = `![${altText}](${img.imageUrl})`;
@@ -869,7 +869,7 @@ export default function ArticleForgePage() {
               t("toolbar.imageAltTextPrompt", {
                 defaultValue: "Enter image alt text (optional):",
               })
-            ) || t("toolbar.imageAltTextDefault", { defaultValue: "image" });
+            ) || t("toolbar.aiImageAltTextDefault", { defaultValue: "image" });
           newText = `![${altText}](${imageUrlFromPrompt})`;
           newCursorPos = start + newText.length;
         } else {
@@ -890,6 +890,48 @@ export default function ArticleForgePage() {
       textarea.focus();
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
+  };
+
+  const handleAIImageGenerated = (imageUrl: string, altText?: string) => {
+    const textarea = mainTextareaRef.current;
+    if (!textarea) return;
+
+    const effectiveAltText =
+      altText ||
+      t("toolbar.aiImageAltTextDefault", {
+        defaultValue: "AI Generated Image",
+      });
+
+    const imageMarkdownPart = `![${effectiveAltText}](${imageUrl})`;
+
+    const attributionText = "gemini-AI";
+    const attributionLinkMarkdown = `<center><small>${attributionText}</small></center>`;
+
+    const fullMarkdownToInsert = `${imageMarkdownPart}\n${attributionLinkMarkdown}`;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    const newMarkdown =
+      articleMarkdown.substring(0, start) +
+      fullMarkdownToInsert +
+      (start === end ? "\n" : "") +
+      articleMarkdown.substring(end);
+
+    setArticleMarkdown(newMarkdown);
+
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPosition = start + fullMarkdownToInsert.length;
+      textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+    }, 0);
+
+    toast({
+      title: t("toastMessages.successTitle"),
+      description: t("toastMessages.aiImageInsertedSuccess", {
+        defaultValue: "AI generated image inserted.",
+      }),
+    });
   };
 
   return (
@@ -1035,6 +1077,7 @@ export default function ArticleForgePage() {
                 disabled={isLoading}
                 onToggleLayout={handleTogglePreviewLayout}
                 currentLayout={previewLayout}
+                onAIImageGenerated={handleAIImageGenerated}
               />
               <textarea
                 ref={mainTextareaRef}

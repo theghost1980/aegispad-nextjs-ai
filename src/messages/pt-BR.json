@@ -130,7 +130,9 @@
       "allClearedMessage": "Todos os campos e dados da sessão foram limpos.",
       "userWritingStartedMessage": "Editor pronto! Você pode começar a escrever seu artigo.",
       "adminActionRequired": "Esta ação requer privilégios de administrador.",
-      "revisionUndoneSuccess": "Revisão desfeita com sucesso."
+      "revisionUndoneSuccess": "Revisão desfeita com sucesso.",
+      "tagAlreadyExistsErrorDescription": "A tag \"{tag}\" já foi adicionada.",
+      "aiImageInsertedSuccess": "Imagem gerada por IA inserida."
     },
     "loadingSpinnerClient": "Carregando AegisPad...",
     "userWriting": {
@@ -179,7 +181,9 @@
       "imageCreditLinkText": "fonte",
       "imageUrlPrompt": "Digite a URL da imagem:",
       "imageAltTextPrompt": "Digite o texto alternativo da imagem (opcional):",
-      "imageAltTextDefault": "descrição da imagem"
+      "imageAltTextDefault": "descrição da imagem",
+      "aiImageGeneratorButtonTitle": "Gerar Imagem com IA",
+      "aiImageAltTextDefault": "Imagem Gerada por IA"
     },
     "imageSearchAndInsert": {
       "modalTitle": "Pesquisar e inserir imagens do Hivelens",

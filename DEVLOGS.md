@@ -1,3 +1,41 @@
+# Cambios y Mejoras - Sesión del 29/05/2024
+
+## Flujo de Generación y Subida de Imágenes AI
+
+- **API de Generación de Imágenes (`/api/ai/generate-image/route.ts`):**
+
+  - **Almacenamiento Temporal Local:**
+    - Se implementó el guardado de la imagen generada (convertida de base64 a buffer) en un directorio temporal local antes de cualquier subida a Cloudinary.
+    - Inicialmente, se usó `public/temp/` para el guardado, generando una URL pública local (`/temp/nombre-aleatorio.extension`).
+    - Posteriormente, se adaptó para entornos serverless (como Netlify) utilizando `os.tmpdir()` para el almacenamiento temporal. Esto es crucial ya que el sistema de archivos en `public/` puede no ser escribible o persistente en dichos entornos.
+  - **Subida a Cloudinary desde Archivo:**
+    - Si la opción `uploadToCloudinary` (configurable en el cuerpo de la solicitud, por defecto `true`) está activa, la imagen guardada temporalmente se sube a Cloudinary.
+    - Se utiliza la nueva función `uploadFileToCloudinary` que toma la ruta del archivo local.
+  - **Mecanismos de Fallback y Opciones:**
+    - Si `uploadToCloudinary` es `false`, la API ahora devuelve la imagen directamente como una cadena base64, sin guardarla localmente ni subirla.
+    - Si la subida a Cloudinary se intenta pero falla (en la versión adaptada para serverless), la API devuelve la imagen en base64 como fallback. En la versión anterior (con `public/temp`), devolvía la URL local.
+  - **Limpieza de Archivos Temporales:** El archivo de imagen temporal local se elimina después de una subida exitosa a Cloudinary o al finalizar el procesamiento si la subida no se realiza.
+  - **Estructura de Respuesta Mejorada:** La respuesta de la API ahora incluye:
+    - `imageUrl`: La URL de Cloudinary, la URL local (si aplica y la subida falló), o `null`.
+    - `imageBase64`: La imagen en base64 si la subida a Cloudinary no se solicitó o falló (en la versión serverless).
+    - `uploadStatus`: Un indicador del resultado (ej. `"cloudinary"`, `"local"`, `"skipped_cloudinary"`, `"failed_cloudinary_fallback_base64"`).
+    - `usageMetadata`: Metadatos de uso de la API de IA.
+
+- **Utilidades de Cloudinary (`lib/cloudinary/server.utils.ts`):**
+
+  - **Nueva Función `uploadFileToCloudinary`:**
+    - Se añadió una nueva función asíncrona que acepta la ruta de un archivo local como argumento.
+    - Sube el archivo especificado a Cloudinary, manteniendo la configuración existente (carpeta `aegispad-uploads`, etiquetas `aegispad`, `ai-generated`).
+
+- **Integración en el Editor (`ArticleForgePage.tsx` - función `handleAIImageGenerated`):**
+  - **Sintaxis Markdown de Imagen Corregida:** Se aseguró que la sintaxis Markdown generada para las imágenes insertadas desde la IA sea la correcta: `!alt text`.
+  - **Enlace de Atribución Automático:**
+    - Se añadió una línea de atribución en Markdown automáticamente debajo de cada imagen generada por IA insertada.
+    - El formato es `<center><small>gemini-AI</small></center>`.
+    - El texto "gemini-AI" es un placeholder y se podría hacer más dinámico o configurable si se desea. (Nota: En la implementación final, se usó un texto traducible `toolbar.aiImageAttributionLinkText` con "Imagen por gemini-AI" como valor por defecto, y se enlazó a una URL de Gemini).
+
+---
+
 # Cambios y Mejoras - Sesión del 28/05/2024
 
 ## Funcionalidad de Publicación y Comunidades en `FinalReviewPage.tsx`

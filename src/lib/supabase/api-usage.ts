@@ -1,6 +1,6 @@
 import { createSupabaseServiceRoleClient } from "./server";
 
-interface ApiUsageData {
+export interface ApiUsageData {
   profileId: string;
   operationType: string;
   modelUsed?: string;

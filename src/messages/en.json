@@ -132,7 +132,9 @@
       "allClearedMessage": "All fields and session data have been cleared.",
       "userWritingStartedMessage": "Editor ready! You can start writing your article.",
       "adminActionRequired": "This action requires administrator privileges.",
-      "revisionUndoneSuccess": "Revision undone successfully."
+      "revisionUndoneSuccess": "Revision undone successfully.",
+      "tagAlreadyExistsErrorDescription": "Tag \"{tag}\" has already been added.",
+      "aiImageInsertedSuccess": "AI generated image inserted."
     },
     "loadingSpinnerClient": "Loading AegisPad...",
     "userWriting": {
@@ -179,7 +181,8 @@
       "imageCreditLinkText": "source",
       "imageUrlPrompt": "Enter image URL:",
       "imageAltTextPrompt": "Enter image alt text (optional):",
-      "imageAltTextDefault": "image description"
+      "aiImageGeneratorButtonTitle": "Generate Image with AI",
+      "aiImageAltTextDefault": "AI Generated Image"
     },
     "imageSearchAndInsert": {
       "modalTitle": "Search and Add Images from Hivelens",
