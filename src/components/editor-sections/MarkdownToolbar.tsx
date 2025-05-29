@@ -1,5 +1,6 @@
 "use client";
 
+import GeneralIcon from "@/components/icons/GeneralIcon"; // Importa el nuevo componente general
 import { Button } from "@/components/ui/button";
 import {
   Bold,
@@ -18,7 +19,6 @@ import {
   Quote,
   Strikethrough, // Añadido para tachado
 } from "lucide-react";
-import Image from "next/image"; // Importar next/image para el SVG
 import React from "react";
 
 export type MarkdownFormatType =
@@ -183,13 +183,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         onClick={onToggleImageModal}
         title="Insert Image from Hivelens"
       >
-        <Image
-          src="/images/hivelens.svg"
-          alt="Hivelens"
-          width={20} // Mantenemos la anchura intrínseca para Next/Image
-          height={20} // Mantenemos la altura intrínseca para Next/Image
-          className="h-6 w-6" // Ajustamos la clase para un tamaño de 20x20px
-        />
+        <GeneralIcon iconName="hivelens" className="h-4 w-4" />
       </Button>
 
       {/* Botón para Imagen por URL */}

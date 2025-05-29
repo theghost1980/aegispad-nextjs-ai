@@ -18,6 +18,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"; // Importar Select
 import {
+  HIVELENS_API_ENDPOINT_DEV,
+  HIVELENS_API_ENDPOINT_PROD,
+} from "@/constants/constants";
+import {
   CheckCircle2,
   ImagePlus,
   Loader2,
@@ -61,7 +65,6 @@ interface SelectedImageData {
 // Props del componente
 interface ImageSearchAndInsertProps {
   onInsertImages: (images: SelectedImageData[]) => void; // Actualizar tipo de prop
-  apiEndpoint: string; // Debería ser "https://hivelens.duckdns.org/api/search" | "http://localhost:9009/api/search"
   mode?: "inline" | "modal";
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -74,13 +77,11 @@ interface ImageSearchAndInsertProps {
   errorText?: string;
   loadingText?: string;
   modalTitle?: string;
-  // Prop para pasar parámetros adicionales a la API si es necesario
   apiExtraParams?: Record<string, string | number | boolean>;
 }
 
 export function ImageSearchAndInsert({
   onInsertImages,
-  apiEndpoint, // Ejemplo: "https://hivelens.duckdns.org/api/search"
   mode = "inline",
   isOpen: controlledIsOpen,
   onOpenChange: controlledOnOpenChange,
@@ -97,15 +98,20 @@ export function ImageSearchAndInsert({
 }: ImageSearchAndInsertProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<ImageType[]>([]);
-  const [selectedImages, setSelectedImages] = useState<SelectedImageData[]>([]); // Cambiar estado para almacenar objetos
+  const [selectedImages, setSelectedImages] = useState<SelectedImageData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [internalModalOpen, setInternalModalOpen] = useState(false);
   const [searchType, setSearchType] = useState<SearchType>("general");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0); // Total de páginas según la API
-  const [hasMore, setHasMore] = useState(false); // Para el botón "Cargar más"
+  const [totalPages, setTotalPages] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [currentLimit, setCurrentLimit] = useState<number>(20);
+
+  const apiEndpoint =
+    process.env.NODE_ENV === "development"
+      ? HIVELENS_API_ENDPOINT_DEV
+      : HIVELENS_API_ENDPOINT_PROD;
 
   const isModalControlled =
     controlledIsOpen !== undefined && controlledOnOpenChange !== undefined;
@@ -122,7 +128,7 @@ export function ImageSearchAndInsert({
     if (!open) {
       setSearchTerm("");
       setSearchResults([]);
-      setSelectedImages([]); // Resetear selectedImages
+      setSelectedImages([]);
       setSearchType("general");
       setError(null);
       setCurrentLimit(20);
@@ -135,17 +141,14 @@ export function ImageSearchAndInsert({
   const performSearch = useCallback(
     async (pageToFetch: number) => {
       setIsLoading(true);
-      // Limpiar error solo si es una nueva búsqueda (página 1)
       if (pageToFetch === 1) {
         setError(null);
-        // No limpiar searchResults aquí si queremos que se acumulen con "Cargar más"
-        // setSelectedImageUrls([]); // Ya no existe este estado
       }
 
       try {
         let queryParamsObj: Record<string, string> = {
           limit: String(currentLimit),
-          page: String(pageToFetch), // Enviar 'page'
+          page: String(pageToFetch),
           ...apiExtraParams,
         };
 
@@ -157,7 +160,6 @@ export function ImageSearchAndInsert({
           queryParamsObj.searchTerm = searchTerm.trim();
         }
 
-        // No buscar si el término está vacío para búsquedas que lo requieren
         if (
           !searchTerm.trim() &&
           (searchType === "general" ||

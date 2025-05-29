@@ -1064,7 +1064,6 @@ export default function ArticleForgePage() {
 
           <ImageSearchAndInsert
             mode="modal"
-            apiEndpoint="https://hivelens.duckdns.org/api/search"
             isOpen={isImageModalOpen}
             onOpenChange={setIsImageModalOpen}
             onInsertImages={handleInsertImagesFromModal}

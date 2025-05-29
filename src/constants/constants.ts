@@ -154,3 +154,7 @@ export const HIVE_CLIENT_NODES = [
   "https://rpc.ausbit.dev",
   "https://api.openhive.network",
 ];
+
+export const HIVELENS_API_ENDPOINT_PROD =
+  "https://hivelens.duckdns.org/api/search";
+export const HIVELENS_API_ENDPOINT_DEV = "http://localhost:9009/api/search";
