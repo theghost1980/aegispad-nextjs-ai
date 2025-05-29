@@ -161,7 +161,7 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
       </div>
 
       {/* ScrollArea should take available space */}
-      <ScrollArea className="border rounded-md bg-white flex-1 min-h-0 overflow-y-auto">
+      <ScrollArea className="border rounded-md bg-background flex-1 min-h-0 overflow-y-auto">
         <div className="font-mono text-sm p-2">
           {displayLines.map((line) => (
             <div
@@ -239,8 +239,8 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
         minWidth={350}
         minHeight={300}
         bounds="window" // Restringir el arrastre a la ventana del navegador
-        enableResizing // Habilitar todas las manijas de redimensionamiento
-        className="bg-yellow-50 border border-yellow-200 shadow-xl rounded-lg p-6 flex flex-col z-50 overflow-hidden"
+        enableResizing
+        className="bg-accent border border-border shadow-xl rounded-lg p-6 flex flex-col z-50 overflow-hidden"
         dragHandleClassName="line-reviewer-drag-handle" // Clase para el área de arrastre (opcional, pero útil)
       >
         {reviewerContent(true)}
@@ -250,7 +250,7 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[70vw] md:max-w-[60vw] lg:max-w-[50vw] w-full flex flex-col max-h-[85vh] gap-4 bg-yellow-50 border-yellow-200 overflow-hidden">
+      <DialogContent className="sm:max-w-[70vw] md:max-w-[60vw] lg:max-w-[50vw] w-full flex flex-col max-h-[85vh] gap-4 bg-accent border-border overflow-hidden">
         {" "}
         {/* El padding p-6 ya está aplicado por DialogContent */}
         {reviewerContent(false)}
