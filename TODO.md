@@ -14,9 +14,26 @@ Importante: //TODO
   - en este punto debemos mirar en que usamos la IA para modificar los contenidos, formatos etc.
 
 - //TODO admins:
+
   - can create: C:\Users\saturno\Downloads\HIVE-Projects\hive-markdown\TODO-ADD-AEGISPAD
   - add a new panel like revise/translate only with admins
   - admin dashboards, etc
+
+- Add assistance about:
+
+  - tags
+  - title
+  - images to add when certain conditions are meet:
+    - no imagen when reaching certain point or stage?
+    - suggest images tags, categories depending on the content/titles
+
+- Add a module to find & target dualinguals:
+  - this module will use hivesql to perfom efefctive searches
+    - locate people who posts in 2 languages and leave an invitation to the app.
+    - sharing info:
+      -a detailed guide
+      -in the future giving an upvote as well
+  - it can be a module that only works if a hivesql search was made.
 
 ## Clean this up MAN!! too many comments we must be "professionals YO"
 

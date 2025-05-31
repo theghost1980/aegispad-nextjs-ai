@@ -934,6 +934,105 @@ export default function ArticleForgePage() {
     });
   };
 
+  const handleTriggerDeviceImageUpload = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*"; // Aceptar solo imágenes
+    input.onchange = async (event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files.length > 0) {
+        const file = target.files[0];
+
+        if (file.size > 5 * 1024 * 1024) {
+          // Límite de 5MB (ajustar si es necesario)
+          toast({
+            title: t("toastMessages.errorTitle"),
+            description: t("toastMessages.fileTooLargeError", {
+              maxSize: "5MB",
+            }),
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setCurrentOperationMessage(
+          t("toastMessages.uploadingImageMessage", {
+            defaultValue: "Uploading image...",
+          })
+        );
+        startProcessingTransition(async () => {
+          try {
+            const formData = new FormData();
+            formData.append("image", file); // El backend espera un campo 'image'
+
+            const response = await authenticatedFetch("/api/images/upload", {
+              method: "POST",
+              body: formData,
+              // No establecer 'Content-Type': 'multipart/form-data' manualmente,
+              // el navegador lo hará correctamente con el boundary si dejas que FormData lo maneje.
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(
+                errorData.error ||
+                  errorData.message ||
+                  `Failed to upload image. Server responded with ${response.status}`
+              );
+            }
+
+            const result = await response.json();
+            if (result.data && result.data.image_url) {
+              // Insertar la imagen en el editor
+              const altText =
+                file.name.split(".")[0] ||
+                t("toolbar.uploadedImageAltTextDefault", {
+                  defaultValue: "uploaded image",
+                });
+              const imageMarkdown = `![${altText}](${result.data.image_url})`;
+
+              const textarea = mainTextareaRef.current;
+              if (textarea) {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const newMarkdown =
+                  articleMarkdown.substring(0, start) +
+                  imageMarkdown +
+                  (start === end ? "\n" : "") +
+                  articleMarkdown.substring(end);
+                setArticleMarkdown(newMarkdown);
+                setTimeout(() => {
+                  textarea.focus();
+                  textarea.setSelectionRange(
+                    start + imageMarkdown.length,
+                    start + imageMarkdown.length
+                  );
+                }, 0);
+              }
+              toast({
+                title: t("toastMessages.successTitle"),
+                description: t("toastMessages.imageUploadedSuccess"),
+              });
+            } else {
+              throw new Error(t("toastMessages.uploadInvalidResponseError"));
+            }
+          } catch (error: any) {
+            console.error("Error uploading image:", error);
+            toast({
+              title: t("toastMessages.errorTitle"),
+              description:
+                error.message || t("toastMessages.uploadFailedError"),
+              variant: "destructive",
+            });
+          } finally {
+            setCurrentOperationMessage(null);
+          }
+        });
+      }
+    };
+    input.click(); // Abrir el diálogo de selección de archivo
+  };
+
   return (
     <div
       className="relative space-y-8 p-4 md:p-6 rounded-lg 
@@ -1078,6 +1177,7 @@ export default function ArticleForgePage() {
                 onToggleLayout={handleTogglePreviewLayout}
                 currentLayout={previewLayout}
                 onAIImageGenerated={handleAIImageGenerated}
+                onTriggerDeviceImageUpload={handleTriggerDeviceImageUpload}
               />
               <textarea
                 ref={mainTextareaRef}

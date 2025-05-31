@@ -30,3 +30,21 @@ export interface SubscribedCommunity {
   role: string; // ej. "guest"
   pending_posts?: string | number;
 }
+
+export interface ImageServiceResponse {
+  ok: boolean;
+  version: string;
+  date: string;
+}
+
+export interface VerifiedServiceInfo {
+  name: string;
+  url: string;
+  data: ImageServiceResponse;
+}
+
+export interface DeterminedStorageInfo {
+  type: "primary" | "fallback";
+  name: string;
+  url?: string;
+}

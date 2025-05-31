@@ -135,6 +135,11 @@ export const faqData: FaqItem[] = [
     questionKey: "blogVsCommunityPostQuestion",
     answerKey: "blogVsCommunityPostAnswer",
   },
+  {
+    id: "faq-devlogs",
+    questionKey: "devlogsQuestion",
+    answerKey: "devlogsAnswerWithLink",
+  },
 ];
 
 export const JWT_ACCESS_TOKEN_EXPIRES_IN = "15m";

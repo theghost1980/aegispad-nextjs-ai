@@ -1,6 +1,28 @@
-# Cambios y Mejoras - Sesión del 29/05/2024
+### Cambios y Mejoras - Sesión del 30/05/2024
 
-## Flujo de Generación y Subida de Imágenes AI
+#### Mejoras en la Subida y Generación de Imágenes
+
+- **Subida de Imágenes desde Dispositivo (`/api/images/upload/route.ts` y `editor/page.tsx`):**
+  - Se implementó un botón en `MarkdownToolbar.tsx` para permitir a los usuarios subir imágenes desde sus dispositivos.
+  - Se creó la lógica en `editor/page.tsx` (`handleTriggerDeviceImageUpload`) para:
+    - Abrir el selector de archivos del navegador.
+    - Validar el tamaño del archivo.
+    - Enviar el archivo al backend (`/api/images/upload`).
+    - Insertar la URL de la imagen devuelta en el editor con la sintaxis Markdown correcta (`!altText`).
+  - Se ajustó la API de subida para usar el método de autenticación `getProfileIdFromAuth` consistentemente con otras rutas.
+  - Se corrigió la restricción de clave foránea en la tabla `user_images` para que `user_id` referencie a `profiles(id)` en lugar de `auth.users(id)`, alineándose con el flujo de autenticación actual.
+  - Se refinó el proceso de firma para la subida a Hive Images, asegurando que se firme el hash SHA256 del `imageBuffer` concatenado con "ImageSigningChallenge".
+- **Generación de Imágenes AI (`/api/ai/generate-image/route.ts`):**
+  - Se modificó la ruta para que, en lugar de subir directamente a Cloudinary, utilice `getDeterminedStorageService` para decidir el destino de la imagen (Hive Images, Ecency, o Cloudinary como fallback).
+  - Se eliminó la necesidad de guardar la imagen generada en un archivo temporal en el servidor; ahora se trabaja directamente con el `Buffer` de la imagen.
+  - Se implementó la subida de la imagen generada (desde base64) al servicio determinado y se guarda la información en la tabla `user_images`.
+- **Documentación:** Se creó un archivo `docs/image-upload-hive-guide.md` con una guía detallada sobre cómo implementar la subida de imágenes a Hive con firma en un proyecto Next.js.
+
+---
+
+### Cambios y Mejoras - Sesión del 29/05/2024
+
+#### Flujo de Generación y Subida de Imágenes AI
 
 - **API de Generación de Imágenes (`/api/ai/generate-image/route.ts`):**
 
@@ -36,9 +58,9 @@
 
 ---
 
-# Cambios y Mejoras - Sesión del 28/05/2024
+### Cambios y Mejoras - Sesión del 28/05/2024
 
-## Funcionalidad de Publicación y Comunidades en `FinalReviewPage.tsx`
+#### Funcionalidad de Publicación y Comunidades en `FinalReviewPage.tsx`
 
 - **Selección de Tipo de Post (Blog vs. Comunidad):**
   - Se añadió un `Switch` en la página de revisión final para permitir al usuario elegir si su publicación es para su blog personal o para una comunidad de Hive.
@@ -59,7 +81,7 @@
   - La función `getUserSubscribedCommunities` en `lib/hive/server-utils.ts` fue corregida para parsear correctamente la respuesta de la API de Hive (que devuelve un array de arrays) y mapearla a la interfaz `HiveCommunity` (con `id`, `name`, `role`). Se manejó el tipado de la respuesta de `dhive` como `unknown` para mayor seguridad.
   - `FinalReviewPage.tsx` ahora llama a esta API al montarse para cargar y mostrar las comunidades.
 
-## Mejoras en la Interfaz de Usuario (UI) y Experiencia de Usuario (UX)
+### Mejoras en la Interfaz de Usuario (UI) y Experiencia de Usuario (UX)
 
 - **Estilos de `TagInput.tsx`:**
   - Se ajustaron los estilos del componente de entrada de etiquetas para que sean compatibles con los temas claro y oscuro, utilizando variables de color de Tailwind CSS (`bg-background`, `text-foreground`) en lugar de colores fijos.
@@ -82,7 +104,7 @@
     - "¿Qué diferencia hay entre publicar en mi blog y en una comunidad?"
   - Se proporcionaron las traducciones correspondientes para estas nuevas entradas del FAQ.
 
-## Correcciones y Refinamientos
+### Correcciones y Refinamientos
 
 - **Aplicación de Tema en `ProfilePage.tsx`:**
   - Se solucionó un problema donde el cambio de tema visual (claro/oscuro) no se aplicaba inmediatamente o se revertía después de guardar las preferencias.
@@ -97,16 +119,16 @@
 - **Inserción de Imágenes en `ArticleForgePage.tsx`:**
   - Se corrigió la función `handleInsertImagesFromModal` para que genere la sintaxis Markdown estándar y correcta para las imágenes: `!alt text`.
 
-## Próximos Pasos y Consideraciones
+### Próximos Pasos y Consideraciones
 
 - **Monetización y Financiamiento (Visión a Futuro):**
   - Se añadió una frase a la visión del proyecto (para ser usada en comunicaciones) sobre la intención de, junto con la comunidad, definir un modelo de financiamiento o monetización justo para asegurar la sostenibilidad y el crecimiento de AegisPad.
 
 ---
 
-# Cambios y Planificación - Sesión del 27/05/2024
+### Cambios y Planificación - Sesión del 27/05/2024
 
-## Mejoras y Correcciones en `LineReviewer.tsx`
+#### Mejoras y Correcciones en `LineReviewer.tsx`
 
 - **Estilo y Fondo:**
   - Se ajustó el color de fondo del componente `LineReviewer` a un amarillo claro (`bg-yellow-50`) para hacerlo más llamativo.
@@ -116,7 +138,7 @@
   - Se añadió `overflow-y-auto` directamente al `ScrollArea` para forzar la barra de scroll vertical cuando sea necesario.
 - **Limpieza:** Se eliminaron todos los comentarios del código fuente de `LineReviewer.tsx`.
 
-## Refactorización de `page.tsx` y Tipado de Traducciones
+### Refactorización de `page.tsx` y Tipado de Traducciones
 
 - **Extracción de Componentes:** Se refactorizó `page.tsx` extrayendo varias secciones de UI a componentes dedicados en `src/components/editor-page/`:
   - `RevisionOptionsPanelComponent.tsx`
@@ -130,9 +152,9 @@
   - Se verificó la estructura de los archivos de mensajes (`en.json`, `es.json`, `pt-BR.json`, `fr.json`) para confirmar los namespaces de primer nivel y asegurar la correcta definición de los tipos.
   - Se aplicaron estos tipos de traducción específicos a las props `t` en todos los componentes relevantes, tanto los nuevos como los existentes en `src/components/editor-sections/`.
 
-## Mejoras en la Vista Previa de Markdown (`MarkdownPreviewComponent.tsx`)
+### Mejoras en la Vista Previa de Markdown (`MarkdownPreviewComponent.tsx`)
 
-- **Renderizado de Encabezados:** Se solucionó un problema donde los encabezados Markdown (ej. `## Título`) no se renderizaban visualmente como títulos.
+- **Renderizado de Encabezados:** Se solucionó un problema donde los encabezados Markdown (ej. `### Título`) no se renderizaban visualmente como títulos.
   - Se confirmó que el HTML generado era correcto (`<h1>`, `<h2>`, etc.).
   - Se identificó que los estilos por defecto de la clase `prose` (de `@tailwindcss/typography`) eran la causa.
 - **Estilos de `@tailwindcss/typography`:**
@@ -141,7 +163,7 @@
 - **Soporte para Tablas GFM:** Se añadió el plugin `remark-gfm` a `ReactMarkdown` para permitir el correcto parseo y renderizado de tablas con sintaxis GitHub Flavored Markdown.
 - **Espaciado entre Párrafos:** Se redujo el margen vertical entre párrafos (`<p>`) dentro de la vista previa modificando la configuración de `prose` en `tailwind.config.ts`.
 
-## Interfaz de Usuario del Editor (`page.tsx` y componentes relacionados)
+### Interfaz de Usuario del Editor (`page.tsx` y componentes relacionados)
 
 - **Panel de "Revisión Final":**
   - Se movió la tarjeta "¿Listo para la Revisión Final?" para que aparezca como un panel de acción (similar a "Traducir", "Combinar") cuando `activeAction === "finalReview"`.
@@ -152,7 +174,7 @@
   - Se modificó la lógica para habilitar el botón "Copiar Resumen" en `EditorActionsMenuComponent.tsx` para que dependa únicamente de si `finalCombinedOutput` tiene contenido (eliminando la dependencia del uso de tokens).
   - Se añadió el `username` del usuario (obtenido del contexto `useHiveAuth`) y la fecha/hora actual al texto del resumen que se copia.
 
-## Planificación y Documentación
+### Planificación y Documentación
 
 - **Conteo de Tokens (API):** Se actualizó el `TODO` en la ruta `api/ai/translate-article/route.ts` con un plan detallado y de alta prioridad para implementar el conteo de tokens (extracción de `usageMetadata`, inclusión en respuesta JSON, y futura función de registro en backend).
 - **Implementación de Modo Oscuro (Dark Mode):**
@@ -163,11 +185,11 @@
 
 ---
 
-# Cambios hechos sesion 26/05/25
+### Cambios hechos sesion 26/05/25
 
-## Mejoras Generales del Editor (page.tsx)
+#### Mejoras Generales del Editor (page.tsx)
 
-### 1. Barra de Herramientas Markdown (`MarkdownToolbar.tsx`)
+#### 1. Barra de Herramientas Markdown (`MarkdownToolbar.tsx`)
 
 - **Creación e Integración:** Se implementó una nueva barra de herramientas para aplicar formatos Markdown comunes.
 - **Funcionalidades de Formato:**
@@ -186,7 +208,7 @@
     - Lado a lado (editor izquierda, vista previa derecha).
     - Apilado (editor arriba, vista previa abajo).
 
-### 2. Componente `ImageSearchAndInsert.tsx` (Buscador de Imágenes Hivelens)
+#### 2. Componente `ImageSearchAndInsert.tsx` (Buscador de Imágenes Hivelens)
 
 - **Optimización:** Se reemplazó la etiqueta `<img>` por el componente `<Image>` de Next.js para optimización automática (lazy loading, WebP, etc.).
 - **Configuración de Dominio:** Se ajustó `next.config.js` para permitir `hivelens.duckdns.org` en `remotePatterns` (usando wildcard `/**` para `pathname`).
@@ -201,12 +223,12 @@
   - Al insertar, se añade un enlace de crédito debajo de la imagen en el formato: `fuente`.
   - El `altText` se trunca a 20 caracteres si es más largo.
 
-### 3. Flujo de Acciones del Editor (`page.tsx`)
+#### 3. Flujo de Acciones del Editor (`page.tsx`)
 
 - **Traducción:**
   - El panel de selección de idioma y el botón "Traducir Artículo" ahora aparecen directamente debajo del `EditorActionsMenu` (panel de acciones).
   - El panel se hizo más compacto, mostrando el selector de idioma y el botón de traducir en una sola línea, eliminando el título del panel.
-  - Al traducir, el texto original se conserva en el editor y la traducción se añade debajo, separada por `---` y un encabezado indicando el idioma de la traducción (ej. `## Traducción (Español)`).
+  - Al traducir, el texto original se conserva en el editor y la traducción se añade debajo, separada por `---` y un encabezado indicando el idioma de la traducción (ej. `### Traducción (Español)`).
 - **Combinación de Formatos:**
   - El panel de selección de formato y el botón "Generar Formato Combinado" ahora aparecen directamente debajo del `EditorActionsMenu`.
   - El panel se hizo más compacto, mostrando el selector de formato y el botón de combinar en una sola línea, eliminando el título del panel.
@@ -236,22 +258,22 @@
     - Se implementó un botón para "acoplar" o cerrar el panel flotante.
   - **Scroll:** Se ajustaron los estilos para asegurar que el contenido dentro del `LineReviewer` tenga scroll vertical si es extenso, tanto en modo modal como flotante.
 
-### 4. Vista Previa de Markdown (`MarkdownPreview`)
+#### 4. Vista Previa de Markdown (`MarkdownPreview`)
 
 - **Renderizado de HTML:** Se integró el plugin `rehype-raw` para que `ReactMarkdown` pueda renderizar correctamente etiquetas HTML como `<details>` y `<summary>`, permitiendo secciones desplegables.
 
-### 5. Interacción con API de IA
+#### 5. Interacción con API de IA
 
 - **Revisión de Artículo:**
   - Se corrigió el `body` de la petición `fetch` en `handleReviseArticle` para enviar correctamente el `articleContent` (eliminando un `JSON.stringify` anidado).
   - Se ajustó el prompt enviado a la IA en `/api/ai/revise-article-input/route.ts` para instruir explícitamente la preservación de la sintaxis Markdown original.
   - Se confirmó que `authenticatedFetch` ya se estaba utilizando para esta ruta.
 
-### 6. Visualización de Uso de Tokens (`EditorTokenUsage.tsx`)
+#### 6. Visualización de Uso de Tokens (`EditorTokenUsage.tsx`)
 
 - Se movió el componente `EditorTokenUsage` para que aparezca dentro de un `Popover` en el `EditorActionsMenu`, activado por un botón "Tokens".
 
-## Correcciones de Errores Menores y Refactorizaciones
+### Correcciones de Errores Menores y Refactorizaciones
 
 - Se corrigió un error en `handleReviseArticle` donde se intentaba llamar a `setIsLoading` (que no existe) en lugar de depender de `isProcessing` de `useTransition`.
 - Se ajustaron las dependencias de `useEffect` en `LineReviewer.tsx`.

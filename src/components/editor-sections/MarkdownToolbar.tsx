@@ -20,6 +20,7 @@ import {
   Quote,
   Sparkles, // Import Sparkles icon
   Strikethrough, // Añadido para tachado
+  UploadCloud, // Icono para subir imagen
 } from "lucide-react";
 import React from "react";
 
@@ -65,6 +66,10 @@ interface MarkdownToolbarProps {
    * Callback for when an AI image is generated and ready to be inserted.
    */
   onAIImageGenerated?: (imageUrl: string, altText?: string) => void;
+  /**
+   * Función que se llama para iniciar el proceso de subida de una imagen desde el dispositivo del usuario.
+   */
+  onTriggerDeviceImageUpload?: () => void;
 }
 
 export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
@@ -74,6 +79,7 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
   onToggleLayout, // Añadir aquí
   currentLayout, // Añadir aquí
   onAIImageGenerated,
+  onTriggerDeviceImageUpload,
 }) => {
   const commonButtonProps = {
     variant: "outline" as const, // Asegura que el tipo sea el correcto para ButtonProps
@@ -202,6 +208,16 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         <ImageIcon className="h-4 w-4" />
       </Button>
 
+      {/* Botón para Subir Imagen desde Dispositivo */}
+      {onTriggerDeviceImageUpload && ( // Renderizar solo si la prop está definida
+        <Button
+          {...commonButtonProps}
+          onClick={onTriggerDeviceImageUpload}
+          title="Upload Image from Device"
+        >
+          <UploadCloud className="h-4 w-4" />
+        </Button>
+      )}
       {/* AI Image Generator Button/Panel */}
       <AIImageGeneratorPanel
         triggerComponent={

@@ -132,7 +132,12 @@
       "adminActionRequired": "Cette action nécessite des privilèges d'administrateur.",
       "revisionUndoneSuccess": "Révision annulée avec succès.",
       "tagAlreadyExistsErrorDescription": "Le tag \"{tag}\" a déjà été ajouté.",
-      "aiImageInsertedSuccess": "Image générée par l'IA insérée."
+      "aiImageInsertedSuccess": "Image générée par l'IA insérée.",
+      "uploadingImageMessage": "Téléchargement de l'image...",
+      "imageUploadedSuccess": "Image téléchargée et insérée avec succès !",
+      "uploadFailedError": "Le téléchargement de l'image a échoué. Veuillez réessayer.",
+      "uploadInvalidResponseError": "Réponse invalide reçue après le téléchargement.",
+      "fileTooLargeError": "Le fichier est trop grand. La taille maximale est {maxSize}."
     },
     "loadingSpinnerClient": "Chargement d'AegisPad...",
     "userWriting": {
@@ -183,7 +188,8 @@
       "imageAltTextPrompt": "Entrez le texte alternatif de l'image (facultatif) :",
       "imageAltTextDefault": "description de l'image",
       "aiImageGeneratorButtonTitle": "Générer une image avec l'IA",
-      "aiImageAltTextDefault": "Image Générée par l'IA"
+      "aiImageAltTextDefault": "Image Générée par l'IA",
+      "uploadedImageAltTextDefault": "image téléchargée"
     },
     "imageSearchAndInsert": {
       "modalTitle": "Rechercher et insérer des images depuis Hivelens",
@@ -313,7 +319,10 @@
     "customizationQuestion": "Puis-je personnaliser mon expérience dans AegisPad ?",
     "customizationAnswer": "Oui ! Vous pouvez personnaliser certains aspects de votre expérience AegisPad, tels que le thème visuel (clair, sombre ou celui par défaut de votre système) et la page vers laquelle vous êtes redirigé après la connexion. Ces options sont disponibles sur votre page de profil.",
     "blogVsCommunityPostQuestion": "Quelle est la différence entre publier sur mon blog et dans une communauté ?",
-    "blogVsCommunityPostAnswer": "Lorsque vous publiez sur votre blog personnel, le contenu apparaît principalement sur votre profil. En publiant dans une communauté, votre publication est associée à cet espace thématique, augmentant sa visibilité auprès des membres intéressés par ce créneau. AegisPad vous permet de choisir facilement où publier, en utilisant la communauté sélectionnée comme tag principal (catégorie) de votre publication."
+    "blogVsCommunityPostAnswer": "Lorsque vous publiez sur votre blog personnel, le contenu apparaît principalement sur votre profil. En publiant dans une communauté, votre publication est associée à cet espace thématique, augmentant sa visibilité auprès des membres intéressés par ce créneau. AegisPad vous permet de choisir facilement où publier, en utilisant la communauté sélectionnée comme tag principal (catégorie) de votre publication.",
+    "devlogsQuestion": "Où puis-je voir l'historique de développement ou le journal des modifications du projet ?",
+    "devlogsAnswerWithLink": "Vous pouvez trouver tous les détails concernant les mises à jour, les nouvelles fonctionnalités et les corrections sur notre page de [devlogs_link].",
+    "devlogsLinkText": "Journaux de développement du projet"
   },
   "OnboardingAssistant": {
     "loadingAssistant": "Chargement de l'assistant...",
@@ -585,5 +594,10 @@
     "invalidTagErrorDescription": "La balise \"{tag}\" n'est pas valide. Les balises doivent avoir {minLength}-{maxLength} caractères, des lettres minuscules, des chiffres et des tirets simples (pas au début/fin ou consécutifs).",
     "tagAlreadyExistsErrorTitle": "Balise Dupliquée",
     "tagAlreadyExistsErrorDescription": "La balise \"{tag}\" a déjà été ajoutée."
+  },
+  "DevlogsPage": {
+    "title": "Journaux de développement du projet",
+    "metaTitle": "Journaux de développement",
+    "metaDescription": "Historique des modifications et du développement du projet AegisPad."
   }
 }

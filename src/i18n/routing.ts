@@ -13,6 +13,7 @@ export const routing = defineRouting({
     "/faq": "/faq",
     "/profile": "/profile",
     "/login": "/login",
+    "/devlogs": "/devlogs",
   } as const,
 });
 

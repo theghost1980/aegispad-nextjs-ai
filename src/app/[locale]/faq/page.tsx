@@ -1,5 +1,6 @@
 "use client";
 
+import CustomButton from "@/components/custom-button";
 import {
   Accordion,
   AccordionContent,
@@ -18,6 +19,28 @@ export interface FaqItem {
 export default function FaqPage() {
   const t = useTranslations("FaqPage");
 
+  const renderAnswer = (answerKey: keyof IntlMessages["FaqPage"]) => {
+    const answerText = t(answerKey);
+    const linkPlaceholder = "[devlogs_link]";
+
+    if (answerText.includes(linkPlaceholder)) {
+      const parts = answerText.split(linkPlaceholder);
+      return (
+        <>
+          {parts[0]}
+          <CustomButton
+            href="/devlogs"
+            className="text-primary hover:underline font-medium"
+          >
+            {t("devlogsLinkText")}
+          </CustomButton>
+          {parts[1]}
+        </>
+      );
+    }
+    return <>{answerText}</>;
+  };
+
   return (
     <div className="container mx-auto max-w-3xl py-8 px-4">
       <h1 className="text-3xl font-bold mb-6 text-center">{t("title")}</h1>
@@ -28,7 +51,7 @@ export default function FaqPage() {
               {t(item.questionKey)}
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground">
-              {t(item.answerKey)}
+              {renderAnswer(item.answerKey)}
             </AccordionContent>
           </AccordionItem>
         ))}

@@ -132,7 +132,12 @@
       "adminActionRequired": "Esta ação requer privilégios de administrador.",
       "revisionUndoneSuccess": "Revisão desfeita com sucesso.",
       "tagAlreadyExistsErrorDescription": "A tag \"{tag}\" já foi adicionada.",
-      "aiImageInsertedSuccess": "Imagem gerada por IA inserida."
+      "aiImageInsertedSuccess": "Imagem gerada por IA inserida.",
+      "uploadingImageMessage": "Carregando imagem...",
+      "imageUploadedSuccess": "Imagem carregada e inserida com sucesso!",
+      "uploadFailedError": "Falha ao carregar a imagem. Por favor, tente novamente.",
+      "uploadInvalidResponseError": "Resposta inválida recebida após o carregamento.",
+      "fileTooLargeError": "O arquivo é muito grande. O tamanho máximo é {maxSize}."
     },
     "loadingSpinnerClient": "Carregando AegisPad...",
     "userWriting": {
@@ -183,7 +188,8 @@
       "imageAltTextPrompt": "Digite o texto alternativo da imagem (opcional):",
       "imageAltTextDefault": "descrição da imagem",
       "aiImageGeneratorButtonTitle": "Gerar Imagem com IA",
-      "aiImageAltTextDefault": "Imagem Gerada por IA"
+      "aiImageAltTextDefault": "Imagem Gerada por IA",
+      "uploadedImageAltTextDefault": "imagem carregada"
     },
     "imageSearchAndInsert": {
       "modalTitle": "Pesquisar e inserir imagens do Hivelens",
@@ -313,7 +319,10 @@
     "customizationQuestion": "Posso personalizar minha experiência no AegisPad?",
     "customizationAnswer": "Sim! Você pode personalizar alguns aspectos da sua experiência no AegisPad, como o tema visual (claro, escuro ou o padrão do seu sistema) e a página para a qual você é redirecionado após o login. Essas opções estão disponíveis na sua página de perfil.",
     "blogVsCommunityPostQuestion": "Qual é a diferença entre postar no meu blog e em uma comunidade?",
-    "blogVsCommunityPostAnswer": "Quando você posta em seu blog pessoal, o conteúdo aparece principalmente em seu perfil. Ao postar em uma comunidade, sua postagem é associada a esse espaço temático, aumentando sua visibilidade entre os membros interessados nesse nicho. O AegisPad permite que você escolha facilmente onde publicar, usando a comunidade selecionada como a tag principal (categoria) de sua postagem."
+    "blogVsCommunityPostAnswer": "Quando você posta em seu blog pessoal, o conteúdo aparece principalmente em seu perfil. Ao postar em uma comunidade, sua postagem é associada a esse espaço temático, aumentando sua visibilidade entre os membros interessados nesse nicho. O AegisPad permite que você escolha facilmente onde publicar, usando a comunidade selecionada como a tag principal (categoria) de sua postagem.",
+    "devlogsQuestion": "¿Onde posso ver o histórico de desenvolvimento ou changelog do projeto?",
+    "devlogsAnswerWithLink": "Você pode encontrar todos os detalhes sobre atualizações, novos recursos e correções em nossa página de [devlogs_link].",
+    "devlogsLinkText": "Devlogs do Projeto"
   },
   "OnboardingAssistant": {
     "loadingAssistant": "Carregando assistente...",
@@ -585,5 +594,10 @@
     "invalidTagErrorDescription": "A tag \"{tag}\" não é válida. Tags devem ter {minLength}-{maxLength} caracteres, letras minúsculas, números e hífens simples (não no início/fim ou consecutivos).",
     "tagAlreadyExistsErrorTitle": "Tag Duplicada",
     "tagAlreadyExistsErrorDescription": "A tag \"{tag}\" já foi adicionada."
+  },
+  "DevlogsPage": {
+    "title": "Devlogs do Projeto",
+    "metaTitle": "Devlogs",
+    "metaDescription": "Histórico de mudanças e desenvolvimento do projeto AegisPad."
   }
 }
