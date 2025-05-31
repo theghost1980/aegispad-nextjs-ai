@@ -12,7 +12,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 const IMAGE_MODEL_NAME = "gemini-2.0-flash-preview-image-generation";
 
-const HIVE_UPLOAD_ACCOUNT_NAME = process.env.HIVE_UPLOAD_ACCOUNT_NAME;
+const HIVE_UPLOAD_ACCOUNT_NAME =
+  process.env.NEXT_PUBLIC_HIVE_UPLOAD_ACCOUNT_NAME;
 const HIVE_UPLOAD_POSTING_KEY = process.env.POSTING_KEY;
 
 if (

@@ -8,7 +8,8 @@ import { PrivateKey } from "@hiveio/dhive";
 import { v2 as cloudinary } from "cloudinary";
 import crypto from "crypto"; // Asegurarse de que crypto está importado
 
-const HIVE_UPLOAD_ACCOUNT_NAME = process.env.HIVE_UPLOAD_ACCOUNT_NAME;
+const HIVE_UPLOAD_ACCOUNT_NAME =
+  process.env.NEXT_PUBLIC_HIVE_UPLOAD_ACCOUNT_NAME;
 const HIVE_UPLOAD_POSTING_KEY = process.env.POSTING_KEY;
 
 if (
