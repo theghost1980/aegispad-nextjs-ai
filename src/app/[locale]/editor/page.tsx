@@ -42,6 +42,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 export default function ArticleForgePage() {
   const t = useTranslations("ArticleForgePage");
   const tTokenUsage = useTranslations("TokenUsage");
+  const tMarkdownToolBar = useTranslations("MarkdownToolbar");
   const router = useRouter();
 
   const {
@@ -107,6 +108,9 @@ export default function ArticleForgePage() {
   const [isLineReviewerOpen, setIsLineReviewerOpen] = useState(false);
   const [revisedContentForReview, setRevisedContentForReview] =
     useState<string>("");
+  const [includeTagSuggestions, setIncludeTagSuggestions] =
+    useState<boolean>(false);
+  const [aiGeneratedTags, setAiGeneratedTags] = useState<string[]>([]);
 
   const { toast } = useToast();
 
@@ -141,6 +145,7 @@ export default function ArticleForgePage() {
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput("");
+    setAiGeneratedTags([]);
     startProcessingTransition(async () => {
       const originalContentBeforeAI = articleMarkdown;
       try {
@@ -151,7 +156,12 @@ export default function ArticleForgePage() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ articleContent: originalContentBeforeAI }),
+            body: JSON.stringify({
+              articleContent: originalContentBeforeAI,
+              ...(includeTagSuggestions && {
+                taskType: "revise_and_suggest_tags",
+              }),
+            }),
           }
         );
 
@@ -167,6 +177,15 @@ export default function ArticleForgePage() {
         const result = await response.json();
         setArticleMarkdown(result.revisedText);
         setArticleBeforeRevision(originalContentBeforeAI);
+        if (result.suggestedTags && result.suggestedTags.length > 0) {
+          console.log(
+            "Tags sugeridos recibidos (revisión completa):",
+            result.suggestedTags
+          ); //TODO REM
+          setAiGeneratedTags(result.suggestedTags);
+        } else {
+          console.log("No se recibieron tags sugeridos (revisión completa)."); //TODO REM
+        }
         setActiveAction(null);
         setTranslatedArticleMarkdown("");
         setOriginalArticleForTranslation("");
@@ -567,6 +586,9 @@ export default function ArticleForgePage() {
     const dataToStore: StoredArticleData = {
       title: title,
       content: contentToReview,
+      ...(aiGeneratedTags.length > 0 && {
+        suggestedTags: aiGeneratedTags,
+      }),
     };
     localStorage.setItem(
       FINAL_REVIEW_ARTICLE_STORAGE_KEY,
@@ -696,7 +718,12 @@ export default function ArticleForgePage() {
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ articleContent: articleMarkdown }),
+              body: JSON.stringify({
+                articleContent: articleMarkdown,
+                ...(includeTagSuggestions && {
+                  taskType: "revise_and_suggest_tags",
+                }),
+              }),
             }
           );
           if (!response.ok) {
@@ -707,6 +734,15 @@ export default function ArticleForgePage() {
           }
           const result = await response.json();
           setRevisedContentForReview(result.revisedText);
+          if (result.suggestedTags && result.suggestedTags.length > 0) {
+            console.log(
+              "Tags sugeridos recibidos (revisión completa):",
+              result.suggestedTags
+            ); //TODO REM
+            setAiGeneratedTags(result.suggestedTags);
+          } else {
+            console.log("No se recibieron tags sugeridos (revisión completa)."); //TODO REM
+          }
           setIsLineReviewerOpen(true);
           setActiveAction(null);
         } catch (error: any) {
@@ -1129,6 +1165,8 @@ export default function ArticleForgePage() {
                 handleInitiateSelectiveRevisionForPanel
               }
               currentOperationMessage={currentOperationMessage}
+              includeTagSuggestions={includeTagSuggestions}
+              onIncludeTagSuggestionsChange={setIncludeTagSuggestions}
               t={t}
             />
           )}
@@ -1178,6 +1216,7 @@ export default function ArticleForgePage() {
                 currentLayout={previewLayout}
                 onAIImageGenerated={handleAIImageGenerated}
                 onTriggerDeviceImageUpload={handleTriggerDeviceImageUpload}
+                t={tMarkdownToolBar}
               />
               <textarea
                 ref={mainTextareaRef}

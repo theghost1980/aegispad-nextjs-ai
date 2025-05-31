@@ -13,11 +13,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
+import { useToast } from "@/hooks/use-toast";
 import { Image as ImageIcon, Loader2, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import NextImage from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface AIImageGeneratorPanelProps {
+  // Si el panel se usa dentro de un DropdownMenu, este trigger es el DropdownMenuItem
+  // que a su vez puede tener un botón interno.
   triggerComponent?: React.ReactNode;
   onImageGenerated?: (imageUrl: string, altText?: string) => void;
 }
@@ -25,6 +29,8 @@ interface AIImageGeneratorPanelProps {
 type GenerationService = "gemini_image_generation";
 
 export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
+  const COOLDOWN_DURATION_SECONDS = 60; // 1 minuto
+
   const { triggerComponent, onImageGenerated } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [selectedService, setSelectedService] =
@@ -35,8 +41,38 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
     null
   );
   const [error, setError] = useState<string | null>(null);
+  const [lastGenerationTimestamp, setLastGenerationTimestamp] = useState<
+    number | null
+  >(null);
+  const [cooldownSecondsRemaining, setCooldownSecondsRemaining] =
+    useState<number>(0);
 
   const { authenticatedFetch } = useHiveAuth();
+  const { toast } = useToast();
+  const t = useTranslations("AIImageGeneratorPanel");
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (lastGenerationTimestamp) {
+      const now = Date.now();
+      const timePassed = Math.floor((now - lastGenerationTimestamp) / 1000);
+      const remaining = COOLDOWN_DURATION_SECONDS - timePassed;
+
+      if (remaining > 0) {
+        setCooldownSecondsRemaining(remaining);
+        timer = setInterval(() => {
+          setCooldownSecondsRemaining((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    }
+    return () => clearInterval(timer);
+  }, [lastGenerationTimestamp]);
 
   const handleServiceSelect = (service: GenerationService) => {
     setSelectedService(service);
@@ -47,6 +83,22 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
 
   const handleGenerateImage = async () => {
     if (!prompt.trim() || !selectedService) return;
+
+    if (cooldownSecondsRemaining > 0) {
+      toast({
+        title: t("cooldownToastTitle"),
+        description: t("cooldownToastDescription", {
+          seconds: cooldownSecondsRemaining,
+        }),
+        variant: "default",
+      });
+      return;
+    }
+
+    // Reiniciar el temporizador de cooldown inmediatamente al intentar generar
+    // para evitar múltiples clics rápidos si la API tarda.
+    // Se actualizará a Date.now() real si la generación es exitosa.
+    setLastGenerationTimestamp(Date.now());
 
     setIsLoading(true);
     setGeneratedImageUrl(null);
@@ -73,6 +125,7 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
         const result = await response.json();
         console.log("Copy result:", result); //TODO REM
         setGeneratedImageUrl(result.imageUrl);
+        setLastGenerationTimestamp(Date.now()); // Actualiza el timestamp al éxito
         if (onImageGenerated) {
           onImageGenerated(result.imageUrl, prompt);
         }
@@ -92,6 +145,8 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
     setGeneratedImageUrl(null);
     setError(null);
     setIsLoading(false);
+    // No reseteamos lastGenerationTimestamp aquí para mantener el cooldown
+    // setCooldownSecondsRemaining(0); // El useEffect se encargará de esto
   };
 
   return (
@@ -161,6 +216,13 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
                 Generando imagen... (esto puede tardar un momento)
               </div>
             )}
+            {cooldownSecondsRemaining > 0 && !isLoading && (
+              <p className="text-sm text-amber-600 dark:text-amber-400 text-center">
+                {t("cooldownMessage", {
+                  seconds: cooldownSecondsRemaining,
+                })}
+              </p>
+            )}
             {error && <p className="text-sm text-destructive">{error}</p>}
             {generatedImageUrl && !isLoading && (
               <div className="border rounded-md p-2">
@@ -186,7 +248,9 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
             <Button
               type="button"
               onClick={handleGenerateImage}
-              disabled={isLoading || !prompt.trim()}
+              disabled={
+                isLoading || !prompt.trim() || cooldownSecondsRemaining > 0
+              }
             >
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

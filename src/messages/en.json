@@ -55,7 +55,9 @@
       "description": "Your article content is below. You can edit the Markdown directly or use AI to help revise it.",
       "reviseButton": "Revise Article with AI",
       "reviseConfirm": "Confirm to revise the current article content using AI.",
-      "revisingArticleMessage": "Revising article..."
+      "revisingArticleMessage": "Revising article...",
+      "includeTagSuggestionsLabel": "Include tag suggestions based on content",
+      "includeTagSuggestionsTooltip": "The AI will suggest 5 tags that you can use when you proceed to final review."
     },
     "translateArticleCard": {
       "title": "Translate Article",
@@ -592,11 +594,77 @@
     "invalidTagErrorTitle": "Invalid Tag",
     "invalidTagErrorDescription": "Tag \"{tag}\" is not valid. Tags must be {minLength}-{maxLength} chars, lowercase letters, numbers, and single hyphens (not at start/end or consecutive).",
     "tagAlreadyExistsErrorTitle": "Duplicate Tag",
-    "tagAlreadyExistsErrorDescription": "Tag \"{tag}\" has already been added."
+    "tagAlreadyExistsErrorDescription": "Tag \"{tag}\" has already been added.",
+    "suggestTagsButtonTitle": "Suggest Tags",
+    "suggestTagsPopoverTitle": "Tag Suggestions AI",
+    "suggestTagsPopoverDescription": "Choose a source for tag suggestions.",
+    "suggestPopularTitle": "Popular on Hive",
+    "suggestFromArticleTitle": "From Article Content",
+    "loadingSuggestions": "Loading suggestions...",
+    "noSuggestionsFound": "No new tag suggestions found.",
+    "fetchSuggestionsError": "Could not fetch tag suggestions.",
+    "articleEmptyForSuggestionsError": "Article content is empty. Cannot suggest tags from content.",
+    "clickToAddSuggestion": "Click a tag to add it:",
+    "errorTitle": "Error",
+    "infoTitle": "Info",
+    "tagsCounter": "{current}/{max} tags"
   },
   "DevlogsPage": {
     "title": "Project Devlogs",
     "metaTitle": "Devlogs",
     "metaDescription": "History of changes and development of the AegisPad project."
+  },
+  "AIImageGeneratorPanel": {
+    "cooldownToastTitle": "Please wait a moment",
+    "cooldownToastDescription": "You must wait {seconds} more seconds to generate another image.",
+    "cooldownMessage": "You can generate another image in {seconds} seconds.",
+    "dialogTitle": "AI Image Generator",
+    "selectServicePrompt": "Select a service to generate your image:",
+    "geminiServiceButton": "Gemini AI",
+    "changeServiceButton": "← Change Service",
+    "promptLabel": "Prompt for Gemini:",
+    "promptPlaceholder": "E.g.: An astronaut cat on the moon",
+    "generatingMessage": "Generating image... (this may take a moment)",
+    "altGeneratedImage": "AI generated image",
+    "closeButton": "Close",
+    "generateButton": "Generate"
+  },
+  "MarkdownToolbar": {
+    "styles": {
+      "title": "Text Styles",
+      "buttonLabel": "Styles",
+      "bold": "Bold (Ctrl+B)",
+      "italic": "Italic (Ctrl+I)",
+      "strikethrough": "Strikethrough"
+    },
+    "headings": {
+      "title": "Headings",
+      "buttonLabel": "Headings",
+      "h1": "Heading 1",
+      "h2": "Heading 2",
+      "h3": "Heading 3"
+    },
+    "blocks": {
+      "title": "Block Elements",
+      "buttonLabel": "Blocks",
+      "bulletedList": "Bulleted List",
+      "numberedList": "Numbered List",
+      "blockquote": "Blockquote",
+      "codeBlock": "Code Block",
+      "horizontalRule": "Horizontal Rule"
+    },
+    "insert": {
+      "title": "Insert Elements",
+      "buttonLabel": "Insert",
+      "link": "Insert Link (Ctrl+K)",
+      "imageFromHivelens": "Insert Image from Hivelens",
+      "imageByUrl": "Insert Image by URL",
+      "uploadImageFromDevice": "Upload Image from Device",
+      "generateAiImage": "Generate AI Image"
+    },
+    "layout": {
+      "switchToStackedView": "Switch to Stacked View (Editor Top, Preview Bottom)",
+      "switchToSideBySideView": "Switch to Side-by-Side View (Editor Left, Preview Right)"
+    }
   }
 }

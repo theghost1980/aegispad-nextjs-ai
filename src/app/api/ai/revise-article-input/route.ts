@@ -11,10 +11,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  let articleContent;
+  let articleContent: string;
+  let taskType: "revise" | "revise_and_suggest_tags" = "revise";
   try {
     const body = await request.json();
     articleContent = body.articleContent;
+    if (body.taskType === "revise_and_suggest_tags") {
+      taskType = "revise_and_suggest_tags";
+    }
   } catch (e) {
     return NextResponse.json({ message: "Invalid JSON body" }, { status: 400 });
   }
@@ -42,16 +46,27 @@ export async function POST(request: NextRequest) {
     const model = genAI.getGenerativeModel({
       model: GEMINI_AI_MODEL_NAME,
     });
+    let prompt;
+    if (taskType === "revise_and_suggest_tags") {
+      prompt = `You are an expert editor and content analyst.
+1. Please revise the following article text for clarity, grammar, spelling, punctuation, and style. Ensure the revised text flows well and is easy to read. Maintain the original language of the article. **Crucially, preserve all original Markdown formatting (like headers, lists, bold, italics, links, images, etc.).**
+2. After the revised text, provide a section clearly marked as "Suggested Tags:" followed by a list of 3-5 relevant tags for the article. Each tag should be on a new line, prefixed with a hyphen (e.g., "- example-tag"). Tags should be lowercase, use only letters (a-z), numbers (0-9), and a single hyphen (-) for multi-word tags.
 
-    const revisionPrompt = `You are an expert editor. Please revise the following article text for clarity, grammar, spelling, punctuation, and style. Ensure the revised text flows well and is easy to read. Maintain the original language of the article. **Crucially, preserve all original Markdown formatting (like headers, lists, bold, italics, links, images, etc.).** Provide only the revised text in your response, without any additional commentary.
+Provide only the revised text and the "Suggested Tags:" section in your response, without any additional commentary.
 
  Article Text:
 
  ${articleContent}`;
+    } else {
+      prompt = `You are an expert editor. Please revise the following article text for clarity, grammar, spelling, punctuation, and style. Ensure the revised text flows well and is easy to read. Maintain the original language of the article. **Crucially, preserve all original Markdown formatting (like headers, lists, bold, italics, links, images, etc.).** Provide only the revised text in your response, without any additional commentary.
 
-    const result = await model.generateContent(revisionPrompt);
+ Article Text:
+
+ ${articleContent}`;
+    }
+    const result = await model.generateContent(prompt);
     const response = result.response;
-    const revisedText = response.text();
+    const fullResponseText = response.text();
 
     // Extract token usage from the response metadata
     const usageMetadata = response.usageMetadata;
@@ -59,21 +74,45 @@ export async function POST(request: NextRequest) {
     const completionTokens = usageMetadata?.candidatesTokenCount;
     const totalTokens = usageMetadata?.totalTokenCount;
 
-    // Record the usage in the database
+    let revisedText = fullResponseText;
+    let suggestedTags: string[] = [];
+
+    if (taskType === "revise_and_suggest_tags") {
+      const tagSectionMarker = "Suggested Tags:";
+      const tagSectionIndex = fullResponseText.indexOf(tagSectionMarker);
+
+      if (tagSectionIndex !== -1) {
+        revisedText = fullResponseText.substring(0, tagSectionIndex).trim();
+        const tagsString = fullResponseText.substring(
+          tagSectionIndex + tagSectionMarker.length
+        );
+        suggestedTags = tagsString
+          .split("\n")
+          .map((tag) => tag.replace(/^- /, "").trim()) // Remove hyphen and trim
+          .filter(
+            (tag) => tag.length > 0 && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(tag)
+          ); // Basic validation
+      }
+      // If marker not found, revisedText remains fullResponseText, and suggestedTags remains empty
+    }
+
     if (profileId) {
-      // Ensure profileId is available
       await recordApiUsage({
         profileId: profileId,
-        operationType: "ai_revise_article", // Specific identifier for this operation
+        operationType: `ai_revise_article${
+          taskType === "revise_and_suggest_tags" ? "_with_tags" : ""
+        }`,
         modelUsed: GEMINI_AI_MODEL_NAME,
-        textTokensUsed: totalTokens, // Using totalTokens for text_tokens_used
-        detailsJson: usageMetadata, // Store the full metadata for details
+        textTokensUsed: totalTokens,
+        detailsJson: usageMetadata,
       });
     }
 
     return NextResponse.json({
       revisedText: revisedText,
-      // Optionally include token usage in the response to the client
+      ...(taskType === "revise_and_suggest_tags" && {
+        suggestedTags: suggestedTags,
+      }),
       tokenUsage: usageMetadata,
     });
   } catch (e: any) {

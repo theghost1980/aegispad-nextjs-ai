@@ -17,6 +17,7 @@ export type RevisionType = "full" | "selective";
 export interface StoredArticleData {
   title: string;
   content: string;
+  suggestedTags?: string[];
 }
 
 export type UserPreferences = {

@@ -21,7 +21,10 @@ Importante: //TODO
 
 - Add assistance about:
 
-  - tags
+  - tags:
+    - TagInput part: IP
+    - When revising article:
+      - should be an option to be included in the revision before doing it so the prompt will change + add this data into localstorage so it can be retrieved on final review.
   - title
   - images to add when certain conditions are meet:
     - no imagen when reaching certain point or stage?

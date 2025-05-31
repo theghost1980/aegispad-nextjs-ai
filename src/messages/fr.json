@@ -55,7 +55,9 @@
       "description": "Le contenu de votre article est ci-dessous. Vous pouvez modifier le Markdown directement ou utiliser l'IA pour vous aider à le réviser.",
       "reviseButton": "Réviser l'Article avec l'IA",
       "reviseConfirm": "Confirmez pour réviser le contenu actuel de l'article à l'aide de l'IA.",
-      "revisingArticleMessage": "Révision de l'article..."
+      "revisingArticleMessage": "Révision de l'article...",
+      "includeTagSuggestionsLabel": "Inclure des suggestions de tags basées sur le contenu",
+      "includeTagSuggestionsTooltip": "L'IA suggérera 5 tags que vous pourrez utiliser lorsque vous passerez à la révision finale."
     },
     "translateArticleCard": {
       "title": "Traduire l'Article",
@@ -593,11 +595,77 @@
     "invalidTagErrorTitle": "Balise Invalide",
     "invalidTagErrorDescription": "La balise \"{tag}\" n'est pas valide. Les balises doivent avoir {minLength}-{maxLength} caractères, des lettres minuscules, des chiffres et des tirets simples (pas au début/fin ou consécutifs).",
     "tagAlreadyExistsErrorTitle": "Balise Dupliquée",
-    "tagAlreadyExistsErrorDescription": "La balise \"{tag}\" a déjà été ajoutée."
+    "tagAlreadyExistsErrorDescription": "La balise \"{tag}\" a déjà été ajoutée.",
+    "suggestTagsButtonTitle": "Suggérer des tags",
+    "suggestTagsPopoverTitle": "Suggestions de tags AI",
+    "suggestTagsPopoverDescription": "Choisissez une source pour les suggestions de tags.",
+    "suggestPopularTitle": "Populaire sur Hive",
+    "suggestFromArticleTitle": "À partir du contenu de l'article",
+    "loadingSuggestions": "Chargement des suggestions...",
+    "noSuggestionsFound": "Aucune nouvelle suggestion de tag trouvée.",
+    "fetchSuggestionsError": "Impossible d'obtenir les suggestions de tags.",
+    "articleEmptyForSuggestionsError": "Le contenu de l'article est vide. Impossible de suggérer des tags à partir du contenu.",
+    "clickToAddSuggestion": "Cliquez sur un tag pour l'ajouter :",
+    "errorTitle": "Erreur",
+    "infoTitle": "Information",
+    "tagsCounter": "{current}/{max} tags"
   },
   "DevlogsPage": {
     "title": "Journaux de développement du projet",
     "metaTitle": "Journaux de développement",
     "metaDescription": "Historique des modifications et du développement du projet AegisPad."
+  },
+  "AIImageGeneratorPanel": {
+    "cooldownToastTitle": "Veuillez patienter un instant",
+    "cooldownToastDescription": "Vous devez attendre encore {seconds} secondes pour générer une autre image.",
+    "cooldownMessage": "Vous pouvez générer une autre image dans {seconds} secondes.",
+    "dialogTitle": "Générateur d'Images IA",
+    "selectServicePrompt": "Sélectionnez un service pour générer votre image :",
+    "geminiServiceButton": "Gemini AI",
+    "changeServiceButton": "← Changer de Service",
+    "promptLabel": "Prompt pour Gemini :",
+    "promptPlaceholder": "Ex : Un chat astronaute sur la lune",
+    "generatingMessage": "Génération de l'image... (cela peut prendre un moment)",
+    "altGeneratedImage": "Image générée par IA",
+    "closeButton": "Fermer",
+    "generateButton": "Générer"
+  },
+  "MarkdownToolbar": {
+    "styles": {
+      "title": "Styles de Texte",
+      "buttonLabel": "Styles",
+      "bold": "Gras (Ctrl+B)",
+      "italic": "Italique (Ctrl+I)",
+      "strikethrough": "Barré"
+    },
+    "headings": {
+      "title": "Titres",
+      "buttonLabel": "Titres",
+      "h1": "Titre 1",
+      "h2": "Titre 2",
+      "h3": "Titre 3"
+    },
+    "blocks": {
+      "title": "Éléments de Bloc",
+      "buttonLabel": "Blocs",
+      "bulletedList": "Liste à Puces",
+      "numberedList": "Liste Numérotée",
+      "blockquote": "Bloc de Citation",
+      "codeBlock": "Bloc de Code",
+      "horizontalRule": "Ligne Horizontale"
+    },
+    "insert": {
+      "title": "Insérer des Éléments",
+      "buttonLabel": "Insérer",
+      "link": "Insérer un Lien (Ctrl+K)",
+      "imageFromHivelens": "Insérer une Image depuis Hivelens",
+      "imageByUrl": "Insérer une Image par URL",
+      "uploadImageFromDevice": "Télécharger une Image depuis l'Appareil",
+      "generateAiImage": "Générer une Image IA"
+    },
+    "layout": {
+      "switchToStackedView": "Passer en Vue Empilée (Éditeur en Haut, Aperçu en Bas)",
+      "switchToSideBySideView": "Passer en Vue Côte à Côte (Éditeur à Gauche, Aperçu à Droite)"
+    }
   }
 }

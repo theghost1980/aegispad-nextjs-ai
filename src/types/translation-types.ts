@@ -71,3 +71,7 @@ export type FinalReviewPageTranslations = ReturnType<
 export type FeedbackPageTranslations = ReturnType<
   typeof useTranslations<"FeedbackPage">
 >;
+
+export type MarkdownToolBarTranslations = ReturnType<
+  typeof useTranslations<"MarkdownToolbar">
+>;

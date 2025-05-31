@@ -55,7 +55,9 @@
       "description": "O conteúdo do seu artigo está abaixo. Você pode editar o Markdown diretamente ou usar a IA para ajudar a revisá-lo.",
       "reviseButton": "Revisar Artigo com IA",
       "reviseConfirm": "Confirme para revisar o conteúdo atual do artigo usando IA.",
-      "revisingArticleMessage": "Revisando artigo..."
+      "revisingArticleMessage": "Revisando artigo...",
+      "includeTagSuggestionsLabel": "Incluir sugestões de tags com base no conteúdo",
+      "includeTagSuggestionsTooltip": "A IA sugerirá 5 tags que você pode usar ao prosseguir para a revisão final."
     },
     "translateArticleCard": {
       "title": "Traduzir Artigo",
@@ -593,11 +595,77 @@
     "invalidTagErrorTitle": "Tag Inválida",
     "invalidTagErrorDescription": "A tag \"{tag}\" não é válida. Tags devem ter {minLength}-{maxLength} caracteres, letras minúsculas, números e hífens simples (não no início/fim ou consecutivos).",
     "tagAlreadyExistsErrorTitle": "Tag Duplicada",
-    "tagAlreadyExistsErrorDescription": "A tag \"{tag}\" já foi adicionada."
+    "tagAlreadyExistsErrorDescription": "A tag \"{tag}\" já foi adicionada.",
+    "suggestTagsButtonTitle": "Sugerir Tags",
+    "suggestTagsPopoverTitle": "Sugestões de Tags IA",
+    "suggestTagsPopoverDescription": "Escolha uma fonte para as sugestões de tags.",
+    "suggestPopularTitle": "Populares no Hive",
+    "suggestFromArticleTitle": "Do Conteúdo do Artigo",
+    "loadingSuggestions": "Carregando sugestões...",
+    "noSuggestionsFound": "Nenhuma nova sugestão de tag encontrada.",
+    "fetchSuggestionsError": "Não foi possível obter as sugestões de tags.",
+    "articleEmptyForSuggestionsError": "O conteúdo do artigo está vazio. Não é possível sugerir tags do conteúdo.",
+    "clickToAddSuggestion": "Clique em uma tag para adicioná-la:",
+    "errorTitle": "Erro",
+    "infoTitle": "Informação",
+    "tagsCounter": "{current}/{max} tags"
   },
   "DevlogsPage": {
     "title": "Devlogs do Projeto",
     "metaTitle": "Devlogs",
     "metaDescription": "Histórico de mudanças e desenvolvimento do projeto AegisPad."
+  },
+  "AIImageGeneratorPanel": {
+    "cooldownToastTitle": "Por favor, espere um momento",
+    "cooldownToastDescription": "Você deve esperar mais {seconds} segundos para gerar outra imagem.",
+    "cooldownMessage": "Você pode gerar outra imagem em {seconds} segundos.",
+    "dialogTitle": "Gerador de Imagens com IA",
+    "selectServicePrompt": "Selecione um serviço para gerar sua imagem:",
+    "geminiServiceButton": "Gemini AI",
+    "changeServiceButton": "← Mudar Serviço",
+    "promptLabel": "Prompt para Gemini:",
+    "promptPlaceholder": "Ex: Um gato astronauta na lua",
+    "generatingMessage": "Gerando imagem... (isso pode levar um momento)",
+    "altGeneratedImage": "Imagem gerada por IA",
+    "closeButton": "Fechar",
+    "generateButton": "Gerar"
+  },
+  "MarkdownToolbar": {
+    "styles": {
+      "title": "Estilos de Texto",
+      "buttonLabel": "Estilos",
+      "bold": "Negrito (Ctrl+B)",
+      "italic": "Itálico (Ctrl+I)",
+      "strikethrough": "Riscado"
+    },
+    "headings": {
+      "title": "Cabeçalhos",
+      "buttonLabel": "Cabeçalhos",
+      "h1": "Cabeçalho 1",
+      "h2": "Cabeçalho 2",
+      "h3": "Cabeçalho 3"
+    },
+    "blocks": {
+      "title": "Elementos de Bloco",
+      "buttonLabel": "Blocos",
+      "bulletedList": "Lista com Marcadores",
+      "numberedList": "Lista Numerada",
+      "blockquote": "Bloco de Citação",
+      "codeBlock": "Bloco de Código",
+      "horizontalRule": "Linha Horizontal"
+    },
+    "insert": {
+      "title": "Inserir Elementos",
+      "buttonLabel": "Inserir",
+      "link": "Inserir Link (Ctrl+K)",
+      "imageFromHivelens": "Inserir Imagem do Hivelens",
+      "imageByUrl": "Inserir Imagem por URL",
+      "uploadImageFromDevice": "Carregar Imagem do Dispositivo",
+      "generateAiImage": "Gerar Imagem com IA"
+    },
+    "layout": {
+      "switchToStackedView": "Mudar para Visualização Empilhada (Editor Acima, Pré-visualização Abaixo)",
+      "switchToSideBySideView": "Mudar para Visualização Lado a Lado (Editor à Esquerda, Pré-visualização à Direita)"
+    }
   }
 }

@@ -1,3 +1,28 @@
+## 2024-08-01
+
+### ✨ Nuevas Funcionalidades
+
+- **Sugerencias de Etiquetas con IA en `TagInput`**:
+  - Se añadió un botón para activar las sugerencias de etiquetas mediante IA, permitiendo elegir entre "Populares en Hive" o "Basadas en el Contenido del Artículo".
+  - Implementada la interfaz de usuario (Popover con Badges) para mostrar y seleccionar las etiquetas sugeridas.
+  - Las etiquetas añadidas mediante sugerencia de IA ahora tienen un estilo visual distintivo (color de badge primario por defecto).
+  - Se incorporó un contador de etiquetas (ej. "3/10 etiquetas") en el componente `TagInput`.
+- **Revisión de Artículo con Sugerencia de Etiquetas**:
+  - Se extendió el endpoint API `/api/ai/revise-article-input` para que, opcionalmente, pueda devolver sugerencias de etiquetas relevantes (3-5) junto con el contenido revisado.
+  - Se añadió un checkbox en el panel de opciones de revisión (`ArticleForgePage`) para que el usuario pueda solicitar estas sugerencias de etiquetas durante el proceso de revisión del artículo.
+- **Integración en el Flujo de Publicación**:
+  - Las etiquetas sugeridas por la IA durante la revisión ahora se guardan en `localStorage` cuando el usuario procede a la "Revisión Final".
+  - La página de "Revisión Final" (`FinalReviewPage`) carga estas etiquetas sugeridas y las pre-popula en el `TagInput`, manteniendo su estilo visual distintivo si el campo de tags solo contenía el tag por defecto.
+
+### 🛠️ Mejoras
+
+- **Experiencia de Desarrollo**: Se añadieron `console.log` en el frontend (`ArticleForgePage`) para facilitar el seguimiento y depuración del flujo de obtención de sugerencias de etiquetas desde la API de revisión.
+- **UI/UX en `TagInput`**:
+  - Se mejoró la visibilidad y alineación del botón de sugerencias de IA, colocándolo a la derecha del campo de entrada de etiquetas.
+  - El botón para solicitar sugerencias de IA ahora también se deshabilita si se ha alcanzado el número máximo de etiquetas permitidas.
+
+---
+
 ### Cambios y Mejoras - Sesión del 30/05/2024
 
 #### Mejoras en la Subida y Generación de Imágenes

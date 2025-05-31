@@ -55,7 +55,9 @@
       "description": "El contenido de tu artículo está abajo. Puedes editar el Markdown directamente o usar la IA para revisarlo.",
       "reviseButton": "Revisar Artículo con IA",
       "reviseConfirm": "Confirma para revisar el contenido actual del artículo usando IA.",
-      "revisingArticleMessage": "Revisando artículo..."
+      "revisingArticleMessage": "Revisando artículo...",
+      "includeTagSuggestionsLabel": "Incluir sugerencias de etiquetas basadas en el contenido",
+      "includeTagSuggestionsTooltip": "La IA sugerirá 5 etiquetas que puedes usar cuando pases a la revisión final."
     },
     "translateArticleCard": {
       "title": "Traducir Artículo",
@@ -593,11 +595,77 @@
     "invalidTagErrorTitle": "Etiqueta No Válida",
     "invalidTagErrorDescription": "La etiqueta \"{tag}\" no es válida. Las etiquetas deben tener {minLength}-{maxLength} caracteres, letras minúsculas, números y guiones simples (no al principio/final ni consecutivos).",
     "tagAlreadyExistsErrorTitle": "Etiqueta Duplicada",
-    "tagAlreadyExistsErrorDescription": "La etiqueta \"{tag}\" ya ha sido añadida."
+    "tagAlreadyExistsErrorDescription": "La etiqueta \"{tag}\" ya ha sido añadida.",
+    "suggestTagsButtonTitle": "Sugerir Etiquetas",
+    "suggestTagsPopoverTitle": "Sugerencias de Etiquetas IA",
+    "suggestTagsPopoverDescription": "Elige una fuente para las sugerencias de etiquetas.",
+    "suggestPopularTitle": "Populares en Hive",
+    "suggestFromArticleTitle": "Del Contenido del Artículo",
+    "loadingSuggestions": "Cargando sugerencias...",
+    "noSuggestionsFound": "No se encontraron nuevas sugerencias de etiquetas.",
+    "fetchSuggestionsError": "No se pudieron obtener las sugerencias de etiquetas.",
+    "articleEmptyForSuggestionsError": "El contenido del artículo está vacío. No se pueden sugerir etiquetas del contenido.",
+    "clickToAddSuggestion": "Haz clic en una etiqueta para añadirla:",
+    "errorTitle": "Error",
+    "infoTitle": "Información",
+    "tagsCounter": "{current}/{max} etiquetas"
   },
   "DevlogsPage": {
     "title": "Devlogs del Proyecto",
     "metaTitle": "Devlogs",
     "metaDescription": "Historial de cambios y desarrollo del proyecto AegisPad."
+  },
+  "AIImageGeneratorPanel": {
+    "cooldownToastTitle": "Espera un momento",
+    "cooldownToastDescription": "Debes esperar {seconds} segundos más para generar otra imagen.",
+    "cooldownMessage": "Puedes generar otra imagen en {seconds} segundos.",
+    "dialogTitle": "Generador de Imágenes con IA",
+    "selectServicePrompt": "Selecciona un servicio para generar tu imagen:",
+    "geminiServiceButton": "Gemini AI",
+    "changeServiceButton": "← Cambiar Servicio",
+    "promptLabel": "Prompt para Gemini:",
+    "promptPlaceholder": "Ej: Un gato astronauta en la luna",
+    "generatingMessage": "Generando imagen... (esto puede tardar un momento)",
+    "altGeneratedImage": "Imagen generada por IA",
+    "closeButton": "Cerrar",
+    "generateButton": "Generar"
+  },
+  "MarkdownToolbar": {
+    "styles": {
+      "title": "Estilos de Texto",
+      "buttonLabel": "Estilos",
+      "bold": "Negrita (Ctrl+B)",
+      "italic": "Cursiva (Ctrl+I)",
+      "strikethrough": "Tachado"
+    },
+    "headings": {
+      "title": "Encabezados",
+      "buttonLabel": "Encabezados",
+      "h1": "Encabezado 1",
+      "h2": "Encabezado 2",
+      "h3": "Encabezado 3"
+    },
+    "blocks": {
+      "title": "Elementos de Bloque",
+      "buttonLabel": "Bloques",
+      "bulletedList": "Lista con Viñetas",
+      "numberedList": "Lista Numerada",
+      "blockquote": "Cita en Bloque",
+      "codeBlock": "Bloque de Código",
+      "horizontalRule": "Línea Horizontal"
+    },
+    "insert": {
+      "title": "Insertar Elementos",
+      "buttonLabel": "Insertar",
+      "link": "Insertar Enlace (Ctrl+K)",
+      "imageFromHivelens": "Insertar Imagen desde Hivelens",
+      "imageByUrl": "Insertar Imagen por URL",
+      "uploadImageFromDevice": "Subir Imagen desde Dispositivo",
+      "generateAiImage": "Generar Imagen con IA"
+    },
+    "layout": {
+      "switchToStackedView": "Cambiar a Vista Apilada (Editor Arriba, Vista Previa Abajo)",
+      "switchToSideBySideView": "Cambiar a Vista Lado a Lado (Editor Izquierda, Vista Previa Derecha)"
+    }
   }
 }

@@ -26,6 +26,7 @@ import {
   APP_NAME,
   APP_VERSION,
   FINAL_REVIEW_ARTICLE_STORAGE_KEY,
+  MAX_HIVE_TAGS,
 } from "@/constants/constants";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { toast } from "@/hooks/use-toast";
@@ -33,13 +34,13 @@ import { StoredArticleData, SubscribedCommunity } from "@/types/general.types";
 import { KeychainHelper } from "keychain-helper";
 import { Loader2, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import { useEffect, useState } from "react";
 
 export default function FinalReviewPage() {
   const t = useTranslations("FinalReviewPage");
-  const tCommunitiesList = useTranslations("FinalReviewPage.communitiesList"); // 't' específica para el sub-namespace
+  const tCommunitiesList = useTranslations("FinalReviewPage.communitiesList");
 
   const router = useRouter();
   const {
@@ -70,6 +71,62 @@ export default function FinalReviewPage() {
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(
     null
   );
+  const [aiAddedInitialTags, setAiAddedInitialTags] = useState<Set<string>>(
+    new Set()
+  );
+
+  const pathname = usePathname();
+
+  // --- Funciones para sugerencias de Tags ---
+  const handleFetchPopularTags = async (): Promise<string[] | undefined> => {
+    // TODO: Implementar llamada real al API endpoint /api/hive/popular-tags
+    console.log("Fetching popular tags from Hive...");
+    // Simulación de llamada a API
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Ejemplo de respuesta (estos deberían venir de tu API)
+    const popularTagsFromApi = [
+      "hive",
+      "posh",
+      "gaming",
+      "art",
+      "photography",
+      "music",
+      "leo",
+      "palnet",
+      "neoxian",
+      "vyb",
+    ];
+    // Filtrar para no sugerir el tag por defecto si ya está
+    return popularTagsFromApi.filter(
+      (tag) => tag.toLowerCase() !== AEGISPAD_DEFAULT_TAG.toLowerCase()
+    );
+  };
+
+  const handleFetchArticleKeywords = async (
+    content: string
+  ): Promise<string[] | undefined> => {
+    // TODO: Implementar llamada real al API endpoint /api/ai/suggest-article-tags
+    console.log(
+      "Fetching article keywords based on content...",
+      content.substring(0, 100)
+    );
+    if (!content.trim()) {
+      toast({ title: "Error", description: "Article content is empty." });
+      return [];
+    }
+    // Simulación de llamada a API
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Ejemplo de respuesta (estos deberían venir de tu API)
+    const keywordsFromApi = [
+      "technology",
+      "ai",
+      "review",
+      "future",
+      "innovation",
+    ];
+    return keywordsFromApi;
+  };
+  // --- Fin de funciones para sugerencias de Tags ---
 
   useEffect(() => {
     setClientLoaded(true);
@@ -93,6 +150,32 @@ export default function FinalReviewPage() {
           setArticleContent(storedData.content || null);
           setInitialTitleFromStorage(storedData.title || "");
           setInitialContentFromStorage(storedData.content || null);
+
+          // Cargar tags sugeridos si existen y el array de tags actual solo tiene el default
+          if (storedData.suggestedTags && storedData.suggestedTags.length > 0) {
+            setTags((currentTags) => {
+              if (
+                currentTags.length === 1 &&
+                currentTags[0].toLowerCase() ===
+                  AEGISPAD_DEFAULT_TAG.toLowerCase()
+              ) {
+                // Mantener el tag por defecto y añadir los sugeridos, respetando el límite
+                const uniqueNewTags = storedData.suggestedTags!.filter(
+                  (tag) =>
+                    tag.toLowerCase() !== AEGISPAD_DEFAULT_TAG.toLowerCase()
+                );
+                const aiTagsFromStorage = new Set(
+                  uniqueNewTags.map((t) => t.toLowerCase())
+                );
+                setAiAddedInitialTags(aiTagsFromStorage);
+                return [
+                  AEGISPAD_DEFAULT_TAG,
+                  ...uniqueNewTags.slice(0, MAX_HIVE_TAGS - 1),
+                ];
+              }
+              return currentTags; // No modificar si ya hay otros tags
+            });
+          }
         } catch (error) {
           console.error("Error parsing stored article data:", error);
           // Si hay un error al parsear, podría ser una cadena antigua sin estructura JSON
@@ -471,7 +554,14 @@ export default function FinalReviewPage() {
       {articleContent !== null && (
         <div className="my-4">
           <h2 className="text-xl font-semibold mb-2">{t("tagsTitle")}</h2>
-          <TagInput onTagsChange={setTags} initialTags={tags} />
+          <TagInput
+            onTagsChange={setTags}
+            initialTags={tags}
+            articleContent={articleContent || ""}
+            onFetchPopularTags={handleFetchPopularTags}
+            onFetchArticleKeywords={handleFetchArticleKeywords}
+            initialAiTags={aiAddedInitialTags}
+          />
           <p className="text-xs text-muted-foreground mt-1">
             {t("tagsDescription")}
           </p>
