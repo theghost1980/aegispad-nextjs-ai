@@ -42,11 +42,6 @@ HIVE_UPLOAD_ACCOUNT_NAME="tu_nombre_de_usuario_hive"
 # Clave de POSTING PRIVADA de la cuenta HIVE_UPLOAD_ACCOUNT_NAME
 # ¡TRATAR CON EXTREMO CUIDADO!
 POSTING_KEY="5K...tu_clave_de_posting_privada"
-
-# (Opcional, para Cloudinary como fallback)
-# NEXT_PUBLIC_CLOUD_NAME="tu_cloud_name_cloudinary"
-# API_KEY="tu_api_key_cloudinary"
-# API_SECRET="tu_api_secret_cloudinary"
 ```
 
 Asegúrate de reemplazar los valores de ejemplo con tus credenciales reales.
@@ -168,17 +163,7 @@ async function uploadToHiveImageService(
 
 // --- Route Handler Principal ---
 export async function POST(request: NextRequest) {
-  // Aquí iría tu lógica de autenticación para asegurar que el usuario
-  // que llama a esta API está autorizado en tu aplicación.
-  // Ejemplo (debes implementarlo según tu sistema de auth):
-  // const profileId = await getProfileIdFromAuth(request);
-  // if (!profileId) {
-  //   return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  // }
-  // const userIdForDB = profileId; // ID para guardar en tu BD
-
-  // Por simplicidad, este ejemplo asume que la autenticación ya se manejó
-  // y que tienes un `userIdForDB` si necesitas guardar la URL en tu base de datos.
+  //Aca podria ir la parte de auth si se usa hive keychain, o una base de datos...
 
   if (request.method !== "POST") {
     return new NextResponse(null, {
@@ -215,34 +200,13 @@ export async function POST(request: NextRequest) {
     const originalFileName = imageFile.name || `uploaded_image_${Date.now()}`;
     const mimeType = imageFile.type;
 
-    // --- Aquí podrías integrar la lógica de `getDeterminedStorageService` ---
-    // --- que verifica Hive Images, Ecency, y usa Cloudinary como fallback. ---
-    // --- Por ahora, llamamos directamente a la función de Hive. ---
     const { imageUrl, serviceMetadata } = await uploadToHiveImageService(
       imageBuffer,
       originalFileName,
       mimeType
     );
 
-    // (Opcional) Guardar la URL en tu base de datos asociada al usuario
-    // const supabase = createSupabaseServiceRoleClient();
-    // const { data: dbEntry, error: dbError } = await supabase
-    //   .from("user_images")
-    //   .insert({
-    //     user_id: userIdForDB, // El ID del usuario de tu sistema
-    //     image_url: imageUrl,
-    //     storage_service: "Hive Images", // O el nombre del servicio usado
-    //     filename: originalFileName,
-    //     size_bytes: imageFile.size,
-    //     mime_type: mimeType,
-    //     metadata: serviceMetadata || {},
-    //   })
-    //   .select()
-    //   .single();
-    // if (dbError) {
-    //   console.error("[UploadAPI] Error al guardar en BD:", dbError);
-    //   // Considerar manejo de error si la subida fue exitosa pero la BD falla
-    // }
+    // (Opcional) Guardar el proceso en una BD o generar un archivo json local en el servidor o un log usando winston
 
     return NextResponse.json(
       { message: "Imagen subida exitosamente", data: { imageUrl } },
@@ -402,3 +366,7 @@ La parte crucial es la función `uploadToHiveImageService` y, específicamente, 
 - **Servicios Múltiples (Hive Images, Ecency, Cloudinary):** El código que te proporcioné en interacciones anteriores (`utils/imageStorageService.ts`) muestra cómo determinar dinámicamente qué servicio usar, incluyendo un fallback a Cloudinary. Puedes integrar esa lógica aquí para mayor robustez.
 
 Este tutorial te proporciona una base sólida para implementar la subida de imágenes firmadas a servicios de Hive. ¡Adapta y expande según las necesidades de tu proyecto!
+
+## Esto lo comparto porque a pesar de que existen mucha documentacion a veces puede ser confusa
+
+La idea es poder guiar a programadores que apenas llegan a HIVE.
