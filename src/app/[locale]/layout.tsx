@@ -39,7 +39,7 @@ export async function generateMetadata({
 
   return {
     title: "AegisPad",
-    description: "Create, revise, and translate articles with AI.",
+    description: "All in one suite Editor for HIVE using AI.",
   };
 }
 
