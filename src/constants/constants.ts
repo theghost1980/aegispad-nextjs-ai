@@ -52,6 +52,7 @@ export const GEMINI_API_KEY_INFO_URL = "https://aistudio.google.com/app/apikey";
 export const GEMINI_AI_MODEL_NAME = "gemini-1.5-flash-latest";
 export const AVAILABLE_LANGUAGES = [
   { value: "Spanish", label: "Spanish" },
+  { value: "Bengali", label: "Bengali" },
   { value: "French", label: "French" },
   { value: "German", label: "German" },
   { value: "Japanese", label: "Japanese" },
