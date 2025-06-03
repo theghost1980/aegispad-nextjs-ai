@@ -31,7 +31,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
         // 1. Deshabilitar la Grabación de Sesiones Completamente
         // Esto es lo que necesitas para detener los eventos "$snapshot".
-        disable_session_recording: false, // @default false
+        disable_session_recording: true, // @default false
 
         // 2. Deshabilitar la Captura Automática de Interacciones (clicks, cambios de input, etc.)
         // Esto es fundamental para reducir la mayoría de los eventos de "heatmap" y otros como "$autocapture".

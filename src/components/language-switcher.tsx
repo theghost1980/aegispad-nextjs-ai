@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { usePathname, useRouter } from "@/i18n/routing"; // Usar hooks de next-intl/routing
+import { usePathname, useRouter } from "@/i18n/routing";
 import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -18,7 +18,6 @@ export default function LanguageSwitcher() {
   const pathname = usePathname();
 
   const onSelectChange = (newLocale: string) => {
-    // La forma recomendada de cambiar de locale con next-intl/navigation
     router.push(pathname, { locale: newLocale });
   };
 

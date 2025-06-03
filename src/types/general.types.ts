@@ -49,3 +49,5 @@ export interface DeterminedStorageInfo {
   name: string;
   url?: string;
 }
+
+export type LanguageCode = "en" | "es" | "fr" | "pt-br";

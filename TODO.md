@@ -1,5 +1,8 @@
 Importante: //TODO
 
+- agregar configuracion para control de voz en profile + mensaje si estan usando otro browser diferente de chrome.
+- Extraer la lógica de manipulación de texto de bajo nivel (aplicar formatos Markdown como negrita, cursiva, encabezados, etc.) a funciones de utilidad reutilizables. Esto permitirá que tanto `handleApplyFormat` (UI) como `handleVoiceCommand` (voz) consuman estas utilidades, evitando la duplicación de código.
+
 - investigar para usar apis de:
 
   - https://unsplash.com/
@@ -18,6 +21,8 @@ Importante: //TODO
   - can create: C:\Users\saturno\Downloads\HIVE-Projects\hive-markdown\TODO-ADD-AEGISPAD
   - add a new panel like revise/translate only with admins
   - admin dashboards, etc
+
+- add mobile support for aegis, fix styles, etc + test
 
 - Add assistance about:
 

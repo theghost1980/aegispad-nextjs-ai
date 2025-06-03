@@ -24,26 +24,32 @@ import {
   ESTIMATED_INITIAL_SESSION_TOKENS,
   FINAL_REVIEW_ARTICLE_STORAGE_KEY,
 } from "@/constants/constants";
+import { useBrowserDetection } from "@/hooks/use-browser-detection";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
+import { useVoiceControl } from "@/hooks/use-voice-control";
 import {
   ActiveEditorAction,
   CombineFormatType,
+  LanguageCode,
   RevisionType,
   StoredArticleData,
 } from "@/types/general.types";
 import { getLocaleFromLanguageValue } from "@/utils/language";
 import { splitMarkdownIntoParagraphs } from "@/utils/markdown";
 import { countWords } from "@/utils/text";
-import { useTranslations } from "next-intl";
+import { Mic, MicOff } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
 export default function ArticleForgePage() {
   const t = useTranslations("ArticleForgePage");
   const tTokenUsage = useTranslations("TokenUsage");
   const tMarkdownToolBar = useTranslations("MarkdownToolbar");
   const router = useRouter();
+
+  const currentLocale = useLocale();
 
   const {
     isAuthenticated: isHiveLoggedIn,
@@ -114,11 +120,101 @@ export default function ArticleForgePage() {
 
   const { toast } = useToast();
 
+  const [voiceInputState, setVoiceInputState] = useState<
+    "idle" | "awaiting_heading_title"
+  >("idle");
+
   const isLoading = isProcessing || isLoadingHiveAuth;
+
+  const { isChrome: isChromeBrowser, isBrave: isBraveBrowser } =
+    useBrowserDetection();
 
   useEffect(() => {
     setClientLoaded(true);
   }, []);
+
+  const mapLocaleToSpeechLang = useCallback((locale: string): string => {
+    const lang = locale.toLowerCase() as LanguageCode;
+    const mapping: Record<LanguageCode, string> = {
+      en: "en-US",
+      es: "es-ES",
+      fr: "fr-FR",
+      "pt-br": "pt-BR",
+    };
+    return mapping[lang] || "en-US";
+  }, []);
+
+  const speechLanguage = mapLocaleToSpeechLang(currentLocale);
+
+  // Definir los comandos de voz y sus acciones
+  const voiceCommands: Record<string, string> = {
+    // Clave: frase a reconocer (en minúsculas, sin puntuación final)
+    // Valor: identificador del comando
+    h2: "CMD_HEADING_2",
+    "nueva línea": "CMD_NEW_LINE",
+    "punto final": "CMD_PERIOD",
+    // Puedes añadir más comandos aquí
+  };
+
+  const handleVoiceCommand = (commandAction: string) => {
+    const textarea = mainTextareaRef.current;
+    if (!textarea && commandAction !== "CMD_PERIOD") return; // Textarea necesario para la mayoría de comandos
+
+    switch (commandAction) {
+      case "CMD_HEADING_2":
+        setArticleMarkdown((prev) => prev + "## ");
+        setVoiceInputState("awaiting_heading_title");
+        // Mover el cursor al final después de "## "
+        if (textarea) {
+          setTimeout(() => {
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd =
+              textarea.value.length;
+          }, 0);
+        }
+        break;
+      case "CMD_NEW_LINE":
+        setArticleMarkdown((prev) => prev + "\n");
+        setVoiceInputState("idle"); // Volver al dictado normal
+        if (textarea) {
+          setTimeout(() => {
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd =
+              textarea.value.length;
+          }, 0);
+        }
+        break;
+      case "CMD_PERIOD":
+        setArticleMarkdown((prev) => prev.trimEnd() + ". ");
+        setVoiceInputState("idle"); // Asumimos que después de un punto se sigue dictando normal
+        break;
+    }
+  };
+
+  const {
+    isListening: isVoiceListening,
+    isSupported: isVoiceSupported,
+    error: voiceError,
+    toggleListening: toggleVoiceListening,
+    setLanguage: setVoiceLanguage,
+  } = useVoiceControl({
+    onTranscript: (text, isFinal) => {
+      if (isFinal) {
+        if (voiceInputState === "awaiting_heading_title") {
+          setArticleMarkdown((prev) => prev + text); // Añadir título sin espacio extra aún
+        } else {
+          setArticleMarkdown((prev) => prev + text + " "); // Dictado normal, añadir espacio
+        }
+      }
+    },
+    initialLanguage: speechLanguage,
+    commands: voiceCommands,
+    onCommand: handleVoiceCommand,
+  });
+
+  useEffect(() => {
+    setVoiceLanguage(speechLanguage);
+  }, [speechLanguage, setVoiceLanguage]);
 
   useEffect(() => {
     if (clientLoaded && !isLoadingHiveAuth) {
@@ -1290,6 +1386,42 @@ export default function ArticleForgePage() {
         </div>
       ) : (
         <div className="min-h-[calc(100vh-200px)]"></div>
+      )}
+
+      {canUseEditor && isVoiceSupported && isChromeBrowser && (
+        <div
+          className="fixed flex flex-col items-center space-y-1"
+          style={{
+            top: "calc(1rem + 20px)",
+            left: "20px",
+            zIndex: 50,
+          }}
+        >
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleVoiceListening}
+            title={
+              isVoiceListening ? "Detener dictado" : "Iniciar dictado por voz"
+            }
+            className={`rounded-full shadow-lg ${
+              isVoiceListening
+                ? "ring-2 ring-red-500 text-red-500"
+                : "bg-background hover:bg-muted"
+            }`}
+          >
+            {isVoiceListening ? (
+              <MicOff className="h-5 w-5" />
+            ) : (
+              <Mic className="h-5 w-5" />
+            )}
+          </Button>
+          {voiceError && !isBraveBrowser && (
+            <p className="text-xs text-destructive bg-background/80 px-2 py-1 rounded shadow-md max-w-[150px] text-center">
+              {voiceError}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
