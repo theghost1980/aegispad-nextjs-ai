@@ -3,14 +3,10 @@
 import { ImageSearchAndInsert } from "@/components/custom/ImageSearchAndInsert";
 import { CombinePanelComponent } from "@/components/editor-page/CombinePanelComponent";
 import { EditorActionsMenuComponent } from "@/components/editor-page/EditorActionsMenuComponent";
-import { MarkdownPreviewComponent } from "@/components/editor-page/MarkdownPreviewComponent";
+import { MainEditorArea } from "@/components/editor-page/MainEditorArea";
 import { RevisionOptionsPanelComponent } from "@/components/editor-page/RevisionOptionsPanelComponent";
 import { TranslationPanelComponent } from "@/components/editor-page/TranslationPanelComponent";
 import { LineReviewer } from "@/components/editor-sections/LineReviewer";
-import {
-  MarkdownFormatType,
-  MarkdownToolbar,
-} from "@/components/editor-sections/MarkdownToolbar";
 import StartArticleCard from "@/components/editor-sections/StartArticleCard";
 import GlobalLoader from "@/components/global-loader";
 import LoadingSpinner from "@/components/loading-spinner";
@@ -23,7 +19,11 @@ import {
   DEFAULT_TARGET_LANGUAGE,
   ESTIMATED_INITIAL_SESSION_TOKENS,
   FINAL_REVIEW_ARTICLE_STORAGE_KEY,
+  VOICE_COMMANDS,
 } from "@/constants/constants";
+import { useArticleCreation } from "@/hooks/use-article-creation";
+import { useArticleRevision } from "@/hooks/use-article-revision";
+import { useArticleTranslation } from "@/hooks/use-article-translation";
 import { useBrowserDetection } from "@/hooks/use-browser-detection";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -32,12 +32,11 @@ import {
   ActiveEditorAction,
   CombineFormatType,
   LanguageCode,
-  RevisionType,
   StoredArticleData,
 } from "@/types/general.types";
 import { getLocaleFromLanguageValue } from "@/utils/language";
 import { splitMarkdownIntoParagraphs } from "@/utils/markdown";
-import { countWords } from "@/utils/text";
+import { getToolbarFormatStrings } from "@/utils/markdown-editor-utils";
 import { Mic, MicOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -71,14 +70,6 @@ export default function ArticleForgePage() {
   const [currentOperationMessage, setCurrentOperationMessage] = useState<
     string | null
   >(null);
-  const [translatedArticleMarkdown, setTranslatedArticleMarkdown] =
-    useState<string>("");
-  const [originalArticleForTranslation, setOriginalArticleForTranslation] =
-    useState<string>("");
-
-  const [articleBeforeRevision, setArticleBeforeRevision] =
-    useState<string>("");
-
   const [currentRequestTokens, setCurrentRequestTokens] = useState<
     number | null
   >(null);
@@ -94,29 +85,15 @@ export default function ArticleForgePage() {
   const [finalCombinedOutput, setFinalCombinedOutput] = useState<string>("");
   const [selectedCombineFormat, setSelectedCombineFormat] =
     useState<CombineFormatType>("simple");
-  const [detectedLanguage, setDetectedLanguage] = useState<string | null>(null);
-
-  const [isProcessing, startProcessingTransition] = useTransition();
 
   const [clientLoaded, setClientLoaded] = useState(false);
-  const [translationProgress, setTranslationProgress] = useState<{
-    current: number;
-    total: number;
-  } | null>(null);
 
   const [isPreviewExpanded, setIsPreviewExpanded] = useState<boolean>(false);
   const [activeAction, setActiveAction] = useState<ActiveEditorAction>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [previewLayout, setPreviewLayout] = useState<"side" | "bottom">("side");
   const mainTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedRevisionType, setSelectedRevisionType] =
-    useState<RevisionType>("full");
-  const [isLineReviewerOpen, setIsLineReviewerOpen] = useState(false);
-  const [revisedContentForReview, setRevisedContentForReview] =
-    useState<string>("");
-  const [includeTagSuggestions, setIncludeTagSuggestions] =
-    useState<boolean>(false);
-  const [aiGeneratedTags, setAiGeneratedTags] = useState<string[]>([]);
+  const [detectedLanguage, setDetectedLanguage] = useState<string | null>(null);
 
   const { toast } = useToast();
 
@@ -124,7 +101,31 @@ export default function ArticleForgePage() {
     "idle" | "awaiting_heading_title"
   >("idle");
 
-  const isLoading = isProcessing || isLoadingHiveAuth;
+  const {
+    translatedArticleMarkdown,
+    originalArticleForTranslation,
+    translationProgress,
+    isTranslating,
+    translationError,
+    translateArticle,
+  } = useArticleTranslation({
+    authenticatedFetch,
+    articleMarkdown,
+    targetLanguage,
+    setCurrentOperationMessage,
+    translatingChunkMessage: (values) =>
+      t("translateArticleCard.translatingChunkMessage", values),
+    translateFailedErrorMessage: t("toastMessages.translateFailedError"),
+  });
+
+  const { createArticle, isCreating: isCreatingArticle } = useArticleCreation({
+    authenticatedFetch,
+  });
+
+  const [isProcessing, startProcessingTransition] = useTransition();
+
+  const isLoading = isProcessing || isLoadingHiveAuth || isTranslating;
+  const isLoadingCreation = isCreatingArticle;
 
   const { isChrome: isChromeBrowser, isBrave: isBraveBrowser } =
     useBrowserDetection();
@@ -132,6 +133,36 @@ export default function ArticleForgePage() {
   useEffect(() => {
     setClientLoaded(true);
   }, []);
+
+  const {
+    articleBeforeRevision,
+    selectedRevisionType,
+    setSelectedRevisionType,
+    isLineReviewerOpen,
+    setIsLineReviewerOpen,
+    revisedContentForReview,
+    setRevisedContentForReview,
+    includeTagSuggestions,
+    setIncludeTagSuggestions,
+    aiGeneratedTags,
+    setAiGeneratedTags,
+    isRevising,
+    revisionError,
+    handleReviseArticle: reviseArticleHook, // Renombrar para evitar conflicto
+    handleUndoRevision: undoRevisionHook, // Renombrar para evitar conflicto
+  } = useArticleRevision({
+    authenticatedFetch,
+    articleMarkdown,
+    setArticleMarkdown,
+    setCurrentOperationMessage,
+    revisingArticleMessage: t("editArticleCard.revisingArticleMessage"),
+    reviseFailedError: t("toastMessages.reviseFailedError"),
+    articleRevisedSuccess: t("toastMessages.articleRevisedSuccess"),
+    revisionUndoneSuccess: t("toastMessages.revisionUndoneSuccess", {
+      defaultValue: "Revision undone successfully.",
+    }),
+    articleEmptyError: t("toastMessages.articleEmptyError"),
+  });
 
   const mapLocaleToSpeechLang = useCallback((locale: string): string => {
     const lang = locale.toLowerCase() as LanguageCode;
@@ -146,48 +177,63 @@ export default function ArticleForgePage() {
 
   const speechLanguage = mapLocaleToSpeechLang(currentLocale);
 
-  // Definir los comandos de voz y sus acciones
-  const voiceCommands: Record<string, string> = {
-    // Clave: frase a reconocer (en minúsculas, sin puntuación final)
-    // Valor: identificador del comando
-    h2: "CMD_HEADING_2",
-    "nueva línea": "CMD_NEW_LINE",
-    "punto final": "CMD_PERIOD",
-    // Puedes añadir más comandos aquí
-  };
-
   const handleVoiceCommand = (commandAction: string) => {
     const textarea = mainTextareaRef.current;
-    if (!textarea && commandAction !== "CMD_PERIOD") return; // Textarea necesario para la mayoría de comandos
+    let textToInsertAtCursor: string | null = null;
+    let newVoiceState: typeof voiceInputState | null = null;
+
+    let finalMarkdown = articleMarkdown;
+    let finalSelectionStart =
+      textarea?.selectionStart ?? articleMarkdown.length;
+    let finalSelectionEnd = textarea?.selectionEnd ?? articleMarkdown.length;
+    let needsTextareaFocus = false;
 
     switch (commandAction) {
       case "CMD_HEADING_2":
-        setArticleMarkdown((prev) => prev + "## ");
-        setVoiceInputState("awaiting_heading_title");
-        // Mover el cursor al final después de "## "
-        if (textarea) {
-          setTimeout(() => {
-            textarea.focus();
-            textarea.selectionStart = textarea.selectionEnd =
-              textarea.value.length;
-          }, 0);
-        }
+        textToInsertAtCursor = "## ";
+        newVoiceState = "awaiting_heading_title";
         break;
       case "CMD_NEW_LINE":
-        setArticleMarkdown((prev) => prev + "\n");
-        setVoiceInputState("idle"); // Volver al dictado normal
-        if (textarea) {
-          setTimeout(() => {
-            textarea.focus();
-            textarea.selectionStart = textarea.selectionEnd =
-              textarea.value.length;
-          }, 0);
-        }
+        textToInsertAtCursor = "\n";
+        newVoiceState = "idle";
         break;
       case "CMD_PERIOD":
-        setArticleMarkdown((prev) => prev.trimEnd() + ". ");
-        setVoiceInputState("idle"); // Asumimos que después de un punto se sigue dictando normal
+        finalMarkdown = articleMarkdown.trimEnd() + ". ";
+        finalSelectionStart = finalMarkdown.length;
+        finalSelectionEnd = finalMarkdown.length;
+        newVoiceState = "idle";
         break;
+    }
+
+    if (textToInsertAtCursor) {
+      const currentCursorPos =
+        textarea?.selectionStart ?? articleMarkdown.length;
+      const selectionEndForInsert = textarea?.selectionEnd ?? currentCursorPos;
+
+      finalMarkdown =
+        articleMarkdown.substring(0, currentCursorPos) +
+        textToInsertAtCursor +
+        articleMarkdown.substring(selectionEndForInsert);
+
+      finalSelectionStart = currentCursorPos + textToInsertAtCursor.length;
+      finalSelectionEnd = finalSelectionStart;
+    }
+
+    if (newVoiceState) {
+      setVoiceInputState(newVoiceState);
+    }
+
+    if (finalMarkdown !== articleMarkdown || textToInsertAtCursor) {
+      setArticleMarkdown(finalMarkdown);
+      needsTextareaFocus = true;
+    }
+
+    if (needsTextareaFocus && textarea) {
+      setTimeout(() => {
+        textarea.focus();
+        textarea.selectionStart = finalSelectionStart;
+        textarea.selectionEnd = finalSelectionEnd;
+      }, 0);
     }
   };
 
@@ -200,15 +246,39 @@ export default function ArticleForgePage() {
   } = useVoiceControl({
     onTranscript: (text, isFinal) => {
       if (isFinal) {
+        const textarea = mainTextareaRef.current;
+        let currentSelectionStart =
+          textarea?.selectionStart ?? articleMarkdown.length;
+        let currentSelectionEnd =
+          textarea?.selectionEnd ?? articleMarkdown.length;
+
+        const textToInsert =
+          voiceInputState === "awaiting_heading_title" ? text : text + " ";
+
+        const newArticleMarkdown =
+          articleMarkdown.substring(0, currentSelectionStart) +
+          textToInsert +
+          articleMarkdown.substring(currentSelectionEnd);
+
+        const newCursorPos = currentSelectionStart + textToInsert.length;
+
+        setArticleMarkdown(newArticleMarkdown);
+
         if (voiceInputState === "awaiting_heading_title") {
-          setArticleMarkdown((prev) => prev + text); // Añadir título sin espacio extra aún
-        } else {
-          setArticleMarkdown((prev) => prev + text + " "); // Dictado normal, añadir espacio
+          setVoiceInputState("idle");
+        }
+
+        if (textarea) {
+          setTimeout(() => {
+            textarea.focus();
+            textarea.selectionStart = newCursorPos;
+            textarea.selectionEnd = newCursorPos;
+          }, 0);
         }
       }
     },
     initialLanguage: speechLanguage,
-    commands: voiceCommands,
+    commands: VOICE_COMMANDS,
     onCommand: handleVoiceCommand,
   });
 
@@ -228,78 +298,67 @@ export default function ArticleForgePage() {
 
   const handleReviseArticle = async () => {
     if (!articleMarkdown.trim()) {
-      setActiveAction(null);
       toast({
         title: t("toastMessages.errorTitle"),
         description: t("toastMessages.articleEmptyError"),
         variant: "destructive",
       });
-      setArticleBeforeRevision("");
       return;
     }
-    setCurrentOperationMessage(t("editArticleCard.revisingArticleMessage"));
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
     setFinalCombinedOutput("");
-    setAiGeneratedTags([]);
-    startProcessingTransition(async () => {
-      const originalContentBeforeAI = articleMarkdown;
-      try {
-        const response = await authenticatedFetch(
-          "/api/ai/revise-article-input",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              articleContent: originalContentBeforeAI,
-              ...(includeTagSuggestions && {
-                taskType: "revise_and_suggest_tags",
-              }),
-            }),
-          }
-        );
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          setArticleBeforeRevision("");
-          throw new Error(
-            errorData.message ||
-              `Failed to revise article. Server responded with ${response.status}`
-          );
-        }
+    const revisionResult = await reviseArticleHook(); // Llamar a la función del hook
 
-        const result = await response.json();
-        setArticleMarkdown(result.revisedText);
-        setArticleBeforeRevision(originalContentBeforeAI);
-        if (result.suggestedTags && result.suggestedTags.length > 0) {
-          console.log(
-            "Tags sugeridos recibidos (revisión completa):",
-            result.suggestedTags
-          ); //TODO REM
-          setAiGeneratedTags(result.suggestedTags);
-        } else {
-          console.log("No se recibieron tags sugeridos (revisión completa)."); //TODO REM
-        }
-        setActiveAction(null);
-        setTranslatedArticleMarkdown("");
-        setOriginalArticleForTranslation("");
-        toast({
-          title: t("toastMessages.successTitle"),
-          description: t("toastMessages.articleRevisedSuccess"),
-        });
-      } catch (error: any) {
-        console.error("Error revising article:", error);
-        toast({
-          title: t("toastMessages.errorTitle"),
-          description: t("toastMessages.reviseFailedError"),
-          variant: "destructive",
-        });
-      } finally {
-        setCurrentOperationMessage(null);
-      }
-    });
+    if (revisionResult.success) {
+      // El hook ya actualiza articleMarkdown y aiGeneratedTags
+      setActiveAction(null); // Cerrar panel después de la revisión completa
+      toast({
+        title: t("toastMessages.successTitle"),
+        description: t("toastMessages.articleRevisedSuccess"),
+      });
+    } else {
+      // El hook ya maneja el error y lo establece en revisionError
+      // Podemos mostrar un toast aquí basado en el error del hook si es necesario,
+      // o dejar que el hook lo maneje internamente con setCurrentOperationMessage.
+      // Si el hook ya muestra el mensaje de error via setCurrentOperationMessage,
+      // este toast podría ser redundante o manejarse de forma diferente.
+      // Por ahora, mostramos un toast genérico si el hook reporta un error.
+      toast({
+        title: t("toastMessages.errorTitle"),
+        description:
+          revisionResult.error?.message || t("toastMessages.reviseFailedError"),
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Efecto para mostrar toast si revisionError ocurre en el hook (opcional, si el hook no muestra toast)
+  useEffect(() => {
+    if (revisionError) {
+      console.error("Revision Error:", revisionError);
+      toast({
+        title: t("toastMessages.errorTitle"),
+        description:
+          revisionError.message || t("toastMessages.reviseFailedError"),
+        variant: "destructive",
+      });
+      // setRevisionError(null); // Considerar limpiar el error aquí si no se necesita en otro lugar
+    }
+  }, [revisionError, toast, t]);
+
+  const handleUndoRevision = () => {
+    const undoResult = undoRevisionHook(); // Llamar a la función del hook
+    if (undoResult.success) {
+      toast({
+        title: t("toastMessages.successTitle"),
+        description: undoResult.message,
+      });
+    } else {
+      // No hay nada que deshacer, el hook ya lo maneja
+      // Podrías mostrar un toast aquí si el hook no lo hace
+    }
   };
 
   const handleTranslateArticle = async () => {
@@ -320,127 +379,63 @@ export default function ArticleForgePage() {
       return;
     }
 
+    if (!articleMarkdown.trim() || !targetLanguage.trim()) {
+      return; // Stop if validation failed
+    }
+
+    // Reset combine output and tokens before starting translation
+    setFinalCombinedOutput("");
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
-    setFinalCombinedOutput("");
-    setTranslationProgress(null);
+    await translateArticle(); // Llamar a la función del hook
+    const translationResult = await translateArticle();
 
-    startProcessingTransition(async () => {
-      const currentArticleContent = articleMarkdown;
-
-      try {
-        setOriginalArticleForTranslation(currentArticleContent);
-
-        const MAX_WORDS_PER_CHUNK = 330;
-        const paragraphs = splitMarkdownIntoParagraphs(currentArticleContent);
-        const chunks: string[] = [];
-        let currentChunk = "";
-        let currentChunkWordCount = 0;
-
-        for (const paragraph of paragraphs) {
-          const paragraphWordCount = countWords(paragraph);
-          if (
-            currentChunkWordCount + paragraphWordCount <= MAX_WORDS_PER_CHUNK &&
-            currentChunk.length + paragraph.length < 8000
-          ) {
-            currentChunk += (currentChunk ? "\n\n" : "") + paragraph;
-            currentChunkWordCount += paragraphWordCount;
-          } else {
-            if (currentChunk.trim()) {
-              chunks.push(currentChunk);
-            }
-            currentChunk = paragraph;
-            currentChunkWordCount = paragraphWordCount;
-          }
-        }
-        if (currentChunk.trim()) {
-          chunks.push(currentChunk);
-        }
-
-        if (chunks.length === 0 && currentArticleContent.trim()) {
-          chunks.push(currentArticleContent);
-        }
-
-        let finalTranslatedText = "";
-        setTranslationProgress({ current: 0, total: chunks.length });
-
-        for (let i = 0; i < chunks.length; i++) {
-          const chunkToTranslate = chunks[i];
-          setCurrentOperationMessage(
-            t("translateArticleCard.translatingChunkMessage", {
-              current: i + 1,
-              total: chunks.length,
-            })
-          );
-          setTranslationProgress({ current: i + 1, total: chunks.length });
-
-          const response = await authenticatedFetch(
-            "/api/ai/translate-article",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                articleContent: chunkToTranslate,
-                targetLanguage: targetLanguage,
-              }),
-            }
-          );
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(
-              errorData.message ||
-                `Failed to translate chunk ${i + 1}. Server responded with ${
-                  response.status
-                }`
-            );
-          }
-          const result = await response.json();
-          finalTranslatedText +=
-            (finalTranslatedText ? "\n\n" : "") + result.translatedText;
-        }
-
-        setTranslatedArticleMarkdown(finalTranslatedText);
-
-        const combinedMarkdown = `${currentArticleContent}\n\n---\n\n## ${t(
-          "translateArticleCard.translationResultTitle",
-          { language: targetLanguage }
-        )}\n\n${finalTranslatedText}`;
-
-        setArticleMarkdown(combinedMarkdown);
-        setActiveAction(null);
-        toast({
-          title: t("toastMessages.successTitle"),
-          description: t("toastMessages.articleTranslatedSuccess", {
-            targetLanguage,
-          }),
-        });
-      } catch (error: any) {
-        console.error("Error in translation process:", error);
-        toast({
-          title: t("toastMessages.errorTitle"),
-          description: t("toastMessages.translateFailedError"),
-          variant: "destructive",
-        });
-      } finally {
-        setCurrentOperationMessage(null);
-        setTranslationProgress(null);
-      }
-    });
-  };
-
-  const handleUndoRevision = () => {
-    if (articleBeforeRevision) {
-      setArticleMarkdown(articleBeforeRevision);
-      setArticleBeforeRevision("");
+    if (
+      translationResult.success &&
+      translationResult.originalText &&
+      translationResult.translatedText
+    ) {
+      const combinedMarkdown = `${
+        translationResult.originalText
+      }\n\n---\n\n## ${t("translateArticleCard.translationResultTitle", {
+        language: targetLanguage,
+      })}\n\n${translationResult.translatedText}`;
+      setArticleMarkdown(combinedMarkdown);
+      setActiveAction(null); // Cerrar panel después de combinar
       toast({
         title: t("toastMessages.successTitle"),
-        description: t("toastMessages.revisionUndoneSuccess", {
-          defaultValue: "Revision undone successfully.",
+        description: t("toastMessages.articleTranslatedSuccess", {
+          targetLanguage,
         }),
+      });
+    } else {
+      // Hubo un error o la traducción no tuvo éxito por alguna razón
+      const errorMessage =
+        translationResult.error?.message ||
+        t("toastMessages.translateFailedError");
+      toast({
+        title: t("toastMessages.errorTitle"),
+        description: errorMessage,
+        variant: "destructive",
       });
     }
   };
+
+  // El estado translationError del hook sigue disponible y puede ser usado por
+  // TranslationPanelComponent para mostrar un error en línea si se desea.
+
+  // const handleUndoRevision = () => {
+  //   if (articleBeforeRevision) {
+  //     setArticleMarkdown(articleBeforeRevision);
+  //     setArticleBeforeRevision("");
+  //     toast({
+  //       title: t("toastMessages.successTitle"),
+  //       description: t("toastMessages.revisionUndoneSuccess", {
+  //         defaultValue: "Revision undone successfully.",
+  //       }),
+  //     });
+  //   }
+  // };
 
   const handleCombineFormat = () => {
     if (
@@ -487,14 +482,11 @@ export default function ArticleForgePage() {
         const targetLangDisplay =
           AVAILABLE_LANGUAGES.find((lang) => lang.value === targetLanguage)
             ?.label || targetLanguage;
-
         const sourceLocale = getLocaleFromLanguageValue(detectedLanguage);
         const noteTextInSourceLanguage =
           COMMENT_NOTES_BY_LOCALE[sourceLocale] ||
           COMMENT_NOTES_BY_LOCALE["en"];
-
         const fullTranslationNote = `> ${noteTextInSourceLanguage}`;
-
         const forPublishingText = t(
           "refineFormatCard.inComments_forPublishingAsComment",
           { language: targetLangDisplay }
@@ -517,7 +509,6 @@ export default function ArticleForgePage() {
   const generateSummaryTextForCopy = () => {
     let summary = `${t("sessionSummaryCard.title")}\n`;
     summary += "=============================\n\n";
-    //TODO add soemthing about admin & ai creation if needed
     summary += `${t("sessionSummaryCard.userLabel", {
       defaultValue: "User:",
     })} ${hiveUsername || "N/A"}\n`;
@@ -587,9 +578,6 @@ export default function ArticleForgePage() {
     setPrompt("");
     setArticleMarkdown("");
     setTargetLanguage(DEFAULT_TARGET_LANGUAGE);
-    setSourceLanguageForCreation(DEFAULT_SOURCE_LANGUAGE_CREATION);
-    setTranslatedArticleMarkdown("");
-    setOriginalArticleForTranslation("");
     setCurrentOperationMessage(null);
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
@@ -624,29 +612,19 @@ export default function ArticleForgePage() {
     setDetailedTokenUsage(null);
     setFinalCombinedOutput("");
     setArticleMarkdown("");
-
     startProcessingTransition(async () => {
       try {
-        const response = await authenticatedFetch("/api/ai/generate-content", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: promptFromPanel }),
-        });
+        const result = await createArticle({ prompt: promptFromPanel });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(
-            errorData.message ||
-              `Failed to generate content. Server responded with ${response.status}`
-          );
+        if (result && result.generatedText) {
+          setArticleMarkdown(result.generatedText);
+          toast({
+            title: t("toastMessages.successTitle"),
+            description: t("toastMessages.articleCreatedSuccess"),
+          });
+        } else {
+          throw new Error(t("toastMessages.createFailedError"));
         }
-
-        const result = await response.json();
-        setArticleMarkdown(result.generatedText);
-        toast({
-          title: t("toastMessages.successTitle"),
-          description: t("toastMessages.articleCreatedSuccess"),
-        });
       } catch (error: any) {
         console.error("Error generating content:", error);
         toast({
@@ -678,7 +656,6 @@ export default function ArticleForgePage() {
     if (lines.length > 0 && lines[0].startsWith("# ")) {
       title = lines[0].substring(2).trim();
     }
-
     const dataToStore: StoredArticleData = {
       title: title,
       content: contentToReview,
@@ -731,14 +708,12 @@ export default function ArticleForgePage() {
           img.altText ||
           t("toolbar.aiImageAltTextDefault", { defaultValue: "image" });
 
-        // Note for ia: never modify the line bellow just ask before
         let markdownImage = `![${altText}](${img.imageUrl})`;
 
         if (img.postUrl) {
           const sourceLinkText = t("toolbar.imageCreditLinkText", {
             defaultValue: "Source",
           });
-          // Puedes ajustar el límite de caracteres para el postUrl si es necesario
           const truncatedPostUrl =
             img.postUrl.length > 40
               ? `${img.postUrl.substring(0, 37)}...`
@@ -795,7 +770,6 @@ export default function ArticleForgePage() {
     newFullMarkdown: string
   ) => {
     setArticleMarkdown(newFullMarkdown);
-    setArticleBeforeRevision(articleMarkdown);
     toast({
       title: "All Changes Applied",
       description: "All visible revisions have been applied to the editor.",
@@ -831,13 +805,7 @@ export default function ArticleForgePage() {
           const result = await response.json();
           setRevisedContentForReview(result.revisedText);
           if (result.suggestedTags && result.suggestedTags.length > 0) {
-            console.log(
-              "Tags sugeridos recibidos (revisión completa):",
-              result.suggestedTags
-            ); //TODO REM
             setAiGeneratedTags(result.suggestedTags);
-          } else {
-            console.log("No se recibieron tags sugeridos (revisión completa)."); //TODO REM
           }
           setIsLineReviewerOpen(true);
           setActiveAction(null);
@@ -853,175 +821,6 @@ export default function ArticleForgePage() {
         }
       });
     }
-  };
-
-  const handleApplyFormat = (formatType: MarkdownFormatType) => {
-    const textarea = mainTextareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = articleMarkdown.substring(start, end);
-    let newText = "";
-    let newCursorPos = end;
-    let textToInsert = "";
-
-    switch (formatType) {
-      case "bold":
-        textToInsert =
-          selectedText ||
-          t("toolbar.boldPlaceholder", {
-            defaultValue: "bold text",
-          });
-        newText = `**${textToInsert}**`;
-        newCursorPos =
-          start + (selectedText ? newText.length : 2 + textToInsert.length);
-        if (!selectedText) newCursorPos = start + 2;
-        break;
-      case "italic":
-        textToInsert =
-          selectedText ||
-          t("toolbar.italicPlaceholder", {
-            defaultValue: "italic text",
-          });
-        newText = `*${textToInsert}*`;
-        newCursorPos =
-          start + (selectedText ? newText.length : 1 + textToInsert.length);
-        if (!selectedText) newCursorPos = start + 1;
-        break;
-      case "strikethrough":
-        textToInsert =
-          selectedText ||
-          t("toolbar.strikethroughPlaceholder", {
-            defaultValue: "strikethrough",
-          });
-        newText = `~~${textToInsert}~~`;
-        newCursorPos =
-          start + (selectedText ? newText.length : 2 + textToInsert.length);
-        if (!selectedText) newCursorPos = start + 2;
-        break;
-      case "link":
-        const urlFromPrompt = window.prompt(
-          t("toolbar.linkPrompt", {
-            defaultValue: "Enter link URL:",
-          }),
-          "https://"
-        );
-        if (urlFromPrompt) {
-          textToInsert =
-            selectedText ||
-            t("toolbar.linkTextPlaceholder", {
-              defaultValue: "link text",
-            });
-          newText = `${textToInsert}`;
-          if (selectedText) {
-            newCursorPos = start + newText.length;
-          } else {
-            newCursorPos = start + 1;
-          }
-        } else {
-          return;
-        }
-        break;
-      case "h1":
-      case "h2":
-      case "h3":
-        const prefix =
-          formatType === "h1" ? "# " : formatType === "h2" ? "## " : "### ";
-        textToInsert =
-          selectedText ||
-          t("toolbar.headingPlaceholder", {
-            defaultValue: "Heading",
-          });
-        if (start === 0 || articleMarkdown[start - 1] === "\n") {
-          newText = `${prefix}${textToInsert}`;
-        } else {
-          newText = `\n${prefix}${textToInsert}`;
-        }
-        newCursorPos =
-          start + newText.length - (selectedText ? 0 : textToInsert.length);
-        if (!selectedText) newCursorPos = start + newText.indexOf(textToInsert);
-        break;
-      case "ul":
-      case "ol":
-        const listPrefix = formatType === "ul" ? "- " : "1. ";
-        textToInsert =
-          selectedText ||
-          t("toolbar.listItemPlaceholder", {
-            defaultValue: "List item",
-          });
-        newText = selectedText
-          ? selectedText
-              .split("\n")
-              .map((line) => `${listPrefix}${line}`)
-              .join("\n")
-          : `${listPrefix}${textToInsert}`;
-        newCursorPos = start + newText.length;
-        break;
-      case "quote":
-        textToInsert =
-          selectedText ||
-          t("toolbar.quotePlaceholder", {
-            defaultValue: "Quote",
-          });
-        newText = selectedText
-          ? selectedText
-              .split("\n")
-              .map((line) => `> ${line}`)
-              .join("\n")
-          : `> ${textToInsert}`;
-        newCursorPos = start + newText.length;
-        break;
-      case "codeblock":
-        textToInsert =
-          selectedText ||
-          t("toolbar.codeBlockPlaceholder", {
-            defaultValue: "code",
-          });
-        newText = `\`\`\`\n${textToInsert}\n\`\`\``;
-        newCursorPos =
-          start +
-          4 +
-          (selectedText ? selectedText.length : textToInsert.length);
-        if (!selectedText) newCursorPos = start + 4;
-        break;
-      case "hr":
-        newText =
-          (start > 0 && articleMarkdown[start - 1] !== "\n" ? "\n" : "") +
-          "---\n";
-        newCursorPos = start + newText.length;
-        break;
-      case "image_url":
-        const imageUrlFromPrompt = window.prompt(
-          t("toolbar.imageUrlPrompt", { defaultValue: "Enter image URL:" })
-        );
-        if (imageUrlFromPrompt) {
-          const altText =
-            window.prompt(
-              t("toolbar.imageAltTextPrompt", {
-                defaultValue: "Enter image alt text (optional):",
-              })
-            ) || t("toolbar.aiImageAltTextDefault", { defaultValue: "image" });
-          newText = `![${altText}](${imageUrlFromPrompt})`;
-          newCursorPos = start + newText.length;
-        } else {
-          return;
-        }
-        break;
-      default:
-        return;
-    }
-
-    const updatedMarkdown =
-      articleMarkdown.substring(0, start) +
-      newText +
-      articleMarkdown.substring(end);
-    setArticleMarkdown(updatedMarkdown);
-
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
   };
 
   const handleAIImageGenerated = (imageUrl: string, altText?: string) => {
@@ -1069,14 +868,13 @@ export default function ArticleForgePage() {
   const handleTriggerDeviceImageUpload = () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "image/*"; // Aceptar solo imágenes
+    input.accept = "image/*";
     input.onchange = async (event) => {
       const target = event.target as HTMLInputElement;
       if (target.files && target.files.length > 0) {
         const file = target.files[0];
 
         if (file.size > 5 * 1024 * 1024) {
-          // Límite de 5MB (ajustar si es necesario)
           toast({
             title: t("toastMessages.errorTitle"),
             description: t("toastMessages.fileTooLargeError", {
@@ -1095,13 +893,11 @@ export default function ArticleForgePage() {
         startProcessingTransition(async () => {
           try {
             const formData = new FormData();
-            formData.append("image", file); // El backend espera un campo 'image'
+            formData.append("image", file);
 
             const response = await authenticatedFetch("/api/images/upload", {
               method: "POST",
               body: formData,
-              // No establecer 'Content-Type': 'multipart/form-data' manualmente,
-              // el navegador lo hará correctamente con el boundary si dejas que FormData lo maneje.
             });
 
             if (!response.ok) {
@@ -1115,7 +911,6 @@ export default function ArticleForgePage() {
 
             const result = await response.json();
             if (result.data && result.data.image_url) {
-              // Insertar la imagen en el editor
               const altText =
                 file.name.split(".")[0] ||
                 t("toolbar.uploadedImageAltTextDefault", {
@@ -1162,7 +957,7 @@ export default function ArticleForgePage() {
         });
       }
     };
-    input.click(); // Abrir el diálogo de selección de archivo
+    input.click();
   };
 
   return (
@@ -1216,7 +1011,7 @@ export default function ArticleForgePage() {
               onPromptChange={setPrompt}
               onMainAction={handleStartArticleFromPanel}
               onClearAll={clearAll}
-              isLoading={isLoading}
+              isLoading={isLoadingCreation}
               currentOperationMessage={currentOperationMessage}
               t={t}
             />
@@ -1288,57 +1083,26 @@ export default function ArticleForgePage() {
               </Card>
             )}
 
-          <div
-            className={`
-                ${
-                  isPreviewExpanded && previewLayout === "side"
-                    ? "flex flex-col md:flex-row gap-4"
-                    : "flex flex-col"
-                }
-              `}
-          >
-            <div
-              className={
-                isPreviewExpanded && previewLayout === "side"
-                  ? "w-full md:w-1/2 flex flex-col"
-                  : "w-full"
-              }
-            >
-              <MarkdownToolbar
-                onApplyFormat={handleApplyFormat}
-                onToggleImageModal={handleToggleImageModal}
-                disabled={isLoading}
-                onToggleLayout={handleTogglePreviewLayout}
-                currentLayout={previewLayout}
-                onAIImageGenerated={handleAIImageGenerated}
-                onTriggerDeviceImageUpload={handleTriggerDeviceImageUpload}
-                t={tMarkdownToolBar}
-              />
-              <textarea
-                ref={mainTextareaRef}
-                value={articleMarkdown}
-                onChange={(e) => setArticleMarkdown(e.target.value)}
-                placeholder={t("mainEditor.placeholder", {
-                  defaultValue:
-                    "Start writing your article here in Markdown...",
-                })}
-                className="w-full min-h-[300px] p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-primary-focus transition-shadow bg-background flex-grow"
-                disabled={isLoading}
-              />
-            </div>
-
-            {isPreviewExpanded && (
-              <div
-                className={
-                  isPreviewExpanded && previewLayout === "side"
-                    ? "w-full md:w-1/2"
-                    : "w-full mt-4"
-                }
-              >
-                <MarkdownPreviewComponent content={articleMarkdown} t={t} />
-              </div>
-            )}
-          </div>
+          <MainEditorArea
+            articleMarkdown={articleMarkdown}
+            onArticleMarkdownChange={setArticleMarkdown}
+            isLoading={isLoading}
+            isPreviewExpanded={isPreviewExpanded}
+            previewLayout={previewLayout}
+            onToggleLayout={handleTogglePreviewLayout}
+            onToggleImageModal={handleToggleImageModal}
+            onAIImageGenerated={handleAIImageGenerated}
+            onTriggerDeviceImageUpload={handleTriggerDeviceImageUpload}
+            mainTextareaRef={mainTextareaRef}
+            editorPlaceholder={t("mainEditor.placeholder", {
+              defaultValue: "Start writing your article here in Markdown...",
+            })}
+            previewTitle={t("markdownPreview.title", {
+              defaultValue: "Markdown Preview",
+            })}
+            tMarkdownToolBar={tMarkdownToolBar}
+            toolbarFormatStrings={getToolbarFormatStrings(t)}
+          />
 
           <ImageSearchAndInsert
             mode="modal"

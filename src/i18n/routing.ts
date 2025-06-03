@@ -1,8 +1,11 @@
 import { createNavigation } from "next-intl/navigation";
 import { defineRouting } from "next-intl/routing";
 
+//TODO while adding new features to keep just english
+// locales: ["en", "es", "fr", "pt-BR"] as const,  ORIGINAL to add translations after feature addition
+
 export const routing = defineRouting({
-  locales: ["en", "es", "fr", "pt-BR"] as const,
+  locales: ["en"] as const,
   defaultLocale: "en" as const,
   localePrefix: {
     mode: "as-needed",

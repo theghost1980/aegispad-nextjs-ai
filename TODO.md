@@ -1,7 +1,8 @@
 Importante: //TODO
 
 - agregar configuracion para control de voz en profile + mensaje si estan usando otro browser diferente de chrome.
-- Extraer la lógica de manipulación de texto de bajo nivel (aplicar formatos Markdown como negrita, cursiva, encabezados, etc.) a funciones de utilidad reutilizables. Esto permitirá que tanto `handleApplyFormat` (UI) como `handleVoiceCommand` (voz) consuman estas utilidades, evitando la duplicación de código.
+
+- integrate https://github.com/aioha-hive/aioha
 
 - investigar para usar apis de:
 

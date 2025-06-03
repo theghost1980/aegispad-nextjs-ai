@@ -7,28 +7,12 @@ import {
   getItem,
   setItem,
 } from "@/lib/indexed-db-service";
-import type { UserPreferences } from "@/types/general.types";
+import type {
+  KeychainLoginResponse,
+  UserPreferences,
+} from "@/types/general.types";
 import { KeychainHelper, KeychainHelperUtils } from "keychain-helper";
 import { useCallback, useContext, useEffect, useState } from "react";
-
-export interface KeychainLoginResponseData {
-  type: string;
-  username: string;
-  message: string;
-  method: string;
-  rpc?: string;
-  key: string;
-}
-
-export interface KeychainLoginResponse {
-  success: boolean;
-  error: string | null;
-  result: string | null;
-  data: KeychainLoginResponseData | null;
-  message: string;
-  request_id: number;
-  publicKey?: string;
-}
 
 export function useHiveAuth() {
   const [isKeychainAvailable, setIsKeychainAvailable] = useState(false);

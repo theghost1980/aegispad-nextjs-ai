@@ -630,6 +630,24 @@
     "generateButton": "Generate"
   },
   "MarkdownToolbar": {
+    "placeholders": {
+      "bold": "bold text",
+      "italic": "italic text",
+      "strikethrough": "strikethrough text",
+      "linkText": "link text",
+      "heading": "Heading",
+      "listItem": "List item",
+      "quote": "Quote text",
+      "code": "code"
+    },
+    "prompts": {
+      "linkUrl": "Enter link URL:",
+      "imageUrl": "Enter image URL:",
+      "imageAltText": "Enter image alt text (optional):"
+    },
+    "defaults": {
+      "aiImageAltText": "image"
+    },
     "styles": {
       "title": "Text Styles",
       "buttonLabel": "Styles",

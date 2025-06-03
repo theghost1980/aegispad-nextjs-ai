@@ -168,3 +168,10 @@ export const WAVESPEED_API_URL =
   "https://api.wavespeed.ai/api/v3/wavespeed-ai/hidream-i1-dev";
 export const WAVESPEED_RESULT_API_URL_BASE =
   "https://api.wavespeed.ai/api/v3/predictions/";
+
+export const VOICE_COMMANDS: Record<string, string> = {
+  h2: "CMD_HEADING_2",
+  "nueva línea": "CMD_NEW_LINE",
+  "punto final": "CMD_PERIOD",
+};
+export const MAX_WORDS_PER_CHUNK = 330;
