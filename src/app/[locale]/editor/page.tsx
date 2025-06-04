@@ -12,6 +12,7 @@ import GlobalLoader from "@/components/global-loader";
 import LoadingSpinner from "@/components/loading-spinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import VoiceHelpModal from "@/components/VoiceHelpModal";
 import {
   AVAILABLE_LANGUAGES,
   COMMENT_NOTES_BY_LOCALE,
@@ -19,7 +20,6 @@ import {
   DEFAULT_TARGET_LANGUAGE,
   ESTIMATED_INITIAL_SESSION_TOKENS,
   FINAL_REVIEW_ARTICLE_STORAGE_KEY,
-  VOICE_COMMANDS,
 } from "@/constants/constants";
 import { useArticleCreation } from "@/hooks/use-article-creation";
 import { useArticleRevision } from "@/hooks/use-article-revision";
@@ -27,7 +27,7 @@ import { useArticleTranslation } from "@/hooks/use-article-translation";
 import { useBrowserDetection } from "@/hooks/use-browser-detection";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useVoiceControl } from "@/hooks/use-voice-control";
+import { useVoiceActionsHandler } from "@/hooks/use-voice-actions-handler"; // Import the new hook
 import {
   ActiveEditorAction,
   CombineFormatType,
@@ -97,12 +97,9 @@ export default function ArticleForgePage() {
   const [previewLayout, setPreviewLayout] = useState<"side" | "bottom">("side");
   const mainTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [detectedLanguage, setDetectedLanguage] = useState<string | null>(null);
+  const [isVoiceHelpModalOpen, setIsVoiceHelpModalOpen] = useState(false);
 
   const { toast } = useToast();
-
-  const [voiceInputState, setVoiceInputState] = useState<
-    "idle" | "awaiting_heading_title"
-  >("idle");
 
   const {
     translatedArticleMarkdown,
@@ -180,115 +177,6 @@ export default function ArticleForgePage() {
   }, []);
 
   const speechLanguage = mapLocaleToSpeechLang(currentLocale);
-
-  const handleVoiceCommand = (commandAction: string) => {
-    const textarea = mainTextareaRef.current;
-    let textToInsertAtCursor: string | null = null;
-    let newVoiceState: typeof voiceInputState | null = null;
-
-    let finalMarkdown = articleMarkdown;
-    let finalSelectionStart =
-      textarea?.selectionStart ?? articleMarkdown.length;
-    let finalSelectionEnd = textarea?.selectionEnd ?? articleMarkdown.length;
-    let needsTextareaFocus = false;
-
-    switch (commandAction) {
-      case "CMD_HEADING_2":
-        textToInsertAtCursor = "## ";
-        newVoiceState = "awaiting_heading_title";
-        break;
-      case "CMD_NEW_LINE":
-        textToInsertAtCursor = "\n";
-        newVoiceState = "idle";
-        break;
-      case "CMD_PERIOD":
-        finalMarkdown = articleMarkdown.trimEnd() + ". ";
-        finalSelectionStart = finalMarkdown.length;
-        finalSelectionEnd = finalMarkdown.length;
-        newVoiceState = "idle";
-        break;
-    }
-
-    if (textToInsertAtCursor) {
-      const currentCursorPos =
-        textarea?.selectionStart ?? articleMarkdown.length;
-      const selectionEndForInsert = textarea?.selectionEnd ?? currentCursorPos;
-
-      finalMarkdown =
-        articleMarkdown.substring(0, currentCursorPos) +
-        textToInsertAtCursor +
-        articleMarkdown.substring(selectionEndForInsert);
-
-      finalSelectionStart = currentCursorPos + textToInsertAtCursor.length;
-      finalSelectionEnd = finalSelectionStart;
-    }
-
-    if (newVoiceState) {
-      setVoiceInputState(newVoiceState);
-    }
-
-    if (finalMarkdown !== articleMarkdown || textToInsertAtCursor) {
-      setArticleMarkdown(finalMarkdown);
-      needsTextareaFocus = true;
-    }
-
-    if (needsTextareaFocus && textarea) {
-      setTimeout(() => {
-        textarea.focus();
-        textarea.selectionStart = finalSelectionStart;
-        textarea.selectionEnd = finalSelectionEnd;
-      }, 0);
-    }
-  };
-
-  const {
-    isListening: isVoiceListening,
-    isSupported: isVoiceSupported,
-    error: voiceError,
-    toggleListening: toggleVoiceListening,
-    setLanguage: setVoiceLanguage,
-  } = useVoiceControl({
-    onTranscript: (text, isFinal) => {
-      if (isFinal) {
-        const textarea = mainTextareaRef.current;
-        let currentSelectionStart =
-          textarea?.selectionStart ?? articleMarkdown.length;
-        let currentSelectionEnd =
-          textarea?.selectionEnd ?? articleMarkdown.length;
-
-        const textToInsert =
-          voiceInputState === "awaiting_heading_title" ? text : text + " ";
-
-        const newArticleMarkdown =
-          articleMarkdown.substring(0, currentSelectionStart) +
-          textToInsert +
-          articleMarkdown.substring(currentSelectionEnd);
-
-        const newCursorPos = currentSelectionStart + textToInsert.length;
-
-        setArticleMarkdown(newArticleMarkdown);
-
-        if (voiceInputState === "awaiting_heading_title") {
-          setVoiceInputState("idle");
-        }
-
-        if (textarea) {
-          setTimeout(() => {
-            textarea.focus();
-            textarea.selectionStart = newCursorPos;
-            textarea.selectionEnd = newCursorPos;
-          }, 0);
-        }
-      }
-    },
-    initialLanguage: speechLanguage,
-    commands: VOICE_COMMANDS,
-    onCommand: handleVoiceCommand,
-  });
-
-  useEffect(() => {
-    setVoiceLanguage(speechLanguage);
-  }, [speechLanguage, setVoiceLanguage]);
 
   useEffect(() => {
     if (clientLoaded && !isLoadingHiveAuth) {
@@ -599,6 +487,29 @@ export default function ArticleForgePage() {
       }
     });
   };
+
+  const toggleVoiceHelpModal = () => {
+    setIsVoiceHelpModalOpen((prev) => !prev);
+  };
+
+  const {
+    isListening: isVoiceListening,
+    isSupported: isVoiceSupported,
+    voiceError,
+    currentVoiceLanguage, // Receive current language
+    interimTranscript,
+    finalTranscript,
+    userInstructionKey, // Recibir la clave de instrucción
+    toggleListening: toggleVoiceListening,
+  } = useVoiceActionsHandler({
+    articleMarkdown,
+    setArticleMarkdown,
+    mainTextareaRef,
+    handleStartArticleFromPanel, // Pass the actual function
+    setActiveAction, // Pass setActiveAction
+    initialSpeechLanguage: speechLanguage,
+    onToggleHelp: toggleVoiceHelpModal,
+  });
 
   const handleProceedToReview = () => {
     const contentToReview =
@@ -924,7 +835,7 @@ export default function ArticleForgePage() {
   return (
     <div
       className="relative space-y-8 p-4 md:p-6 rounded-lg 
-                    before:absolute before:inset-0 
+                    before:absolute before:inset-0
                     before:bg-[url('/images/bg-writing.jpg')] before:bg-cover before:bg-center
                     before:opacity-30 before:rounded-lg before:-z-10"
     >
@@ -1114,40 +1025,74 @@ export default function ArticleForgePage() {
       )}
 
       {canUseEditor && isVoiceSupported && isChromeBrowser && (
-        <div
-          className="fixed flex flex-col items-center space-y-1"
-          style={{
-            top: "calc(1rem + 20px)",
-            left: "20px",
-            zIndex: 50,
-          }}
-        >
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleVoiceListening}
-            title={
-              isVoiceListening ? "Detener dictado" : "Iniciar dictado por voz"
-            }
-            className={`rounded-full shadow-lg ${
-              isVoiceListening
-                ? "ring-2 ring-red-500 text-red-500"
-                : "bg-background hover:bg-muted"
-            }`}
+        <>
+          {/* Contenedor para el botón de voz y mensajes de error/idioma */}
+          <div
+            className="fixed flex flex-col items-center space-y-1"
+            style={{
+              top: "calc(1rem + 20px)", // Ajusta según el header y padding
+              left: "20px",
+              zIndex: 50, // Asegura que esté sobre el contenido pero debajo de modales
+            }}
           >
-            {isVoiceListening ? (
-              <MicOff className="h-5 w-5" />
-            ) : (
-              <Mic className="h-5 w-5" />
-            )}
-          </Button>
-          {voiceError && !isBraveBrowser && (
-            <p className="text-xs text-destructive bg-background/80 px-2 py-1 rounded shadow-md max-w-[150px] text-center">
-              {voiceError}
-            </p>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleVoiceListening}
+              title={
+                isVoiceListening ? "Detener dictado" : "Iniciar dictado por voz"
+              }
+              className={`rounded-full shadow-lg ${
+                isVoiceListening
+                  ? "ring-2 ring-red-500 text-red-500"
+                  : "bg-background hover:bg-muted"
+              }`}
+            >
+              {isVoiceListening ? (
+                <MicOff className="h-5 w-5" />
+              ) : (
+                <Mic className="h-5 w-5" />
+              )}
+            </Button>
+            <div className="mt-1 text-xs text-center max-w-[180px] space-y-1">
+              {voiceError && !isBraveBrowser ? (
+                <p className="text-destructive bg-background/80 px-2 py-1 rounded shadow-md">
+                  {voiceError}
+                </p>
+              ) : isVoiceListening &&
+                currentVoiceLanguage &&
+                !userInstructionKey ? ( // Mostrar "Lang:" solo si está escuchando, hay idioma y NO hay instrucción
+                <p className="text-muted-foreground bg-background/80 px-2 py-1 rounded shadow-md">
+                  Lang: {currentVoiceLanguage}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Contenedor para el mensaje de instrucción (centrado) */}
+          {userInstructionKey && !voiceError && isVoiceListening && (
+            <div
+              className="fixed left-1/2 transform -translate-x-1/2 z-[51]
+                         bg-background/90 dark:bg-neutral-800/90 backdrop-blur-sm
+                         text-foreground p-4 rounded-lg shadow-xl text-center"
+              style={{
+                top: `calc(1rem + 20px + 40px + 1rem)`, // padding_pagina + offset_boton + altura_boton + espacio_extra
+                maxWidth: "80vw",
+                minWidth: "250px",
+              }}
+            >
+              <p className="text-lg font-semibold">
+                {t(userInstructionKey as any)}
+              </p>
+            </div>
           )}
-        </div>
+        </>
       )}
+      <VoiceHelpModal
+        isOpen={isVoiceHelpModalOpen}
+        onClose={toggleVoiceHelpModal}
+        t={(key, values) => t(key as any, values)} // Pasa la función t con el namespace correcto
+      />
     </div>
   );
 }

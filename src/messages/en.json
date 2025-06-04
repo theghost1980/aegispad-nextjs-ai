@@ -213,6 +213,26 @@
       "applyAllVisibleButtonText": "Apply All Visible & Close",
       "closeButtonText": "Close",
       "noLinesToReviewText": "No lines to review or all lines have been removed from this view."
+    },
+    "voicePrompts": {
+      "dictateNow": "Dictation mode active. Speak your text.",
+      "dictatePrompt": "Dictate the article prompt.",
+      "dictateHeading": "Dictate the heading title."
+    },
+    "voiceHelpModal": {
+      "title": "Voice Command Help",
+      "description": "Here are the available voice commands you can use:",
+      "commandListTitle": "Available Commands:",
+      "orSeparator": " or ",
+      "closeButton": "Close",
+      "CMD_HEADING_1_desc": "Inserts a level 1 Markdown heading (#) and waits for you to dictate the title.",
+      "CMD_CREATE_ARTICLE_desc": "Starts the article creation process. You will be prompted to dictate the topic.",
+      "CMD_HEADING_2_desc": "Inserts a level 2 Markdown heading (##) and waits for you to dictate the title.",
+      "CMD_HEADING_3_desc": "Inserts a level 3 Markdown heading (###) and waits for you to dictate the title.",
+      "CMD_NEW_LINE_desc": "Inserts a new line (like pressing Enter).",
+      "CMD_PERIOD_desc": "Inserts a period followed by a space.",
+      "CMD_WRITE_DOWN_desc": "Activates direct dictation mode. The next thing you say will be typed into the editor.",
+      "CMD_SHOW_VOICE_HELP_desc": "Shows this help dialog with all available voice commands."
     }
   },
   "ArticleEditor": {

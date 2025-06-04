@@ -1,5 +1,11 @@
 Importante: //TODO
 
+- para poder lanzar el control de voz en el BETA, solo EN y ES:
+  - revisar el locale em.json y quitar las claves que no se usan.
+  - aprovechar para borrar los componentes que no se usan.
+  - quitar las mismas claves del es.json
+  - por ultimo agregar una condicion para que aunque reconozca que chrome esta en uso, solo permita usar EN y ES y no muestre al control de voz si el idioma actual es FR o portugues BR.
+  - por ultimo usar en.json para obtener traduccion en FR y portugues BR, modificar y probar.
 - agregar configuracion para control de voz en profile + mensaje si estan usando otro browser diferente de chrome.
 
 - integrate https://github.com/aioha-hive/aioha

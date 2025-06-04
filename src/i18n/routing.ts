@@ -5,7 +5,7 @@ import { defineRouting } from "next-intl/routing";
 // locales: ["en", "es", "fr", "pt-BR"] as const,  ORIGINAL to add translations after feature addition
 
 export const routing = defineRouting({
-  locales: ["en"] as const,
+  locales: ["en", "es"] as const,
   defaultLocale: "en" as const,
   localePrefix: {
     mode: "as-needed",

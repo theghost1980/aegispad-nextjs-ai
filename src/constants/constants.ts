@@ -168,10 +168,68 @@ export const WAVESPEED_API_URL =
   "https://api.wavespeed.ai/api/v3/wavespeed-ai/hidream-i1-dev";
 export const WAVESPEED_RESULT_API_URL_BASE =
   "https://api.wavespeed.ai/api/v3/predictions/";
-
-export const VOICE_COMMANDS: Record<string, string> = {
-  h2: "CMD_HEADING_2",
-  "nueva línea": "CMD_NEW_LINE",
-  "punto final": "CMD_PERIOD",
-};
 export const MAX_WORDS_PER_CHUNK = 330;
+//voice control feature
+export const CMD_CREATE_ARTICLE = "CMD_CREATE_ARTICLE";
+export const CMD_HEADING_1 = "CMD_HEADING_1";
+export const CMD_HEADING_2 = "CMD_HEADING_2";
+export const CMD_HEADING_3 = "CMD_HEADING_3";
+export const CMD_NEW_LINE = "CMD_NEW_LINE";
+export const CMD_PERIOD = "CMD_PERIOD";
+export const CMD_WRITE_DOWN = "CMD_WRITE_DOWN";
+export const CMD_SHOW_VOICE_HELP = "CMD_SHOW_VOICE_HELP";
+export interface VoiceCommand {
+  action: string;
+  keywords: string[]; // Palabras clave que activan esta acción
+}
+
+export const VOICE_COMMANDS: VoiceCommand[] = [
+  {
+    action: CMD_CREATE_ARTICLE,
+    keywords: ["create", "crear", "create article", "crear artículo"],
+  },
+  {
+    action: CMD_HEADING_1,
+    keywords: [
+      "h1",
+      "heading 1",
+      "encabezado 1",
+      "título 1",
+      "encabezado principal",
+      "título principal",
+    ],
+  },
+  {
+    action: CMD_HEADING_2,
+    keywords: ["h2", "heading 2", "encabezado 2", "título 2"],
+  },
+  {
+    action: CMD_HEADING_3,
+    keywords: ["h3", "heading 3", "encabezado 3", "título 3", "subtítulo"],
+  },
+  {
+    action: CMD_NEW_LINE,
+    keywords: ["new line", "nueva línea", "enter", "intro"],
+  },
+  {
+    action: CMD_PERIOD,
+    keywords: ["period", "punto", "punto final"],
+  },
+  {
+    action: CMD_WRITE_DOWN,
+    keywords: ["write down", "escribir", "dictar", "escribe", "dicta"],
+  },
+  {
+    action: CMD_SHOW_VOICE_HELP,
+    keywords: [
+      "show help",
+      "voice help",
+      "voice commands",
+      "muestra ayuda",
+      "mostrar ayuda",
+      "ayuda de voz",
+      "comandos de voz",
+    ],
+  },
+  // ... puedes añadir más comandos aquí
+];

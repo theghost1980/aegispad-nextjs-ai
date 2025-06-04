@@ -1,3 +1,18 @@
+## 2024-08-02
+
+### ✨ Nuevas Funcionalidades - Control por Voz
+
+- **Comandos de Encabezado H1 y H3**:
+  - iniciamos con la implementacion de voz para chrome en PC/desktop.
+  - se agregaron los comandos basicos de voz: dictar, mostrar ayuda, probados en EN y ES.
+  - En progreso...
+
+### 🛠️ Mejoras
+
+- **Ayuda de Voz**: El modal de ayuda de voz ahora incluye los nuevos comandos para H1 y H3, proporcionando al usuario una lista más completa de las capacidades de dictado.
+
+---
+
 ## 2024-08-01
 
 ### ✨ Nuevas Funcionalidades
