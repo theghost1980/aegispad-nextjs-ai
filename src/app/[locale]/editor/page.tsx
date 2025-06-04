@@ -124,9 +124,6 @@ export default function ArticleForgePage() {
 
   const [isProcessing, startProcessingTransition] = useTransition();
 
-  const isLoading = isProcessing || isLoadingHiveAuth || isTranslating;
-  const isLoadingCreation = isCreatingArticle;
-
   const { isChrome: isChromeBrowser, isBrave: isBraveBrowser } =
     useBrowserDetection();
 
@@ -163,6 +160,10 @@ export default function ArticleForgePage() {
     }),
     articleEmptyError: t("toastMessages.articleEmptyError"),
   });
+
+  const isLoading =
+    isProcessing || isLoadingHiveAuth || isTranslating || isRevising;
+  const isLoadingCreation = isCreatingArticle;
 
   const mapLocaleToSpeechLang = useCallback((locale: string): string => {
     const lang = locale.toLowerCase() as LanguageCode;
@@ -296,7 +297,7 @@ export default function ArticleForgePage() {
 
   const canUseEditor = clientLoaded && !isLoadingHiveAuth && isHiveLoggedIn;
 
-  const handleReviseArticle = async () => {
+  const handleReviseArticle = () => {
     if (!articleMarkdown.trim()) {
       toast({
         title: t("toastMessages.errorTitle"),
@@ -305,33 +306,40 @@ export default function ArticleForgePage() {
       });
       return;
     }
-    setCurrentRequestTokens(null);
-    setDetailedTokenUsage(null);
     setFinalCombinedOutput("");
+    // setCurrentRequestTokens y setDetailedTokenUsage se manejan en el hook o no son necesarios aquí
+    // para el inicio de la revisión.
 
-    const revisionResult = await reviseArticleHook(); // Llamar a la función del hook
+    // El hook useArticleRevision se encarga de setCurrentOperationMessage.
+    // startProcessingTransition activará el GlobalLoader a través de isProcessing.
+    startProcessingTransition(async () => {
+      try {
+        const revisionResult = await reviseArticleHook();
 
-    if (revisionResult.success) {
-      // El hook ya actualiza articleMarkdown y aiGeneratedTags
-      setActiveAction(null); // Cerrar panel después de la revisión completa
-      toast({
-        title: t("toastMessages.successTitle"),
-        description: t("toastMessages.articleRevisedSuccess"),
-      });
-    } else {
-      // El hook ya maneja el error y lo establece en revisionError
-      // Podemos mostrar un toast aquí basado en el error del hook si es necesario,
-      // o dejar que el hook lo maneje internamente con setCurrentOperationMessage.
-      // Si el hook ya muestra el mensaje de error via setCurrentOperationMessage,
-      // este toast podría ser redundante o manejarse de forma diferente.
-      // Por ahora, mostramos un toast genérico si el hook reporta un error.
-      toast({
-        title: t("toastMessages.errorTitle"),
-        description:
-          revisionResult.error?.message || t("toastMessages.reviseFailedError"),
-        variant: "destructive",
-      });
-    }
+        if (revisionResult.success) {
+          setActiveAction(null);
+          toast({
+            title: t("toastMessages.successTitle"),
+            description: t("toastMessages.articleRevisedSuccess"),
+          });
+        } else {
+          toast({
+            title: t("toastMessages.errorTitle"),
+            description:
+              revisionResult.error?.message ||
+              t("toastMessages.reviseFailedError"),
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
+        console.error("Error during article revision process:", error);
+        toast({
+          title: t("toastMessages.errorTitle"),
+          description: error.message || t("toastMessages.reviseFailedError"),
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   // Efecto para mostrar toast si revisionError ocurre en el hook (opcional, si el hook no muestra toast)
@@ -361,7 +369,7 @@ export default function ArticleForgePage() {
     }
   };
 
-  const handleTranslateArticle = async () => {
+  const handleTranslateArticle = () => {
     if (!articleMarkdown.trim()) {
       toast({
         title: t("toastMessages.errorTitle"),
@@ -379,46 +387,53 @@ export default function ArticleForgePage() {
       return;
     }
 
-    if (!articleMarkdown.trim() || !targetLanguage.trim()) {
-      return; // Stop if validation failed
-    }
-
-    // Reset combine output and tokens before starting translation
     setFinalCombinedOutput("");
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
-    await translateArticle(); // Llamar a la función del hook
-    const translationResult = await translateArticle();
 
-    if (
-      translationResult.success &&
-      translationResult.originalText &&
-      translationResult.translatedText
-    ) {
-      const combinedMarkdown = `${
-        translationResult.originalText
-      }\n\n---\n\n## ${t("translateArticleCard.translationResultTitle", {
-        language: targetLanguage,
-      })}\n\n${translationResult.translatedText}`;
-      setArticleMarkdown(combinedMarkdown);
-      setActiveAction(null); // Cerrar panel después de combinar
-      toast({
-        title: t("toastMessages.successTitle"),
-        description: t("toastMessages.articleTranslatedSuccess", {
-          targetLanguage,
-        }),
-      });
-    } else {
-      // Hubo un error o la traducción no tuvo éxito por alguna razón
-      const errorMessage =
-        translationResult.error?.message ||
-        t("toastMessages.translateFailedError");
-      toast({
-        title: t("toastMessages.errorTitle"),
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
+    // El hook useArticleTranslation se encarga de setCurrentOperationMessage.
+    // startProcessingTransition activará el GlobalLoader.
+    startProcessingTransition(async () => {
+      try {
+        const translationResult = await translateArticle();
+
+        if (
+          translationResult.success &&
+          translationResult.originalText &&
+          translationResult.translatedText
+        ) {
+          const combinedMarkdown = `${
+            translationResult.originalText
+          }\n\n---\n\n## ${t("translateArticleCard.translationResultTitle", {
+            language: targetLanguage,
+          })}\n\n${translationResult.translatedText}`;
+          setArticleMarkdown(combinedMarkdown);
+          setActiveAction(null);
+          toast({
+            title: t("toastMessages.successTitle"),
+            description: t("toastMessages.articleTranslatedSuccess", {
+              targetLanguage,
+            }),
+          });
+        } else {
+          const errorMessage =
+            translationResult.error?.message ||
+            t("toastMessages.translateFailedError");
+          toast({
+            title: t("toastMessages.errorTitle"),
+            description: errorMessage,
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
+        console.error("Error during article translation process:", error);
+        toast({
+          title: t("toastMessages.errorTitle"),
+          description: error.message || t("toastMessages.translateFailedError"),
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   // El estado translationError del hook sigue disponible y puede ser usado por
