@@ -125,6 +125,7 @@
       "articleTranslatedSuccess": "Article translated to {targetLanguage} successfully!",
       "languageDetectedSuccess": "Language detected: {language}",
       "combinedFormatSuccess": "Combined article format generated!",
+      "combineFailedError": "Failed to combine article formats. Please try again.",
       "summaryCopiedSuccess": "Session summary copied to clipboard!",
       "createFailedError": "Failed to create article. Please try again.",
       "reviseFailedError": "Failed to revise article. Please try again.",

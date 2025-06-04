@@ -35,6 +35,14 @@ Importante: //TODO
   - images to add when certain conditions are meet:
     - no imagen when reaching certain point or stage?
     - suggest images tags, categories depending on the content/titles
+  - Real TAG Assistance to the hiver:
+    - connect to be-hivesql and if available:
+      - allow to search:
+        - new tags
+        - recently used by user
+        - tags within a date range to:
+          - know avg votes values by tags
+          - most voted tags and so on....
 
 - Add a module to find & target dualinguals:
   - this module will use hivesql to perfom efefctive searches

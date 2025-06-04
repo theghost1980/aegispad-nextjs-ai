@@ -24,7 +24,6 @@ import {
 import { useArticleCreation } from "@/hooks/use-article-creation";
 import { useArticleRevision } from "@/hooks/use-article-revision";
 import { useArticleTranslation } from "@/hooks/use-article-translation";
-import { useAsyncOperationRunner } from "@/hooks/use-async-operation-runner";
 import { useBrowserDetection } from "@/hooks/use-browser-detection";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -51,6 +50,7 @@ export default function ArticleForgePage() {
   const tTokenUsage = useTranslations("TokenUsage");
   const tMarkdownToolBar = useTranslations("MarkdownToolbar");
   const router = useRouter();
+
   const currentLocale = useLocale();
 
   const {
@@ -127,13 +127,6 @@ export default function ArticleForgePage() {
 
   const [isProcessing, startProcessingTransition] = useTransition();
 
-  const { isChrome: isChromeBrowser, isBrave: isBraveBrowser } =
-    useBrowserDetection();
-
-  useEffect(() => {
-    setClientLoaded(true);
-  }, []);
-
   const {
     articleBeforeRevision,
     selectedRevisionType,
@@ -164,17 +157,16 @@ export default function ArticleForgePage() {
     articleEmptyError: t("toastMessages.articleEmptyError"),
   });
 
-  const { runAsyncOperation } = useAsyncOperationRunner(
-    setCurrentOperationMessage,
-    {
-      success: t("toastMessages.successTitle"),
-      error: t("toastMessages.errorTitle"),
-    }
-  );
-
   const isLoading =
     isProcessing || isLoadingHiveAuth || isTranslating || isRevising;
   const isLoadingCreation = isCreatingArticle;
+
+  const { isChrome: isChromeBrowser, isBrave: isBraveBrowser } =
+    useBrowserDetection();
+
+  useEffect(() => {
+    setClientLoaded(true);
+  }, []);
 
   const mapLocaleToSpeechLang = useCallback((locale: string): string => {
     const lang = locale.toLowerCase() as LanguageCode;
@@ -318,6 +310,11 @@ export default function ArticleForgePage() {
       return;
     }
     setFinalCombinedOutput("");
+    // setCurrentRequestTokens y setDetailedTokenUsage se manejan en el hook o no son necesarios aquí
+    // para el inicio de la revisión.
+
+    // El hook useArticleRevision se encarga de setCurrentOperationMessage.
+    // startProcessingTransition activará el GlobalLoader a través de isProcessing.
     startProcessingTransition(async () => {
       try {
         const revisionResult = await reviseArticleHook();
@@ -348,6 +345,7 @@ export default function ArticleForgePage() {
     });
   };
 
+  // Efecto para mostrar toast si revisionError ocurre en el hook (opcional, si el hook no muestra toast)
   useEffect(() => {
     if (revisionError) {
       console.error("Revision Error:", revisionError);
@@ -357,11 +355,12 @@ export default function ArticleForgePage() {
           revisionError.message || t("toastMessages.reviseFailedError"),
         variant: "destructive",
       });
+      // setRevisionError(null); // Considerar limpiar el error aquí si no se necesita en otro lugar
     }
   }, [revisionError, toast, t]);
 
   const handleUndoRevision = () => {
-    const undoResult = undoRevisionHook();
+    const undoResult = undoRevisionHook(); // Llamar a la función del hook
     if (undoResult.success) {
       toast({
         title: t("toastMessages.successTitle"),
@@ -395,6 +394,8 @@ export default function ArticleForgePage() {
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
 
+    // El hook useArticleTranslation se encarga de setCurrentOperationMessage.
+    // startProcessingTransition activará el GlobalLoader.
     startProcessingTransition(async () => {
       try {
         const translationResult = await translateArticle();
@@ -437,6 +438,22 @@ export default function ArticleForgePage() {
       }
     });
   };
+
+  // El estado translationError del hook sigue disponible y puede ser usado por
+  // TranslationPanelComponent para mostrar un error en línea si se desea.
+
+  // const handleUndoRevision = () => {
+  //   if (articleBeforeRevision) {
+  //     setArticleMarkdown(articleBeforeRevision);
+  //     setArticleBeforeRevision("");
+  //     toast({
+  //       title: t("toastMessages.successTitle"),
+  //       description: t("toastMessages.revisionUndoneSuccess", {
+  //         defaultValue: "Revision undone successfully.",
+  //       }),
+  //     });
+  //   }
+  // };
 
   const handleCombineFormat = () => {
     if (
@@ -508,26 +525,36 @@ export default function ArticleForgePage() {
   };
 
   const handleCopySummary = () => {
-    runAsyncOperation({
-      operation: async () => {
-        const summaryText = getGenerateSummaryTextForCopy(
-          t,
-          hiveUsername!,
-          userRole!,
-          detectedLanguage!,
-          sessionTotalTokens,
-          sessionTextTokensUsed,
-          sessionImageTokensUsed,
-          finalCombinedOutput
-        );
+    startProcessingTransition(async () => {
+      setCurrentOperationMessage(
+        t("sessionSummaryCard.preparingSummaryMessage")
+      );
+      const summaryText = getGenerateSummaryTextForCopy(
+        t,
+        hiveUsername!,
+        userRole!,
+        detectedLanguage!,
+        sessionTotalTokens,
+        sessionTextTokensUsed,
+        sessionImageTokensUsed,
+        finalCombinedOutput
+      );
+      try {
         await navigator.clipboard.writeText(summaryText);
-      },
-      manageOperationMessage: true,
-      onStartMessage: t("sessionSummaryCard.preparingSummaryMessage"),
-      onSuccessMessage: t("toastMessages.summaryCopiedSuccess"),
-      onErrorMessage: (error: any) => {
-        return t("toastMessages.copySummaryFailedError");
-      },
+        toast({
+          title: t("toastMessages.successTitle"),
+          description: t("toastMessages.summaryCopiedSuccess"),
+        });
+      } catch (err) {
+        console.error("Failed to copy summary: ", err);
+        toast({
+          title: t("toastMessages.errorTitle"),
+          description: t("toastMessages.copySummaryFailedError"),
+          variant: "destructive",
+        });
+      } finally {
+        setCurrentOperationMessage(null);
+      }
     });
   };
 
