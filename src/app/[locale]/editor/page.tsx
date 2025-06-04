@@ -310,11 +310,7 @@ export default function ArticleForgePage() {
       return;
     }
     setFinalCombinedOutput("");
-    // setCurrentRequestTokens y setDetailedTokenUsage se manejan en el hook o no son necesarios aquí
-    // para el inicio de la revisión.
 
-    // El hook useArticleRevision se encarga de setCurrentOperationMessage.
-    // startProcessingTransition activará el GlobalLoader a través de isProcessing.
     startProcessingTransition(async () => {
       try {
         const revisionResult = await reviseArticleHook();
@@ -345,7 +341,6 @@ export default function ArticleForgePage() {
     });
   };
 
-  // Efecto para mostrar toast si revisionError ocurre en el hook (opcional, si el hook no muestra toast)
   useEffect(() => {
     if (revisionError) {
       console.error("Revision Error:", revisionError);
@@ -355,12 +350,11 @@ export default function ArticleForgePage() {
           revisionError.message || t("toastMessages.reviseFailedError"),
         variant: "destructive",
       });
-      // setRevisionError(null); // Considerar limpiar el error aquí si no se necesita en otro lugar
     }
   }, [revisionError, toast, t]);
 
   const handleUndoRevision = () => {
-    const undoResult = undoRevisionHook(); // Llamar a la función del hook
+    const undoResult = undoRevisionHook();
     if (undoResult.success) {
       toast({
         title: t("toastMessages.successTitle"),
@@ -394,8 +388,6 @@ export default function ArticleForgePage() {
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
 
-    // El hook useArticleTranslation se encarga de setCurrentOperationMessage.
-    // startProcessingTransition activará el GlobalLoader.
     startProcessingTransition(async () => {
       try {
         const translationResult = await translateArticle();
@@ -438,22 +430,6 @@ export default function ArticleForgePage() {
       }
     });
   };
-
-  // El estado translationError del hook sigue disponible y puede ser usado por
-  // TranslationPanelComponent para mostrar un error en línea si se desea.
-
-  // const handleUndoRevision = () => {
-  //   if (articleBeforeRevision) {
-  //     setArticleMarkdown(articleBeforeRevision);
-  //     setArticleBeforeRevision("");
-  //     toast({
-  //       title: t("toastMessages.successTitle"),
-  //       description: t("toastMessages.revisionUndoneSuccess", {
-  //         defaultValue: "Revision undone successfully.",
-  //       }),
-  //     });
-  //   }
-  // };
 
   const handleCombineFormat = () => {
     if (
