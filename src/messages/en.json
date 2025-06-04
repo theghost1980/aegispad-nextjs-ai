@@ -108,8 +108,8 @@
       "noFinalCombinedArticleMessage": "No final combined article was generated in this session.",
       "copySummaryButton": "Copy Full Summary & Output",
       "preparingSummaryMessage": "Preparing summary for copy...",
-      "userLabel": "Utilisateur :",
-      "dateTimeLabel": "Date/Heure :"
+      "userLabel": "Username:",
+      "dateTimeLabel": "Date/Time:"
     },
     "toastMessages": {
       "errorTitle": "Error",

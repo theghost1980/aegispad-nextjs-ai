@@ -314,3 +314,55 @@ export const getToolbarFormatStrings = (t: ArticleForgePageTranslations) => {
     }),
   };
 };
+
+export const getGenerateSummaryTextForCopy = (
+  t: ArticleForgePageTranslations,
+  hiveUsername: string,
+  userRole: string,
+  detectedLanguage: string,
+  sessionTotalTokens: number,
+  sessionTextTokensUsed: number,
+  sessionImageTokensUsed: number,
+  finalCombinedOutput: string
+) => {
+  let summary = `${t("sessionSummaryCard.title")}\n`;
+  summary += "=============================\n\n";
+  summary += `${t("sessionSummaryCard.userLabel", {
+    defaultValue: "User:",
+  })} ${hiveUsername || "N/A"}\n`;
+  summary += userRole === "admin" ? `User Role: ${userRole}\n` : "";
+  summary += `${t("sessionSummaryCard.dateTimeLabel", {
+    defaultValue: "Date/Time:",
+  })} ${new Date().toLocaleString()}\n`;
+  if (detectedLanguage) {
+    summary += `${t(
+      "sessionSummaryCard.detectedLanguageLabel"
+    )} ${detectedLanguage}\n`;
+  }
+  summary += "\n";
+  summary += `${t("sessionSummaryCard.tokenUsageTitle")}:\n`;
+  summary += `-----------------------------\n`;
+  summary += `${t(
+    "sessionSummaryCard.totalTokensUsedLabel"
+  )} ${sessionTotalTokens.toLocaleString()}\n`;
+  if (sessionTextTokensUsed > 0) {
+    summary += `  ${t(
+      "sessionSummaryCard.textGenerationTokensLabel"
+    )} ${sessionTextTokensUsed.toLocaleString()}\n`;
+  }
+  if (sessionImageTokensUsed > 0) {
+    summary += `  ${t(
+      "sessionSummaryCard.imageGenerationTokensLabel"
+    )} ${sessionImageTokensUsed.toLocaleString()}\n`;
+  }
+  summary += "-----------------------------\n\n";
+
+  if (finalCombinedOutput.trim()) {
+    summary += `${t("refineFormatCard.combinedOutputTitle")}\n`;
+    summary += "-----------------------------\n";
+    summary += finalCombinedOutput;
+  } else {
+    summary += `${t("sessionSummaryCard.noFinalCombinedArticleMessage")}\n`;
+  }
+  return summary;
+};

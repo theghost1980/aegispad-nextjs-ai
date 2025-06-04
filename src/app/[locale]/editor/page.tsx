@@ -24,6 +24,7 @@ import {
 import { useArticleCreation } from "@/hooks/use-article-creation";
 import { useArticleRevision } from "@/hooks/use-article-revision";
 import { useArticleTranslation } from "@/hooks/use-article-translation";
+import { useAsyncOperationRunner } from "@/hooks/use-async-operation-runner";
 import { useBrowserDetection } from "@/hooks/use-browser-detection";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -36,7 +37,10 @@ import {
 } from "@/types/general.types";
 import { getLocaleFromLanguageValue } from "@/utils/language";
 import { splitMarkdownIntoParagraphs } from "@/utils/markdown";
-import { getToolbarFormatStrings } from "@/utils/markdown-editor-utils";
+import {
+  getGenerateSummaryTextForCopy,
+  getToolbarFormatStrings,
+} from "@/utils/markdown-editor-utils";
 import { Mic, MicOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -47,7 +51,6 @@ export default function ArticleForgePage() {
   const tTokenUsage = useTranslations("TokenUsage");
   const tMarkdownToolBar = useTranslations("MarkdownToolbar");
   const router = useRouter();
-
   const currentLocale = useLocale();
 
   const {
@@ -145,8 +148,8 @@ export default function ArticleForgePage() {
     setAiGeneratedTags,
     isRevising,
     revisionError,
-    handleReviseArticle: reviseArticleHook, // Renombrar para evitar conflicto
-    handleUndoRevision: undoRevisionHook, // Renombrar para evitar conflicto
+    handleReviseArticle: reviseArticleHook,
+    handleUndoRevision: undoRevisionHook,
   } = useArticleRevision({
     authenticatedFetch,
     articleMarkdown,
@@ -160,6 +163,14 @@ export default function ArticleForgePage() {
     }),
     articleEmptyError: t("toastMessages.articleEmptyError"),
   });
+
+  const { runAsyncOperation } = useAsyncOperationRunner(
+    setCurrentOperationMessage,
+    {
+      success: t("toastMessages.successTitle"),
+      error: t("toastMessages.errorTitle"),
+    }
+  );
 
   const isLoading =
     isProcessing || isLoadingHiveAuth || isTranslating || isRevising;
@@ -307,11 +318,6 @@ export default function ArticleForgePage() {
       return;
     }
     setFinalCombinedOutput("");
-    // setCurrentRequestTokens y setDetailedTokenUsage se manejan en el hook o no son necesarios aquí
-    // para el inicio de la revisión.
-
-    // El hook useArticleRevision se encarga de setCurrentOperationMessage.
-    // startProcessingTransition activará el GlobalLoader a través de isProcessing.
     startProcessingTransition(async () => {
       try {
         const revisionResult = await reviseArticleHook();
@@ -342,7 +348,6 @@ export default function ArticleForgePage() {
     });
   };
 
-  // Efecto para mostrar toast si revisionError ocurre en el hook (opcional, si el hook no muestra toast)
   useEffect(() => {
     if (revisionError) {
       console.error("Revision Error:", revisionError);
@@ -352,12 +357,11 @@ export default function ArticleForgePage() {
           revisionError.message || t("toastMessages.reviseFailedError"),
         variant: "destructive",
       });
-      // setRevisionError(null); // Considerar limpiar el error aquí si no se necesita en otro lugar
     }
   }, [revisionError, toast, t]);
 
   const handleUndoRevision = () => {
-    const undoResult = undoRevisionHook(); // Llamar a la función del hook
+    const undoResult = undoRevisionHook();
     if (undoResult.success) {
       toast({
         title: t("toastMessages.successTitle"),
@@ -391,8 +395,6 @@ export default function ArticleForgePage() {
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
 
-    // El hook useArticleTranslation se encarga de setCurrentOperationMessage.
-    // startProcessingTransition activará el GlobalLoader.
     startProcessingTransition(async () => {
       try {
         const translationResult = await translateArticle();
@@ -435,22 +437,6 @@ export default function ArticleForgePage() {
       }
     });
   };
-
-  // El estado translationError del hook sigue disponible y puede ser usado por
-  // TranslationPanelComponent para mostrar un error en línea si se desea.
-
-  // const handleUndoRevision = () => {
-  //   if (articleBeforeRevision) {
-  //     setArticleMarkdown(articleBeforeRevision);
-  //     setArticleBeforeRevision("");
-  //     toast({
-  //       title: t("toastMessages.successTitle"),
-  //       description: t("toastMessages.revisionUndoneSuccess", {
-  //         defaultValue: "Revision undone successfully.",
-  //       }),
-  //     });
-  //   }
-  // };
 
   const handleCombineFormat = () => {
     if (
@@ -521,70 +507,27 @@ export default function ArticleForgePage() {
     });
   };
 
-  const generateSummaryTextForCopy = () => {
-    let summary = `${t("sessionSummaryCard.title")}\n`;
-    summary += "=============================\n\n";
-    summary += `${t("sessionSummaryCard.userLabel", {
-      defaultValue: "User:",
-    })} ${hiveUsername || "N/A"}\n`;
-    summary += `${t("sessionSummaryCard.dateTimeLabel", {
-      defaultValue: "Date/Time:",
-    })} ${new Date().toLocaleString()}\n`;
-    if (detectedLanguage) {
-      summary += `${t(
-        "sessionSummaryCard.detectedLanguageLabel"
-      )} ${detectedLanguage}\n`;
-    }
-    summary += "\n";
-    summary += `${t("sessionSummaryCard.tokenUsageTitle")}:\n`;
-    summary += `-----------------------------\n`;
-    summary += `${t(
-      "sessionSummaryCard.totalTokensUsedLabel"
-    )} ${sessionTotalTokens.toLocaleString()}\n`;
-    if (sessionTextTokensUsed > 0) {
-      summary += `  ${t(
-        "sessionSummaryCard.textGenerationTokensLabel"
-      )} ${sessionTextTokensUsed.toLocaleString()}\n`;
-    }
-    if (sessionImageTokensUsed > 0) {
-      summary += `  ${t(
-        "sessionSummaryCard.imageGenerationTokensLabel"
-      )} ${sessionImageTokensUsed.toLocaleString()}\n`;
-    }
-    summary += "-----------------------------\n\n";
-
-    if (finalCombinedOutput.trim()) {
-      summary += `${t("refineFormatCard.combinedOutputTitle")}\n`;
-      summary += "-----------------------------\n";
-      summary += finalCombinedOutput;
-    } else {
-      summary += `${t("sessionSummaryCard.noFinalCombinedArticleMessage")}\n`;
-    }
-    return summary;
-  };
-
   const handleCopySummary = () => {
-    startProcessingTransition(async () => {
-      setCurrentOperationMessage(
-        t("sessionSummaryCard.preparingSummaryMessage")
-      );
-      const summaryText = generateSummaryTextForCopy();
-      try {
+    runAsyncOperation({
+      operation: async () => {
+        const summaryText = getGenerateSummaryTextForCopy(
+          t,
+          hiveUsername!,
+          userRole!,
+          detectedLanguage!,
+          sessionTotalTokens,
+          sessionTextTokensUsed,
+          sessionImageTokensUsed,
+          finalCombinedOutput
+        );
         await navigator.clipboard.writeText(summaryText);
-        toast({
-          title: t("toastMessages.successTitle"),
-          description: t("toastMessages.summaryCopiedSuccess"),
-        });
-      } catch (err) {
-        console.error("Failed to copy summary: ", err);
-        toast({
-          title: t("toastMessages.errorTitle"),
-          description: t("toastMessages.copySummaryFailedError"),
-          variant: "destructive",
-        });
-      } finally {
-        setCurrentOperationMessage(null);
-      }
+      },
+      manageOperationMessage: true,
+      onStartMessage: t("sessionSummaryCard.preparingSummaryMessage"),
+      onSuccessMessage: t("toastMessages.summaryCopiedSuccess"),
+      onErrorMessage: (error: any) => {
+        return t("toastMessages.copySummaryFailedError");
+      },
     });
   };
 
