@@ -1,5 +1,9 @@
-import { VOICE_COMMANDS } from "@/constants/constants"; // Moveremos o redefiniremos esto aquí
-import { ActiveEditorAction } from "@/types/general.types";
+import {
+  PunctuationRule,
+  VOICE_COMMANDS,
+  VOICE_PUNCTUATION_MAP,
+} from "@/constants/constants";
+import { ActiveEditorAction, LanguageCode } from "@/types/general.types";
 import { RefObject, useEffect, useState } from "react";
 import { useVoiceControl } from "./use-voice-control";
 
@@ -81,14 +85,40 @@ export function useVoiceActionsHandler({
     onTranscript: (text, isFinal) => {
       // TODO: Implementar lógica basada en voiceActionState
       if (isFinal) {
+        const normalizedFinalTranscript = text.toLowerCase().trim();
+
+        // 1. Comprobar si es un signo de puntuación
+        const currentLangKey = (currentVoiceLanguage.split("-")[0] ||
+          "en") as LanguageCode;
+        const punctuationRules: PunctuationRule[] =
+          VOICE_PUNCTUATION_MAP[currentLangKey] ||
+          VOICE_PUNCTUATION_MAP["en"] ||
+          [];
+
+        let punctuationHandled = false;
+        for (const rule of punctuationRules) {
+          if (
+            normalizedFinalTranscript ===
+            rule.word_detection.toLowerCase().trim()
+          ) {
+            const noSpaceAfterChars = ["\n", "\n\n", "(", "[", "{"];
+            const addSpace = !noSpaceAfterChars.includes(rule.char_sign);
+            insertTextAtCursorOrSelection(rule.char_sign, addSpace);
+            setUserInstructionKey("voicePrompts.punctuationInserted");
+            setVoiceActionState("idle"); // Volver a idle después de la puntuación
+            punctuationHandled = true;
+            break;
+          }
+        }
+
+        if (punctuationHandled) return; // Si se manejó puntuación, no hacer más.
+
         if (voiceActionState === "awaiting_prompt") {
           console.log("Prompt dictado (final):", text);
           handleStartArticleFromPanel(text);
           setVoiceActionState("idle");
         } else if (voiceActionState === "awaiting_heading_title") {
           console.log("Heading title dictado (final):", text);
-          // El "## " ya fue insertado por el comando.
-          // No añadimos espacio extra después del título del encabezado.
           insertTextAtCursorOrSelection(text, false);
           setVoiceActionState("idle");
         } else if (voiceActionState === "awaiting_direct_dictation") {
@@ -96,10 +126,8 @@ export function useVoiceActionsHandler({
           insertTextAtCursorOrSelection(text, true); // Añadir espacio después del texto dictado
           setVoiceActionState("idle"); // Volver a idle después de la inserción
         } else {
-          // Estado "idle": inserción de texto normal, el usuario está dictando libremente.
           console.log("Idle dictation (final):", text);
           insertTextAtCursorOrSelection(text, true); // Añadir espacio después del texto dictado
-          // No cambiamos el estado, permanece en "idle" para permitir dictado continuo.
         }
       }
     },

@@ -16,7 +16,6 @@ import VoiceHelpModal from "@/components/VoiceHelpModal";
 import {
   AVAILABLE_LANGUAGES,
   COMMENT_NOTES_BY_LOCALE,
-  DEFAULT_SOURCE_LANGUAGE_CREATION,
   DEFAULT_TARGET_LANGUAGE,
   ESTIMATED_INITIAL_SESSION_TOKENS,
   FINAL_REVIEW_ARTICLE_STORAGE_KEY,
@@ -27,7 +26,7 @@ import { useArticleTranslation } from "@/hooks/use-article-translation";
 import { useBrowserDetection } from "@/hooks/use-browser-detection";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useVoiceActionsHandler } from "@/hooks/use-voice-actions-handler"; // Import the new hook
+import { useVoiceActionsHandler } from "@/hooks/use-voice-actions-handler";
 import {
   ActiveEditorAction,
   CombineFormatType,
@@ -40,7 +39,7 @@ import {
   getGenerateSummaryTextForCopy,
   getToolbarFormatStrings,
 } from "@/utils/markdown-editor-utils";
-import { Mic, MicOff } from "lucide-react";
+import { HelpCircle, Mic, MicOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
@@ -50,7 +49,6 @@ export default function ArticleForgePage() {
   const tTokenUsage = useTranslations("TokenUsage");
   const tMarkdownToolBar = useTranslations("MarkdownToolbar");
   const router = useRouter();
-
   const currentLocale = useLocale();
 
   const {
@@ -66,10 +64,6 @@ export default function ArticleForgePage() {
   const [targetLanguage, setTargetLanguage] = useState<string>(
     DEFAULT_TARGET_LANGUAGE
   );
-  const [sourceLanguageForCreation, setSourceLanguageForCreation] =
-    useState<string>(DEFAULT_SOURCE_LANGUAGE_CREATION);
-  const [generateMainImage, setGenerateMainImage] = useState<boolean>(false);
-
   const [currentOperationMessage, setCurrentOperationMessage] = useState<
     string | null
   >(null);
@@ -84,13 +78,10 @@ export default function ArticleForgePage() {
   const [sessionTextTokensUsed, setSessionTextTokensUsed] = useState<number>(0);
   const [sessionImageTokensUsed, setSessionImageTokensUsed] =
     useState<number>(0);
-
   const [finalCombinedOutput, setFinalCombinedOutput] = useState<string>("");
   const [selectedCombineFormat, setSelectedCombineFormat] =
     useState<CombineFormatType>("simple");
-
   const [clientLoaded, setClientLoaded] = useState(false);
-
   const [isPreviewExpanded, setIsPreviewExpanded] = useState<boolean>(false);
   const [activeAction, setActiveAction] = useState<ActiveEditorAction>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -248,9 +239,6 @@ export default function ArticleForgePage() {
         title: t("toastMessages.successTitle"),
         description: undoResult.message,
       });
-    } else {
-      // No hay nada que deshacer, el hook ya lo maneja
-      // Podrías mostrar un toast aquí si el hook no lo hace
     }
   };
 
@@ -430,7 +418,6 @@ export default function ArticleForgePage() {
     setCurrentOperationMessage(null);
     setCurrentRequestTokens(null);
     setDetailedTokenUsage(null);
-    setGenerateMainImage(false);
     setFinalCombinedOutput("");
     setSelectedCombineFormat("simple");
     setDetectedLanguage(null);
@@ -496,17 +483,17 @@ export default function ArticleForgePage() {
     isListening: isVoiceListening,
     isSupported: isVoiceSupported,
     voiceError,
-    currentVoiceLanguage, // Receive current language
+    currentVoiceLanguage,
     interimTranscript,
     finalTranscript,
-    userInstructionKey, // Recibir la clave de instrucción
+    userInstructionKey,
     toggleListening: toggleVoiceListening,
   } = useVoiceActionsHandler({
     articleMarkdown,
     setArticleMarkdown,
     mainTextareaRef,
-    handleStartArticleFromPanel, // Pass the actual function
-    setActiveAction, // Pass setActiveAction
+    handleStartArticleFromPanel,
+    setActiveAction,
     initialSpeechLanguage: speechLanguage,
     onToggleHelp: toggleVoiceHelpModal,
   });
@@ -1026,13 +1013,12 @@ export default function ArticleForgePage() {
 
       {canUseEditor && isVoiceSupported && isChromeBrowser && (
         <>
-          {/* Contenedor para el botón de voz y mensajes de error/idioma */}
           <div
-            className="fixed flex flex-col items-center space-y-1"
+            className="fixed flex items-start space-x-2" // Cambiado a space-x-2 para alinear horizontalmente
             style={{
-              top: "calc(1rem + 20px)", // Ajusta según el header y padding
+              top: "calc(1rem + 20px)",
               left: "20px",
-              zIndex: 50, // Asegura que esté sobre el contenido pero debajo de modales
+              zIndex: 50,
             }}
           >
             <Button
@@ -1054,14 +1040,33 @@ export default function ArticleForgePage() {
                 <Mic className="h-5 w-5" />
               )}
             </Button>
+            {isVoiceListening && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleVoiceHelpModal}
+                title={t("voiceHelpButtonTitle", {
+                  defaultValue: "Ayuda de comandos de voz",
+                })}
+                className="rounded-full shadow-lg bg-background hover:bg-muted"
+              >
+                <HelpCircle className="h-5 w-5" />
+              </Button>
+            )}
             <div className="mt-1 text-xs text-center max-w-[180px] space-y-1">
               {voiceError && !isBraveBrowser ? (
                 <p className="text-destructive bg-background/80 px-2 py-1 rounded shadow-md">
                   {voiceError}
                 </p>
               ) : isVoiceListening &&
+                interimTranscript &&
+                !userInstructionKey ? (
+                <p className="text-xs text-blue-500 bg-background/80 px-2 py-1 rounded shadow-md animate-pulse">
+                  {interimTranscript}
+                </p>
+              ) : isVoiceListening &&
                 currentVoiceLanguage &&
-                !userInstructionKey ? ( // Mostrar "Lang:" solo si está escuchando, hay idioma y NO hay instrucción
+                !userInstructionKey ? (
                 <p className="text-muted-foreground bg-background/80 px-2 py-1 rounded shadow-md">
                   Lang: {currentVoiceLanguage}
                 </p>
@@ -1069,14 +1074,13 @@ export default function ArticleForgePage() {
             </div>
           </div>
 
-          {/* Contenedor para el mensaje de instrucción (centrado) */}
           {userInstructionKey && !voiceError && isVoiceListening && (
             <div
               className="fixed left-1/2 transform -translate-x-1/2 z-[51]
                          bg-background/90 dark:bg-neutral-800/90 backdrop-blur-sm
                          text-foreground p-4 rounded-lg shadow-xl text-center"
               style={{
-                top: `calc(1rem + 20px + 40px + 1rem)`, // padding_pagina + offset_boton + altura_boton + espacio_extra
+                top: `calc(1rem + 20px + 40px + 1rem)`,
                 maxWidth: "80vw",
                 minWidth: "250px",
               }}
@@ -1091,7 +1095,7 @@ export default function ArticleForgePage() {
       <VoiceHelpModal
         isOpen={isVoiceHelpModalOpen}
         onClose={toggleVoiceHelpModal}
-        t={(key, values) => t(key as any, values)} // Pasa la función t con el namespace correcto
+        t={(key, values) => t(key as any, values)}
       />
     </div>
   );

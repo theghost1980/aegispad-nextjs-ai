@@ -182,7 +182,6 @@ export interface VoiceCommand {
   action: string;
   keywords: string[]; // Palabras clave que activan esta acción
 }
-
 export const VOICE_COMMANDS: VoiceCommand[] = [
   {
     action: CMD_CREATE_ARTICLE,
@@ -233,3 +232,194 @@ export const VOICE_COMMANDS: VoiceCommand[] = [
   },
   // ... puedes añadir más comandos aquí
 ];
+
+export interface PunctuationRule {
+  key: string; // Stable identifier, e.g., "comma", "question_mark"
+  char_sign: string; // The actual punctuation character, e.g., ",", "?"
+  word_detection: string; // The spoken word(s) to detect, e.g., "comma", "question mark"
+}
+
+export const VOICE_PUNCTUATION_MAP: Record<string, PunctuationRule[]> = {
+  en: [
+    { key: "comma", char_sign: ",", word_detection: "comma" },
+    { key: "period", char_sign: ".", word_detection: "period" },
+    { key: "full_stop", char_sign: ".", word_detection: "full stop" },
+    { key: "question_mark", char_sign: "?", word_detection: "question mark" },
+    {
+      key: "ellipsis",
+      char_sign: "...",
+      word_detection: "ellipsis",
+    },
+    {
+      key: "open_question_mark",
+      char_sign: "?",
+      word_detection: "open question",
+    },
+    {
+      key: "close_question_mark",
+      char_sign: "?",
+      word_detection: "open question",
+    },
+    {
+      key: "open_exclamation_mark",
+      char_sign: "¡",
+      word_detection: "open exclamation mark",
+    },
+    {
+      key: "close_exclamation_mark",
+      char_sign: "!",
+      word_detection: "close exclamation mark",
+    },
+    { key: "quote", char_sign: '"', word_detection: "quotes" },
+    { key: "open_quote", char_sign: '"', word_detection: "open quotes" },
+    { key: "close_quote", char_sign: '"', word_detection: "close quotes" },
+    { key: "apostrophe", char_sign: "'", word_detection: "apostrophe" },
+    { key: "dash", char_sign: "-", word_detection: "dash" },
+    { key: "low_dash", char_sign: "_", word_detection: "low dash" },
+    { key: "colon", char_sign: ":", word_detection: "colon" },
+    { key: "semicolon", char_sign: ";", word_detection: "semicolon" },
+    { key: "newline", char_sign: "\n", word_detection: "newline" },
+    {
+      key: "new_paragraph",
+      char_sign: "\n\n",
+      word_detection: "new paragraph",
+    },
+    { key: "asterisk", char_sign: "*", word_detection: "asterisk" },
+    { key: "hashtag", char_sign: "#", word_detection: "hashtag" },
+    { key: "equals", char_sign: "=", word_detection: "equals" },
+    { key: "plus", char_sign: "+", word_detection: "plus" },
+    { key: "minus", char_sign: "-", word_detection: "minus" },
+    { key: "tilde", char_sign: "~", word_detection: "tilde" },
+    { key: "bar", char_sign: "/", word_detection: "slash" },
+    { key: "backtick", char_sign: "`", word_detection: "backtick" },
+    {
+      key: "backslash",
+      char_sign: "\\",
+      word_detection: "back slash",
+    },
+
+    {
+      key: "open_parenthesis",
+      char_sign: "(",
+      word_detection: "open parenthesis",
+    },
+    {
+      key: "close_parenthesis",
+      char_sign: ")",
+      word_detection: "close parenthesis",
+    },
+    { key: "open_bracket", char_sign: "[", word_detection: "open bracket" },
+    { key: "close_bracket", char_sign: "]", word_detection: "close bracket" },
+    { key: "open_brace", char_sign: "{", word_detection: "open brace" },
+    { key: "close_brace", char_sign: "}", word_detection: "close brace" },
+    { key: "at_symbol", char_sign: "@", word_detection: "at symbol" },
+    { key: "ampersand", char_sign: "&", word_detection: "ampersand" },
+    { key: "dollar_sign", char_sign: "$", word_detection: "dollar sign" },
+    { key: "percent_sign", char_sign: "%", word_detection: "percent sign" },
+    { key: "caret", char_sign: "^", word_detection: "caret" },
+    { key: "pipe", char_sign: "|", word_detection: "pipe" },
+    { key: "less_than", char_sign: "<", word_detection: "less than" },
+    { key: "greater_than", char_sign: ">", word_detection: "greater than" },
+  ],
+  es: [
+    { key: "comma", char_sign: ",", word_detection: "coma" },
+    { key: "period", char_sign: ".", word_detection: "punto" },
+    { key: "full_stop", char_sign: ".", word_detection: "punto final" },
+    { key: "question_mark", char_sign: "?", word_detection: "cierra pregunta" },
+    {
+      key: "ellipsis",
+      char_sign: "...",
+      word_detection: "punto suspensivos",
+    },
+    {
+      key: "open_question_mark",
+      char_sign: "¿",
+      word_detection: "signo de interrogación",
+    },
+    {
+      key: "close_question_mark",
+      char_sign: "?",
+      word_detection: "cierre interrogación",
+    },
+    {
+      key: "open_exclamation_mark",
+      char_sign: "¡",
+      word_detection: "signo de exclamación",
+    },
+    {
+      key: "close_exclamation_mark",
+      char_sign: "!",
+      word_detection: "cierre exclamación",
+    },
+    { key: "quote", char_sign: '"', word_detection: "comillas" },
+    { key: "open_quote", char_sign: '"', word_detection: "abrir comillas" },
+    {
+      key: "close_quote",
+      char_sign: '"',
+      word_detection: "cerrar comillas",
+    },
+    { key: "apostrophe", char_sign: "'", word_detection: "apóstrofo" },
+    { key: "dash", char_sign: "-", word_detection: "guion" },
+    { key: "low_dash", char_sign: "_", word_detection: "guion bajo" },
+    { key: "colon", char_sign: ":", word_detection: "coma" },
+    { key: "semicolon", char_sign: ";", word_detection: "punto y coma" },
+    { key: "newline", char_sign: "\n", word_detection: "nueva línea" },
+    {
+      key: "new_paragraph",
+      char_sign: "\n\n",
+      word_detection: "nuevo parrafo",
+    },
+    { key: "asterisk", char_sign: "*", word_detection: "asterisco" },
+    { key: "hashtag", char_sign: "#", word_detection: "almohadilla" },
+    { key: "equals", char_sign: "=", word_detection: "signo igual" },
+    { key: "plus", char_sign: "+", word_detection: "signo suma" },
+    { key: "minus", char_sign: "-", word_detection: "signo resta" },
+    { key: "tilde", char_sign: "~", word_detection: "tilde" },
+    { key: "bar", char_sign: "/", word_detection: "simbolo de barra" },
+    { key: "backtick", char_sign: "`", word_detection: "comilla invertida" },
+    {
+      key: "backslash",
+      char_sign: "\\",
+      word_detection: "barra invertida",
+    },
+    {
+      key: "open_parenthesis",
+      char_sign: "(",
+      word_detection: "paréntesis abierto",
+    },
+    {
+      key: "close_parenthesis",
+      char_sign: ")",
+      word_detection: "paréntesis cerrado",
+    },
+    {
+      key: "open_bracket",
+      char_sign: "[",
+      word_detection: "corchete abierto",
+    },
+    {
+      key: "close_bracket",
+      char_sign: "]",
+      word_detection: "corchete cerrado",
+    },
+    { key: "open_brace", char_sign: "{", word_detection: "llave abierta" },
+    { key: "close_brace", char_sign: "}", word_detection: "llave cerrada" },
+    { key: "at_symbol", char_sign: "@", word_detection: "arroba" },
+    { key: "ampersand", char_sign: "&", word_detection: "ampersand" },
+    { key: "dollar_sign", char_sign: "$", word_detection: "signo de dólar" },
+    {
+      key: "percent_sign",
+      char_sign: "%",
+      word_detection: "signo de porcentaje",
+    },
+    {
+      key: "caret",
+      char_sign: "^",
+      word_detection: "acento circunflejo",
+    },
+    { key: "pipe", char_sign: "|", word_detection: "barra vertical" },
+    { key: "less_than", char_sign: "<", word_detection: "menor que" },
+    { key: "greater_than", char_sign: ">", word_detection: "mayor que" },
+  ],
+  // Add other languages as needed
+};
