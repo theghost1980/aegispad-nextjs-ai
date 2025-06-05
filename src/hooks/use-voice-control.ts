@@ -1,6 +1,7 @@
 "use client"; // Los hooks con estado y efectos secundarios que interactúan con APIs del navegador deben ser client components
 
 import { VoiceCommand } from "@/constants/constants"; // Importar la nueva interfaz
+import { defaultLocale } from "@/i18n/config"; // Importar el defaultLocale
 import VoiceControlService from "@/lib/web-speech-api/voice-control-service"; // Ajusta la ruta si es necesario
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -51,9 +52,21 @@ export function useVoiceControl({
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(true); // Asumir soportado hasta que se compruebe
   const [error, setError] = useState<string | null>(null);
-  const [currentLanguage, setCurrentLanguage] = useState<string>(
-    initialLanguage || navigator.language || "en-US"
-  ); // State for current language
+  const [currentLanguage, setCurrentLanguage] = useState<string>(() => {
+    // Initialize currentLanguage safely, ensuring it's never empty initially
+    const lang = initialLanguage?.trim()
+      ? initialLanguage
+      : typeof navigator !== "undefined"
+      ? navigator.language
+      : "en-US";
+    const fallbackLang = lang?.trim() ? lang : "en-US";
+    console.log(
+      `[useVoiceControl] Initial currentLanguage state set to: ${fallbackLang} (from initialLanguage: ${initialLanguage}, navigator.language: ${
+        typeof navigator !== "undefined" ? navigator.language : "N/A"
+      })`
+    );
+    return fallbackLang;
+  });
 
   const voiceServiceRef = useRef<VoiceControlService | null>(null);
 
@@ -80,6 +93,25 @@ export function useVoiceControl({
     finalTranscriptRef.current = finalTranscript;
   }, [interimTranscript, finalTranscript]);
 
+  const setLanguage = useCallback((language: string) => {
+    if (!language || language.trim() === "") {
+      console.warn(
+        `[useVoiceControl] Attempted to set an empty or invalid language. Received: "${language}". Ignoring.`
+      );
+      // Optionally, fall back to a default language if currentLanguage is also problematic,
+      // but currentLanguage should already have a safe default from useState.
+      return;
+    }
+    setCurrentLanguage(language); // Update state immediately
+    console.log("[useVoiceControl] Setting language to:", language);
+    if (voiceServiceRef.current) {
+      voiceServiceRef.current.setLanguage(language);
+      setIsListening(false); // Stop listening when language changes
+      setInterimTranscript("");
+      setFinalTranscript("");
+    }
+  }, []);
+
   useEffect(() => {
     // Solo inicializar en el cliente
     if (typeof window === "undefined") {
@@ -89,12 +121,12 @@ export function useVoiceControl({
 
     // Ensure the service is created only once or when initialLanguage/commands change significantly
     if (voiceServiceRef.current) {
-      // If service already exists, just update its language if needed
-      const newLang = initialLanguage || navigator.language || "en-US";
-      if (currentLanguage !== newLang) {
-        // Usar el estado currentLanguage del hook
-        voiceServiceRef.current.setLanguage(newLang);
-        setCurrentLanguage(newLang); // Update state when language is set
+      // If service exists, ensure its language matches the currentLanguage state.
+      // The currentLanguage state is the single source of truth.
+      // It's updated by setLanguage or by initialLanguage prop changes via setLanguage.
+      if (voiceServiceRef.current.getLanguage() !== currentLanguage) {
+        // Assuming getLanguage() exists on the service
+        voiceServiceRef.current.setLanguage(currentLanguage);
       }
       // No need to recreate the service just for callback changes, refs handle that.
       return;
@@ -102,7 +134,7 @@ export function useVoiceControl({
 
     console.log(
       "[useVoiceControl] Initializing VoiceControlService with language:",
-      initialLanguage || navigator.language || "en-US"
+      currentLanguage // Use the state which has a safe fallback
     );
     const serviceOptions: VoiceServiceOptions = {
       onTranscript: (text, isFinal) => {
@@ -113,10 +145,19 @@ export function useVoiceControl({
 
           const normalizedText = normalizeTextForCommand(text);
           let commandAction: string | undefined = undefined;
+          const baseLang = currentLanguage.split("-")[0];
 
           // Iterar sobre la nueva estructura de comandos
           for (const cmd of commands) {
-            if (cmd.keywords.includes(normalizedText)) {
+            // Obtener las palabras clave para el idioma actual, con fallbacks
+            const langKeywords =
+              cmd.keywords[currentLanguage] || // ej. "es-ES"
+              cmd.keywords[baseLang] || // ej. "es"
+              cmd.keywords[defaultLocale] || // ej. "en-US" (del i18n config)
+              cmd.keywords["en-US"] || // Fallback duro a en-US
+              cmd.keywords["en"]; // Fallback duro a en
+
+            if (langKeywords && langKeywords.includes(normalizedText)) {
               commandAction = cmd.action;
               break;
             }
@@ -173,7 +214,7 @@ export function useVoiceControl({
           setFinalTranscript("");
         }
       },
-      language: initialLanguage || navigator.language || "en-US",
+      language: currentLanguage, // Use the state which has a safe fallback
     };
 
     const service = new VoiceControlService(serviceOptions);
@@ -186,7 +227,28 @@ export function useVoiceControl({
     return () => {
       voiceServiceRef.current?.stopListening();
     };
-  }, [initialLanguage, commands]);
+  }, [commands, currentLanguage, showInterimResults]); // Removed initialLanguage, rely on currentLanguage state
+
+  // Effect to update currentLanguage if initialLanguage prop changes
+  useEffect(() => {
+    console.log(
+      `[useVoiceControl] Effect for initialLanguage change. initialLanguage prop: ${initialLanguage}, currentLanguage state: ${currentLanguage}`
+    );
+    if (
+      initialLanguage &&
+      initialLanguage.trim() !== "" &&
+      initialLanguage !== currentLanguage
+    ) {
+      console.log(
+        `[useVoiceControl] initialLanguage prop (${initialLanguage}) is different from currentLanguage state (${currentLanguage}). Calling setLanguage.`
+      );
+      setLanguage(initialLanguage);
+    } else {
+      console.log(
+        `[useVoiceControl] initialLanguage prop (${initialLanguage}) is NOT different or invalid compared to currentLanguage state (${currentLanguage}). Not calling setLanguage.`
+      );
+    }
+  }, [initialLanguage, currentLanguage, setLanguage]);
 
   const startListening = useCallback(() => {
     if (voiceServiceRef.current?.isSupported()) {
@@ -207,15 +269,6 @@ export function useVoiceControl({
     } else if (voiceServiceRef.current) {
       setError("El reconocimiento de voz no es compatible con este navegador.");
     }
-  }, []);
-
-  const setLanguage = useCallback((language: string) => {
-    setCurrentLanguage(language); // Update state immediately
-    console.log("[useVoiceControl] Setting language to:", language);
-    voiceServiceRef.current?.setLanguage(language);
-    setIsListening(false); // Asumir que se detiene al cambiar idioma
-    setInterimTranscript(""); // Limpiar transcripciones
-    setFinalTranscript("");
   }, []);
 
   return {

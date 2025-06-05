@@ -3,7 +3,7 @@ import {
   VOICE_COMMANDS,
   VOICE_PUNCTUATION_MAP,
 } from "@/constants/constants";
-import { ActiveEditorAction, LanguageCode } from "@/types/general.types";
+import { ActiveEditorAction } from "@/types/general.types";
 import { RefObject, useEffect, useState } from "react";
 import { useVoiceControl } from "./use-voice-control";
 
@@ -23,6 +23,7 @@ export interface UseVoiceActionsHandlerProps {
   setActiveAction: (action: ActiveEditorAction) => void; // Add setActiveAction here
   initialSpeechLanguage: string;
   onToggleHelp: () => void; // Callback to toggle help display
+  locale: string; // Pass the locale directly from useLocale
   // Podríamos necesitar 't' para mensajes si el hook genera alguno,
   // pero idealmente los toasts los manejan las funciones de acción.
   // t: (key: string) => string;
@@ -36,6 +37,7 @@ export function useVoiceActionsHandler({
   setActiveAction, // Destructure setActiveAction
   initialSpeechLanguage,
   onToggleHelp,
+  locale, // Destructure locale
 }: UseVoiceActionsHandlerProps) {
   const [voiceActionState, setVoiceActionState] =
     useState<VoiceActionState>("idle");
@@ -72,6 +74,12 @@ export function useVoiceActionsHandler({
   };
   // Lógica para manejar comandos y transcripciones irá aquí
 
+  useEffect(() => {
+    console.log(
+      `[useVoiceActionsHandler] Mounted/Updated. initialSpeechLanguage prop: ${initialSpeechLanguage}, locale prop: ${locale}`
+    );
+  }, [initialSpeechLanguage, locale]);
+
   const {
     isListening,
     isSupported,
@@ -88,11 +96,16 @@ export function useVoiceActionsHandler({
         const normalizedFinalTranscript = text.toLowerCase().trim();
 
         // 1. Comprobar si es un signo de puntuación
-        const currentLangKey = (currentVoiceLanguage.split("-")[0] ||
-          "en") as LanguageCode;
+        const baseLang = currentVoiceLanguage.split("-")[0];
         const punctuationRules: PunctuationRule[] =
-          VOICE_PUNCTUATION_MAP[currentLangKey] ||
-          VOICE_PUNCTUATION_MAP["en"] ||
+          VOICE_PUNCTUATION_MAP[
+            currentVoiceLanguage as keyof typeof VOICE_PUNCTUATION_MAP
+          ] || // Intenta con el locale completo ej: "es-ES"
+          VOICE_PUNCTUATION_MAP[
+            baseLang as keyof typeof VOICE_PUNCTUATION_MAP
+          ] || // Fallback al idioma base ej: "es"
+          VOICE_PUNCTUATION_MAP["en-US"] || // Fallback a "en-US"
+          VOICE_PUNCTUATION_MAP["en"] || // Fallback a "en"
           [];
 
         let punctuationHandled = false;
@@ -224,10 +237,6 @@ export function useVoiceActionsHandler({
       }
     },
   });
-
-  useEffect(() => {
-    setVoiceLanguage(initialSpeechLanguage);
-  }, [initialSpeechLanguage, setVoiceLanguage]);
 
   useEffect(() => {
     // Si se deja de escuchar por cualquier motivo (ej. toggle, error, etc.),

@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { VOICE_COMMANDS, VOICE_PUNCTUATION_MAP } from "@/constants/constants";
+import { defaultLocale } from "@/i18n/config"; // Importar el defaultLocale
 import { useLocale } from "next-intl";
 
 interface VoiceHelpModalProps {
@@ -28,6 +29,15 @@ const VoiceHelpModal: React.FC<VoiceHelpModalProps> = ({
   t,
 }) => {
   const locale = useLocale();
+  const baseLanguage = locale.split("-")[0];
+
+  const punctuationRulesToUse =
+    VOICE_PUNCTUATION_MAP[locale as keyof typeof VOICE_PUNCTUATION_MAP] || // Intenta con el locale completo ej: "es-ES"
+    VOICE_PUNCTUATION_MAP[baseLanguage as keyof typeof VOICE_PUNCTUATION_MAP] || // Fallback al idioma base ej: "es"
+    VOICE_PUNCTUATION_MAP["en-US"] || // Fallback a en-US
+    VOICE_PUNCTUATION_MAP["en"] || // Luego a en
+    []; // Fallback final a un array vacío
+
   if (!isOpen) return null;
 
   return (
@@ -44,22 +54,36 @@ const VoiceHelpModal: React.FC<VoiceHelpModalProps> = ({
             {t("voiceHelpModal.commandListTitle")}
           </h4>
           <ul className="space-y-3">
-            {VOICE_COMMANDS.map((cmd) => (
-              <li key={cmd.action} className="text-sm">
-                <p className="font-medium text-primary">
-                  {cmd.keywords
-                    .map((kw) => `"${kw}"`)
-                    .join(
-                      t("voiceHelpModal.orSeparator", { defaultValue: " or " })
-                    )}
-                </p>
-                <p className="text-muted-foreground">
-                  {t(`voiceHelpModal.${cmd.action}_desc` as any, {
-                    defaultValue: `Description for ${cmd.action}`,
-                  })}
-                </p>
-              </li>
-            ))}
+            {VOICE_COMMANDS.map((cmd) =>
+              (() => {
+                // IIFE para manejar la lógica de keywords
+                const langKeywords =
+                  cmd.keywords[locale] || // ej. "es-ES"
+                  cmd.keywords[baseLanguage] || // ej. "es"
+                  cmd.keywords[defaultLocale] || // ej. "en-US" (del i18n config)
+                  cmd.keywords["en-US"] || // Fallback duro a en-US
+                  cmd.keywords["en"]; // Fallback duro a en
+
+                return (
+                  <li key={cmd.action} className="text-sm">
+                    <p className="font-medium text-primary">
+                      {(langKeywords || [])
+                        .map((kw) => `"${kw}"`)
+                        .join(
+                          t("voiceHelpModal.orSeparator", {
+                            defaultValue: " or ",
+                          })
+                        )}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {t(`voiceHelpModal.${cmd.action}_desc` as any, {
+                        defaultValue: `Description for ${cmd.action}`,
+                      })}
+                    </p>
+                  </li>
+                );
+              })()
+            )}
           </ul>
 
           <Accordion type="single" collapsible className="w-full mt-6">
@@ -72,9 +96,7 @@ const VoiceHelpModal: React.FC<VoiceHelpModalProps> = ({
                   {t("voiceHelpModal.punctuation_commands_desc")}
                 </p>
                 <ul className="space-y-3">
-                  {(
-                    VOICE_PUNCTUATION_MAP[locale] || VOICE_PUNCTUATION_MAP["en"]
-                  ).map((rule) => (
+                  {punctuationRulesToUse.map((rule) => (
                     <li key={rule.key} className="text-sm">
                       <p className="font-medium text-primary">{`"${rule.word_detection}"`}</p>
                       <p className="text-muted-foreground">

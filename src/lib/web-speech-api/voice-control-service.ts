@@ -1,15 +1,9 @@
 interface VoiceControlServiceOptions {
-  /** Callback para cuando se recibe una transcripción de voz. */
   onTranscript: (text: string, isFinal: boolean) => void;
-  /** Callback para cuando se detecta un comando (funcionalidad futura). */
-  //   onCommand?: (command: string) => void;
-  /** Callback para errores del servicio de reconocimiento. */
   onError?: (
     errorEvent: SpeechRecognitionErrorEvent | { error: string; message: string }
   ) => void;
-  /** Callback para cambios en el estado de escucha. */
   onStateChange?: (isListening: boolean) => void;
-  /** Idioma para el reconocimiento (formato BCP 47, ej: 'en-US', 'es-ES'). */
   language?: string;
 }
 
@@ -21,8 +15,6 @@ class VoiceControlService {
 
   constructor(options: VoiceControlServiceOptions) {
     this.options = options;
-    // Intenta obtener el idioma del navegador o usa 'en-US' por defecto.
-    // El idioma de la app (de next-intl) se puede pasar para mayor precisión.
     this.currentLanguage =
       options.language ||
       (typeof navigator !== "undefined" ? navigator.language : "en-US");
@@ -52,12 +44,7 @@ class VoiceControlService {
   private setupRecognition() {
     if (!this.recognition) return;
 
-    // true: sigue escuchando incluso después de una pausa del usuario.
-    // Si es false, se detiene después de la primera frase/pausa.
     this.recognition.continuous = true;
-
-    // true: devuelve resultados provisionales mientras el usuario habla.
-    // false: solo devuelve el resultado final.
     this.recognition.interimResults = true;
 
     this.recognition.lang = this.currentLanguage;
@@ -75,14 +62,8 @@ class VoiceControlService {
         }
       }
 
-      // Notificar solo si hay texto
       if (finalTranscript.trim()) {
-        // Aquí podríamos añadir lógica para detectar si es un comando
-        // if (this.options.onCommand && this.isCommand(finalTranscript.trim())) {
-        //   this.options.onCommand(finalTranscript.trim());
-        // } else {
         this.options.onTranscript(finalTranscript.trim(), true);
-        // }
       }
       if (interimTranscript.trim()) {
         this.options.onTranscript(interimTranscript, false);
@@ -98,12 +79,7 @@ class VoiceControlService {
       if (this.options.onError) {
         this.options.onError(event);
       }
-      // Errores comunes:
-      // 'no-speech': No se detectó voz.
-      // 'audio-capture': Fallo al capturar audio (problema de micrófono).
-      // 'not-allowed': Permiso denegado por el usuario o política de seguridad.
-      // 'network': Algunos navegadores usan un servicio en la nube y puede haber error de red.
-      this._isListening = false; // Asegurar que el estado se actualice
+      this._isListening = false;
       if (this.options.onStateChange) {
         this.options.onStateChange(this._isListening);
       }
@@ -118,30 +94,23 @@ class VoiceControlService {
     };
 
     this.recognition.onend = () => {
-      // Este evento se dispara cuando el reconocimiento se detiene, ya sea
-      // manualmente con stop(), por un error, o porque 'continuous' es false.
       console.log("Reconocimiento de voz finalizado.");
       const wasListening = this._isListening;
       this._isListening = false;
       if (this.options.onStateChange) {
         this.options.onStateChange(this._isListening);
       }
-      // Si 'continuous' es true, algunos navegadores intentan reiniciar automáticamente
-      // si el final no fue por stop() o abort().
-      // Si quisiéramos forzar un reinicio (con cuidado para evitar bucles):
-      // if (wasListening && this.recognition && this.options.autoRestart) {
-      //   this.recognition.start();
-      // }
     };
   }
 
   public startListening(): void {
     if (this.recognition && !this._isListening) {
       try {
-        // Asegurar que el idioma esté actualizado antes de iniciar
+        console.log(
+          `[VoiceControlService] Attempting to start recognition. Service currentLanguage: ${this.currentLanguage}. Recognition object lang will be set to: ${this.currentLanguage}`
+        );
         this.recognition.lang = this.currentLanguage;
         this.recognition.start();
-        // El evento 'onstart' se encargará de actualizar _isListening y notificar
       } catch (e: any) {
         console.error("Error al intentar iniciar reconocimiento:", e);
         if (this.options.onError) {
@@ -150,7 +119,7 @@ class VoiceControlService {
             message: e.message || "No se pudo iniciar el reconocimiento.",
           });
         }
-        this._isListening = false; // Asegurar estado correcto
+        this._isListening = false;
         if (this.options.onStateChange) {
           this.options.onStateChange(this._isListening);
         }
@@ -161,7 +130,6 @@ class VoiceControlService {
   public stopListening(): void {
     if (this.recognition && this._isListening) {
       this.recognition.stop();
-      // El evento 'onend' se encargará de actualizar _isListening y notificar
     }
   }
 
@@ -181,13 +149,11 @@ class VoiceControlService {
         this.recognition.stop(); // Detener para aplicar el cambio de idioma
       }
       this.recognition.lang = this.currentLanguage;
-      // Si estaba escuchando, podría ser necesario reiniciar manualmente
-      // o informar al usuario que debe volver a activar.
-      // Por ahora, si estaba escuchando, se detendrá. El usuario deberá reactivar.
-      // if (wasListening) {
-      //   setTimeout(() => this.startListening(), 100); // Pequeña demora para asegurar que stop() complete
-      // }
     }
+  }
+
+  public getLanguage(): string {
+    return this.currentLanguage;
   }
 
   public getIsListening(): boolean {

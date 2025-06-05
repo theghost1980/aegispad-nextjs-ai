@@ -1,4 +1,31 @@
-## 2024-08-02
+## 2025-06-05
+
+### 🌍 Internacionalización y Mejoras en Comandos de Voz
+
+- **Comandos de Voz Multilingües (`VOICE_COMMANDS` en `constants.ts`):**
+  - Se reestructuró `VOICE_COMMANDS` para que la propiedad `keywords` sea un objeto `Record<string, string[]>`, permitiendo definir palabras clave específicas para cada locale (ej. `"en-US"`, `"es-ES"`, `"fr-FR"`, `"pt-BR"`).
+  - Se añadieron las traducciones de palabras clave para los comandos principales en francés (`fr-FR`) y portugués de Brasil (`pt-BR`).
+- **Mapa de Puntuación por Voz (`VOICE_PUNCTUATION_MAP` en `constants.ts`):**
+  - Se actualizaron las claves principales del mapa de `en`, `es`, etc., a los códigos de locale completos (ej. `"en-US"`, `"es-ES"`) para mayor consistencia y especificidad.
+- **Lógica de Detección de Comandos y Puntuación Actualizada:**
+  - En `useVoiceControl.ts`: Se actualizó la lógica de detección de comandos para utilizar la nueva estructura multilingüe de `VOICE_COMMANDS`, buscando coincidencias según el `currentLanguage` del reconocimiento de voz y aplicando fallbacks (idioma base, idioma por defecto).
+  - En `useVoiceActionsHandler.ts`: Se mejoró la lógica para acceder a `VOICE_PUNCTUATION_MAP`, intentando primero con el locale completo (ej. `"es-ES"`), luego con el idioma base (ej. `"es"`) y finalmente con fallbacks a inglés.
+- **Modal de Ayuda de Voz (`VoiceHelpModal.tsx`):**
+  - Se actualizó para mostrar las palabras clave de los `VOICE_COMMANDS` y las reglas de `VOICE_PUNCTUATION_MAP` correspondientes al idioma actual de la interfaz de usuario (`locale` de `useLocale()`), con un sistema de fallback similar al de la detección.
+- **FAQ Actualizada (`constants.ts` y `messages/es-ES.json`):**
+  - Se añadió una nueva pregunta frecuente (`voiceCommandsMultiLanguageQuestion`) y su respuesta (`voiceCommandsMultiLanguageAnswer`) sobre cómo utilizar los comandos de voz en diferentes idiomas.
+  - Se incluyó un marcador `//TODO <link>` en la respuesta para un futuro enlace a una guía detallada.
+- **Simplificación en `ArticleForgePage.tsx`:**
+  - Se eliminó la función `mapLocaleToSpeechLang` ya que `currentLocale` (obtenido de `useLocale()`) ya provee el formato de idioma necesario (ej. `"es-ES"`) directamente desde la configuración de `i18n`. `speechLanguage` ahora usa `currentLocale` directamente.
+  - Se aseguró que la prop `locale` se pase correctamente a `useVoiceActionsHandler`.
+
+### 🛠️ Mejoras
+
+- **Consistencia de Locales**: Se estandarizó el uso de códigos de locale completos (ej. "es-ES") a través de las configuraciones de comandos de voz y puntuación, alineándose con la configuración general de `next-intl`.
+
+---
+
+## 2025-06-04
 
 ### ✨ Nuevas Funcionalidades - Control por Voz
 
@@ -13,7 +40,7 @@
 
 ---
 
-## 2024-08-01
+## 2025-06-03
 
 ### ✨ Nuevas Funcionalidades
 
@@ -38,7 +65,7 @@
 
 ---
 
-### Cambios y Mejoras - Sesión del 30/05/2024
+## 2025-06-02
 
 #### Mejoras en la Subida y Generación de Imágenes
 
@@ -60,7 +87,7 @@
 
 ---
 
-### Cambios y Mejoras - Sesión del 29/05/2024
+## 2025-06-01
 
 #### Flujo de Generación y Subida de Imágenes AI
 
@@ -98,7 +125,7 @@
 
 ---
 
-### Cambios y Mejoras - Sesión del 28/05/2024
+## 2025-05-31
 
 #### Funcionalidad de Publicación y Comunidades en `FinalReviewPage.tsx`
 
@@ -166,7 +193,7 @@
 
 ---
 
-### Cambios y Planificación - Sesión del 27/05/2024
+## 2025-05-30
 
 #### Mejoras y Correcciones en `LineReviewer.tsx`
 
@@ -225,7 +252,7 @@
 
 ---
 
-### Cambios hechos sesion 26/05/25
+## 2025-05-29
 
 #### Mejoras Generales del Editor (page.tsx)
 

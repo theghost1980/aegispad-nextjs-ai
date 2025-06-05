@@ -30,7 +30,6 @@ import { useVoiceActionsHandler } from "@/hooks/use-voice-actions-handler";
 import {
   ActiveEditorAction,
   CombineFormatType,
-  LanguageCode,
   StoredArticleData,
 } from "@/types/general.types";
 import { getLocaleFromLanguageValue } from "@/utils/language";
@@ -42,7 +41,7 @@ import {
 import { HelpCircle, Mic, MicOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 export default function ArticleForgePage() {
   const t = useTranslations("ArticleForgePage");
@@ -156,18 +155,14 @@ export default function ArticleForgePage() {
     setClientLoaded(true);
   }, []);
 
-  const mapLocaleToSpeechLang = useCallback((locale: string): string => {
-    const lang = locale.toLowerCase() as LanguageCode;
-    const mapping: Record<LanguageCode, string> = {
-      en: "en-US",
-      es: "es-ES",
-      fr: "fr-FR",
-      "pt-br": "pt-BR",
-    };
-    return mapping[lang] || "en-US";
-  }, []);
+  // currentLocale from useLocale() already provides the correct format (e.g., "es-ES", "en-US")
+  const speechLanguage = currentLocale;
 
-  const speechLanguage = mapLocaleToSpeechLang(currentLocale);
+  useEffect(() => {
+    console.log(
+      `[ArticleForgePage] Locale/SpeechLang Update: currentLocale: ${currentLocale}, speechLanguage: ${speechLanguage}`
+    );
+  }, [currentLocale, speechLanguage]);
 
   useEffect(() => {
     if (clientLoaded && !isLoadingHiveAuth) {
@@ -496,6 +491,7 @@ export default function ArticleForgePage() {
     setActiveAction,
     initialSpeechLanguage: speechLanguage,
     onToggleHelp: toggleVoiceHelpModal,
+    locale: currentLocale, // Pass the currentLocale to the locale prop
   });
 
   const handleProceedToReview = () => {

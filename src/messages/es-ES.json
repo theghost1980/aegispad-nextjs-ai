@@ -264,12 +264,12 @@
       "bar_desc": "Inserta una barra inclinada hacia adelante (/)",
       "backtick_desc": "Inserta una comilla invertida (`)",
       "backslash_desc": "Inserta una barra invertida (\\)",
-      "open_parenthesis_desc": "Inserta un paréntesis de apertura (()",
-      "close_parenthesis_desc": "Inserta un paréntesis de cierre ())",
+      "open_parenthesis_desc": "Inserta un paréntesis de apertura ('(')",
+      "close_parenthesis_desc": "Inserta un paréntesis de cierre (')')",
       "open_bracket_desc": "Inserta un corchete de apertura ([)",
       "close_bracket_desc": "Inserta un corchete de cierre (])",
-      "open_brace_desc": "Inserta una llave de apertura ({)",
-      "close_brace_desc": "Inserta una llave de cierre (})",
+      "open_brace_desc": "Inserta una llave de apertura ('{')",
+      "close_brace_desc": "Inserta una llave de cierre ('}')",
       "at_symbol_desc": "Inserta un símbolo de arroba (@)",
       "ampersand_desc": "Inserta un ampersand (&)",
       "dollar_sign_desc": "Inserta un signo de dólar ($)",
@@ -384,6 +384,8 @@
     "betaVersionMeaningAnswer": "Estar en Beta significa que AegisPad está activamente en desarrollo y prueba. Aunque nos esforzamos por una experiencia estable, podrías encontrar errores ocasionales o alguna función podría no estar completamente pulida. Trabajamos continuamente para mejorar y añadir nuevas funcionalidades basándonos en la retroalimentación de los usuarios.",
     "dataPrivacyQuestion": "¿Cómo se manejan mis datos y mi privacidad?",
     "dataPrivacyAnswer": "Nos tomamos tu privacidad muy en serio. El contenido de tu artículo es procesado por los servicios de IA solo cuando usas explícitamente una función de IA (como revisar o traducir). La autenticación se maneja a través de Hive Keychain, lo que significa que tus claves de Hive nunca se exponen a AegisPad. Almacenamos tu nombre de usuario de Hive y claves API encriptadas (si elegiste proporcionar una en el pasado, aunque ahora usamos una clave maestra) de forma segura. Para más detalles, consulta nuestra Política de Privacidad (enlace por añadir).",
+    "voiceCommandsMultiLanguageQuestion": "¿Cómo uso los comandos de voz en diferentes idiomas?",
+    "voiceCommandsMultiLanguageAnswer": "AegisPad soporta comandos de voz en varios idiomas. Asegúrate de que el idioma de la aplicación (seleccionado en el selector de idioma) coincida con el idioma en el que deseas dictar. Las palabras clave específicas para cada comando pueden variar según el idioma. Consulta nuestra //TODO <link>guía detallada de comandos de voz por idioma</link> para más información.",
     "customizationQuestion": "¿Puedo personalizar mi experiencia en AegisPad?",
     "customizationAnswer": "¡Sí! Puedes personalizar algunos aspectos de tu experiencia en AegisPad, como el tema visual (claro, oscuro o el predeterminado de tu sistema) y la página a la que eres redirigido después de iniciar sesión. Estas opciones están disponibles en tu página de perfil.",
     "blogVsCommunityPostQuestion": "¿Cuál es la diferencia entre publicar en mi blog y en una comunidad?",
@@ -682,6 +684,7 @@
     "metaDescription": "Historial de cambios y desarrollo del proyecto AegisPad."
   },
   "AIImageGeneratorPanel": {
+    "defaultTriggerButtonLabel": "Imagen IA",
     "cooldownToastTitle": "Por favor, espera un momento",
     "cooldownToastDescription": "Debes esperar {seconds} segundos más para generar otra imagen.",
     "cooldownMessage": "Puedes generar otra imagen en {seconds} segundos.",
@@ -694,7 +697,8 @@
     "generatingMessage": "Generando imagen... (esto puede tardar un momento)",
     "altGeneratedImage": "Imagen generada por IA",
     "closeButton": "Cerrar",
-    "generateButton": "Generar"
+    "generateButton": "Generar",
+    "apiErrorFallback": "Ocurrió un error inesperado."
   },
   "MarkdownToolbar": {
     "placeholders": {

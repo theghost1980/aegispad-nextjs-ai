@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { localeDetails } from "@/i18n/config";
 import { usePathname, useRouter } from "@/i18n/routing";
 import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -29,10 +30,11 @@ export default function LanguageSwitcher() {
           <SelectValue placeholder={t("selectLanguage")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="en">{t("english")}</SelectItem>
-          <SelectItem value="es">{t("spanish")}</SelectItem>
-          <SelectItem value="fr">{t("french")}</SelectItem>
-          <SelectItem value="pt-BR">{t("portugueseBrazil")}</SelectItem>
+          {localeDetails.map((detail) => (
+            <SelectItem key={detail.code} value={detail.code}>
+              {t(detail.nameKey)}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>

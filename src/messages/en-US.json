@@ -390,7 +390,9 @@
     "blogVsCommunityPostAnswer": "When you post to your personal blog, the content primarily appears on your profile. When posting to a community, your post is associated with that thematic space, increasing its visibility among members interested in that niche. AegisPad allows you to easily choose where to publish, using the selected community as the main tag (category) for your post.",
     "devlogsQuestion": "Where can I see the project's development history or changelog?",
     "devlogsAnswerWithLink": "You can find all the details about updates, new features, and fixes on our [devlogs_link] page.",
-    "devlogsLinkText": "Project Devlogs"
+    "devlogsLinkText": "Project Devlogs",
+    "voiceCommandsMultiLanguageQuestion": "How do I use voice commands in different languages?",
+    "voiceCommandsMultiLanguageAnswer": "AegisPad supports voice commands in multiple languages. Make sure the app's language (selected in the language picker) matches the language you wish to dictate in. Specific keywords for each command may vary by language. Please refer to our //TODO <link>detailed voice command guide by language</link> for more information."
   },
   "OnboardingAssistant": {
     "loadingAssistant": "Loading assistant...",
@@ -682,6 +684,7 @@
     "metaDescription": "History of changes and development of the AegisPad project."
   },
   "AIImageGeneratorPanel": {
+    "defaultTriggerButtonLabel": "AI Image",
     "cooldownToastTitle": "Please wait a moment",
     "cooldownToastDescription": "You must wait {seconds} more seconds to generate another image.",
     "cooldownMessage": "You can generate another image in {seconds} seconds.",
@@ -694,7 +697,8 @@
     "generatingMessage": "Generating image... (this may take a moment)",
     "altGeneratedImage": "AI generated image",
     "closeButton": "Close",
-    "generateButton": "Generate"
+    "generateButton": "Generate",
+    "apiErrorFallback": "An unexpected error occurred."
   },
   "MarkdownToolbar": {
     "placeholders": {
