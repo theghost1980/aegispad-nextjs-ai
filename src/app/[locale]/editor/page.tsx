@@ -1088,6 +1088,7 @@ export default function ArticleForgePage() {
         isOpen={isVoiceHelpModalOpen}
         onClose={toggleVoiceHelpModal}
         t={(key, values) => t(key as any, values)}
+        userRole={userRole}
       />
     </div>
   );

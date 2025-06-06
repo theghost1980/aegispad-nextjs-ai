@@ -14,29 +14,31 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { VOICE_COMMANDS, VOICE_PUNCTUATION_MAP } from "@/constants/constants";
-import { defaultLocale } from "@/i18n/config"; // Importar el defaultLocale
+import { defaultLocale } from "@/i18n/config";
 import { useLocale } from "next-intl";
 
 interface VoiceHelpModalProps {
   isOpen: boolean;
   onClose: () => void;
   t: (key: string, values?: Record<string, any>) => string;
+  userRole: string | null;
 }
 
 const VoiceHelpModal: React.FC<VoiceHelpModalProps> = ({
   isOpen,
   onClose,
   t,
+  userRole,
 }) => {
   const locale = useLocale();
   const baseLanguage = locale.split("-")[0];
 
   const punctuationRulesToUse =
-    VOICE_PUNCTUATION_MAP[locale as keyof typeof VOICE_PUNCTUATION_MAP] || // Intenta con el locale completo ej: "es-ES"
-    VOICE_PUNCTUATION_MAP[baseLanguage as keyof typeof VOICE_PUNCTUATION_MAP] || // Fallback al idioma base ej: "es"
-    VOICE_PUNCTUATION_MAP["en-US"] || // Fallback a en-US
-    VOICE_PUNCTUATION_MAP["en"] || // Luego a en
-    []; // Fallback final a un array vacío
+    VOICE_PUNCTUATION_MAP[locale as keyof typeof VOICE_PUNCTUATION_MAP] ||
+    VOICE_PUNCTUATION_MAP[baseLanguage as keyof typeof VOICE_PUNCTUATION_MAP] ||
+    VOICE_PUNCTUATION_MAP["en-US"] ||
+    VOICE_PUNCTUATION_MAP["en"] ||
+    [];
 
   if (!isOpen) return null;
 
@@ -54,7 +56,12 @@ const VoiceHelpModal: React.FC<VoiceHelpModalProps> = ({
             {t("voiceHelpModal.commandListTitle")}
           </h4>
           <ul className="space-y-3">
-            {VOICE_COMMANDS.map((cmd) =>
+            {VOICE_COMMANDS.filter((cmd) => {
+              if (cmd.action === "CMD_CREATE_ARTICLE") {
+                return userRole === "admin";
+              }
+              return true;
+            }).map((cmd) =>
               (() => {
                 const langKeywords =
                   cmd.keywords[locale] || // ej. "es-ES"
