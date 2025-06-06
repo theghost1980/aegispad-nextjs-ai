@@ -108,8 +108,8 @@
       "noFinalCombinedArticleMessage": "No final combined article was generated in this session.",
       "copySummaryButton": "Copy Full Summary & Output",
       "preparingSummaryMessage": "Preparing summary for copy...",
-      "userLabel": "Utilisateur :",
-      "dateTimeLabel": "Date/Heure :"
+      "userLabel": "Username:",
+      "dateTimeLabel": "Date/Time:"
     },
     "toastMessages": {
       "errorTitle": "Error",
@@ -125,6 +125,7 @@
       "articleTranslatedSuccess": "Article translated to {targetLanguage} successfully!",
       "languageDetectedSuccess": "Language detected: {language}",
       "combinedFormatSuccess": "Combined article format generated!",
+      "combineFailedError": "Failed to combine article formats. Please try again.",
       "summaryCopiedSuccess": "Session summary copied to clipboard!",
       "createFailedError": "Failed to create article. Please try again.",
       "reviseFailedError": "Failed to revise article. Please try again.",
@@ -212,6 +213,76 @@
       "applyAllVisibleButtonText": "Apply All Visible & Close",
       "closeButtonText": "Close",
       "noLinesToReviewText": "No lines to review or all lines have been removed from this view."
+    },
+    "voicePrompts": {
+      "dictateNow": "Dictation mode active. Speak your text.",
+      "dictatePrompt": "Dictate the article prompt.",
+      "dictateHeading": "Dictate the heading title.",
+      "punctuationInserted": "Punctuation inserted."
+    },
+    "voiceHelpModal": {
+      "title": "Voice Commands Help",
+      "description": "Here are the available voice commands you can use:",
+      "commandListTitle": "Available Commands:",
+      "orSeparator": " or ",
+      "closeButton": "Close",
+      "CMD_HEADING_1_desc": "Inserts a Markdown level 1 heading (#) and waits for you to dictate the title.",
+      "CMD_CREATE_ARTICLE_desc": "Initiates the article creation process. You'll be prompted to dictate the topic.",
+      "CMD_HEADING_2_desc": "Inserts a Markdown level 2 heading (##) and waits for you to dictate the title.",
+      "CMD_HEADING_3_desc": "Inserts a Markdown level 3 heading (###) and waits for you to dictate the title.",
+      "CMD_NEW_LINE_desc": "Inserts a new line (like pressing Enter).",
+      "CMD_PERIOD_desc": "Inserts a period followed by a space.",
+      "CMD_WRITE_DOWN_desc": "Activates direct dictation mode. The next thing you say will be typed into the editor.",
+      "CMD_SHOW_VOICE_HELP_desc": "Shows this help dialog with all available voice commands.",
+      "punctuation_commands_title": "Punctuation Commands",
+      "punctuation_commands_desc": "You can say the following words to insert punctuation:",
+      "comma_desc": "Inserts a comma (,)",
+      "period_desc": "Inserts a period (.)",
+      "full_stop_desc": "Inserts a period (.)",
+      "question_mark_desc": "Inserts a question mark (?)",
+      "ellipsis_desc": "Inserts an ellipsis (...)",
+      "open_question_mark_desc": "Inserts an opening question mark (¿)",
+      "close_question_mark_desc": "Inserts a closing question mark (?)",
+      "open_exclamation_mark_desc": "Inserts an opening exclamation mark (¡)",
+      "close_exclamation_mark_desc": "Inserts a closing exclamation mark (!)",
+      "quote_desc": "Inserts quotation marks (\")",
+      "open_quote_desc": "Inserts opening quotation marks (\")",
+      "close_quote_desc": "Inserts closing quotation marks (\")",
+      "apostrophe_desc": "Inserts an apostrophe (')",
+      "dash_desc": "Inserts a hyphen (-)",
+      "low_dash_desc": "Inserts an underscore (_)",
+      "colon_desc": "Inserts a colon (:)",
+      "semicolon_desc": "Inserts a semicolon (;)",
+      "newline_desc": "Inserts a new line.",
+      "new_paragraph_desc": "Inserts a new paragraph.",
+      "asterisk_desc": "Inserts an asterisk (*)",
+      "hashtag_desc": "Inserts a hash symbol (#)",
+      "equals_desc": "Inserts an equals sign (=)",
+      "plus_desc": "Inserts a plus sign (+)",
+      "minus_desc": "Inserts a minus sign (-)",
+      "tilde_desc": "Inserts a tilde (~)",
+      "bar_desc": "Inserts a forward slash (/)",
+      "backtick_desc": "Inserts a backtick (`)",
+      "backslash_desc": "Inserts a backslash (\\)",
+      "open_parenthesis_desc": "Inserts an opening parenthesis ('(')",
+      "close_parenthesis_desc": "Inserts a closing parenthesis (')')",
+      "open_bracket_desc": "Inserts an opening square bracket ([)",
+      "close_bracket_desc": "Inserts a closing square bracket (])",
+      "open_brace_desc": "Inserts an opening curly brace ('{')",
+      "close_brace_desc": "Inserts a closing curly brace ('}')",
+      "at_symbol_desc": "Inserts an at symbol (@)",
+      "ampersand_desc": "Inserts an ampersand (&)",
+      "dollar_sign_desc": "Inserts a dollar sign ($)",
+      "percent_sign_desc": "Inserts a percentage sign (%)",
+      "caret_desc": "Inserts a caret (^)",
+      "pipe_desc": "Inserts a vertical bar (|)",
+      "less_than_desc": "Inserts a less-than sign (<)",
+      "greater_than_desc": "Inserts a greater-than sign (>)"
+    },
+    "voiceHelpButtonTitle": "Voice Commands Help",
+    "voiceDictation": {
+      "startDictationTitle": "Start voice dictation",
+      "stopDictationTitle": "Stop dictation"
     }
   },
   "ArticleEditor": {
@@ -248,8 +319,10 @@
     "visionBeneficiary": "For now, the AegisPad account benefits from your publications with 6% of what they generate. This helps us maintain and improve the platform for everyone.",
     "visionFeedbackLink": "Your feedback is crucial for this journey. <link>Share your thoughts!</link>",
     "visionHiveReminder": "Easily publish your masterpieces directly to the Hive blockchain and connect with a vibrant community.",
-    "secondaryCtaButton": "Probar el Editor Ahora",
-    "featuresIntro": "AegisPad is designed to save you time and effort by unifying everything a blogger needs in one place, supercharged with AI assistance."
+    "secondaryCtaButton": "Try editor now!",
+    "featuresIntro": "AegisPad is designed to save you time and effort by unifying everything a blogger needs in one place, supercharged with AI assistance.",
+    "featureVoiceTitle": "Voice Commands",
+    "featureVoiceDescription": "Control the editor and dictate content using your voice for a hands-free experience."
   },
   "TestingsPage": {
     "title": "Hive Keychain Test Page",
@@ -323,7 +396,9 @@
     "blogVsCommunityPostAnswer": "When you post to your personal blog, the content primarily appears on your profile. When posting to a community, your post is associated with that thematic space, increasing its visibility among members interested in that niche. AegisPad allows you to easily choose where to publish, using the selected community as the main tag (category) for your post.",
     "devlogsQuestion": "Where can I see the project's development history or changelog?",
     "devlogsAnswerWithLink": "You can find all the details about updates, new features, and fixes on our [devlogs_link] page.",
-    "devlogsLinkText": "Project Devlogs"
+    "devlogsLinkText": "Project Devlogs",
+    "voiceCommandsMultiLanguageQuestion": "How do I use voice commands in different languages?",
+    "voiceCommandsMultiLanguageAnswer": "AegisPad supports voice commands in multiple languages. Make sure the app's language (selected in the language picker) matches the language you wish to dictate in. Specific keywords for each command may vary by language. Please refer to our //TODO <link>detailed voice command guide by language</link> for more information."
   },
   "OnboardingAssistant": {
     "loadingAssistant": "Loading assistant...",
@@ -615,6 +690,7 @@
     "metaDescription": "History of changes and development of the AegisPad project."
   },
   "AIImageGeneratorPanel": {
+    "defaultTriggerButtonLabel": "AI Image",
     "cooldownToastTitle": "Please wait a moment",
     "cooldownToastDescription": "You must wait {seconds} more seconds to generate another image.",
     "cooldownMessage": "You can generate another image in {seconds} seconds.",
@@ -627,9 +703,28 @@
     "generatingMessage": "Generating image... (this may take a moment)",
     "altGeneratedImage": "AI generated image",
     "closeButton": "Close",
-    "generateButton": "Generate"
+    "generateButton": "Generate",
+    "apiErrorFallback": "An unexpected error occurred."
   },
   "MarkdownToolbar": {
+    "placeholders": {
+      "bold": "bold text",
+      "italic": "italic text",
+      "strikethrough": "strikethrough text",
+      "linkText": "link text",
+      "heading": "Heading",
+      "listItem": "List item",
+      "quote": "Quote text",
+      "code": "code"
+    },
+    "prompts": {
+      "linkUrl": "Enter link URL:",
+      "imageUrl": "Enter image URL:",
+      "imageAltText": "Enter image alt text (optional):"
+    },
+    "defaults": {
+      "aiImageAltText": "image"
+    },
     "styles": {
       "title": "Text Styles",
       "buttonLabel": "Styles",

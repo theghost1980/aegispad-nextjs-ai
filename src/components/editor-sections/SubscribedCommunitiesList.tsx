@@ -84,7 +84,6 @@ const SubscribedCommunitiesList: FC<SubscribedCommunitiesListProps> = ({
     );
   }
 
-  // displayMode === "full"
   if (!communities || communities.length === 0) {
     return <p className="text-muted-foreground">{t("noCommunitiesList")}</p>;
   }

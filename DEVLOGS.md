@@ -1,4 +1,80 @@
-## 2024-08-01
+## 2025-06-06
+
+### ✨ Mejoras en la Experiencia de Usuario y Funcionalidad
+
+- **Avatar de Usuario desde Perfil de Hive:**
+  - **API de Login (`login/route.ts`):** Se actualizó para extraer la URL de la imagen de perfil (`profile_image`) del `posting_json_metadata` de la cuenta de Hive del usuario. Si se encuentra una URL válida, se incluye como `profile_image_url` en la respuesta de la API.
+  - **Hook `useHiveAuth.ts`:**
+    - Se añadió un nuevo estado `profileImageUrl` para almacenar la URL de la imagen de perfil del usuario.
+    - Se implementó la carga y guardado de `profileImageUrl` en IndexedDB (bajo la clave `currentUserProfileImageUrl`) para persistencia entre sesiones.
+    - Se asegura la limpieza de `profileImageUrl` (estado e IndexedDB) al cerrar sesión.
+    - El hook ahora devuelve `profileImageUrl` para su uso en componentes.
+  - **Componente `UserAvatarDropdown.tsx`:**
+    - Ahora utiliza `profileImageUrl` del hook `useHiveAuth`.
+    - Si `profileImageUrl` está disponible, se renderiza un componente `<AvatarImage>` con la imagen del perfil del usuario.
+    - El `<AvatarFallback>` (con las iniciales del usuario) se mantiene como respaldo si no hay imagen o esta no carga.
+  - **Componente `Avatar.tsx` (UI):** Se añadió la clase `object-cover` al componente `AvatarImage` para asegurar que la imagen de perfil se muestre con una relación de aspecto 1:1, cubriendo el área designada sin distorsionarse.
+- **Ajustes de Interfaz de Usuario (UI):**
+  - **Header (`header.tsx`):** Se añadió un pequeño padding (`pr-2`) al contenedor del `UserAvatarDropdown` para evitar que quede pegado al borde derecho de la cabecera.
+- **Control de Voz (`use-voice-actions-handler.ts` y `editor/page.tsx`):**
+  - Se pasó el `userRole` al hook `useVoiceActionsHandler`.
+  - Se modificó la lógica del comando de voz `CMD_CREATE_ARTICLE`: si el usuario no tiene el rol "admin", en lugar de iniciar el panel de creación de artículo, se insertará un emoticono `:)` en el área de texto del editor.
+
+### 🧹 Limpieza y Refactorización
+
+- **Eliminación de Comentarios:**
+  - Se eliminaron comentarios innecesarios del archivo `HomePage` (`app/[locale]/page.tsx`).
+  - Se discutieron y proporcionaron expresiones regulares para facilitar la búsqueda y eliminación de comentarios en todo el proyecto, con la excepción de los comentarios `//TODO`.
+
+### 🛠️ Mejoras
+
+- **Consistencia en la Obtención de Metadatos:** Se especificó el uso de `posting_json_metadata` para la imagen de perfil, que es comúnmente donde los usuarios de Hive almacenan esta información a través de interfaces como PeakD o Ecency.
+
+---
+
+## 2025-06-05
+
+### 🌍 Internacionalización y Mejoras en Comandos de Voz
+
+- **Comandos de Voz Multilingües (`VOICE_COMMANDS` en `constants.ts`):**
+  - Se reestructuró `VOICE_COMMANDS` para que la propiedad `keywords` sea un objeto `Record<string, string[]>`, permitiendo definir palabras clave específicas para cada locale (ej. `"en-US"`, `"es-ES"`, `"fr-FR"`, `"pt-BR"`).
+  - Se añadieron las traducciones de palabras clave para los comandos principales en francés (`fr-FR`) y portugués de Brasil (`pt-BR`).
+- **Mapa de Puntuación por Voz (`VOICE_PUNCTUATION_MAP` en `constants.ts`):**
+  - Se actualizaron las claves principales del mapa de `en`, `es`, etc., a los códigos de locale completos (ej. `"en-US"`, `"es-ES"`) para mayor consistencia y especificidad.
+- **Lógica de Detección de Comandos y Puntuación Actualizada:**
+  - En `useVoiceControl.ts`: Se actualizó la lógica de detección de comandos para utilizar la nueva estructura multilingüe de `VOICE_COMMANDS`, buscando coincidencias según el `currentLanguage` del reconocimiento de voz y aplicando fallbacks (idioma base, idioma por defecto).
+  - En `useVoiceActionsHandler.ts`: Se mejoró la lógica para acceder a `VOICE_PUNCTUATION_MAP`, intentando primero con el locale completo (ej. `"es-ES"`), luego con el idioma base (ej. `"es"`) y finalmente con fallbacks a inglés.
+- **Modal de Ayuda de Voz (`VoiceHelpModal.tsx`):**
+  - Se actualizó para mostrar las palabras clave de los `VOICE_COMMANDS` y las reglas de `VOICE_PUNCTUATION_MAP` correspondientes al idioma actual de la interfaz de usuario (`locale` de `useLocale()`), con un sistema de fallback similar al de la detección.
+- **FAQ Actualizada (`constants.ts` y `messages/es-ES.json`):**
+  - Se añadió una nueva pregunta frecuente (`voiceCommandsMultiLanguageQuestion`) y su respuesta (`voiceCommandsMultiLanguageAnswer`) sobre cómo utilizar los comandos de voz en diferentes idiomas.
+  - Se incluyó un marcador `//TODO <link>` en la respuesta para un futuro enlace a una guía detallada.
+- **Simplificación en `ArticleForgePage.tsx`:**
+  - Se eliminó la función `mapLocaleToSpeechLang` ya que `currentLocale` (obtenido de `useLocale()`) ya provee el formato de idioma necesario (ej. `"es-ES"`) directamente desde la configuración de `i18n`. `speechLanguage` ahora usa `currentLocale` directamente.
+  - Se aseguró que la prop `locale` se pase correctamente a `useVoiceActionsHandler`.
+
+### 🛠️ Mejoras
+
+- **Consistencia de Locales**: Se estandarizó el uso de códigos de locale completos (ej. "es-ES") a través de las configuraciones de comandos de voz y puntuación, alineándose con la configuración general de `next-intl`.
+
+---
+
+## 2025-06-04
+
+### ✨ Nuevas Funcionalidades - Control por Voz
+
+- **Comandos de Encabezado H1 y H3**:
+  - iniciamos con la implementacion de voz para chrome en PC/desktop.
+  - se agregaron los comandos basicos de voz: dictar, mostrar ayuda, probados en EN y ES.
+  - En progreso...
+
+### 🛠️ Mejoras
+
+- **Ayuda de Voz**: El modal de ayuda de voz ahora incluye los nuevos comandos para H1 y H3, proporcionando al usuario una lista más completa de las capacidades de dictado.
+
+---
+
+## 2025-06-03
 
 ### ✨ Nuevas Funcionalidades
 
@@ -23,7 +99,7 @@
 
 ---
 
-### Cambios y Mejoras - Sesión del 30/05/2024
+## 2025-06-02
 
 #### Mejoras en la Subida y Generación de Imágenes
 
@@ -45,7 +121,7 @@
 
 ---
 
-### Cambios y Mejoras - Sesión del 29/05/2024
+## 2025-06-01
 
 #### Flujo de Generación y Subida de Imágenes AI
 
@@ -83,7 +159,7 @@
 
 ---
 
-### Cambios y Mejoras - Sesión del 28/05/2024
+## 2025-05-31
 
 #### Funcionalidad de Publicación y Comunidades en `FinalReviewPage.tsx`
 
@@ -151,7 +227,7 @@
 
 ---
 
-### Cambios y Planificación - Sesión del 27/05/2024
+## 2025-05-30
 
 #### Mejoras y Correcciones en `LineReviewer.tsx`
 
@@ -210,7 +286,7 @@
 
 ---
 
-### Cambios hechos sesion 26/05/25
+## 2025-05-29
 
 #### Mejoras Generales del Editor (page.tsx)
 

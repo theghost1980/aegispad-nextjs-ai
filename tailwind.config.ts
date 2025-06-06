@@ -89,16 +89,8 @@ export default {
             "--tw-prose-links": theme("colors.primary.DEFAULT / 1"),
             "--tw-prose-bold": theme("colors.foreground / 1"),
             "--tw-prose-pre-bg": theme("colors.muted.DEFAULT / 0.5"),
-            // Estilos de tabla para modo oscuro si necesitas anular algo específico
-            // Por ejemplo, si los colores de borde por defecto no contrastan bien
-            // 'thead th': {
-            //   color: theme('colors.gray.300'),
-            // },
-            // 'tbody td': {
-            //   color: theme('colors.gray.400'),
-            // },
-            "--tw-prose-th-borders": theme("colors.border / 0.5"), // Ejemplo de ajuste para bordes de tabla en oscuro
-            "--tw-prose-td-borders": theme("colors.border / 0.3"), // Ejemplo de ajuste para bordes de tabla en oscuro
+            "--tw-prose-th-borders": theme("colors.border / 0.5"),
+            "--tw-prose-td-borders": theme("colors.border / 0.3"),
           },
         },
       }),

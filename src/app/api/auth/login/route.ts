@@ -3,7 +3,7 @@ import {
   JWT_ACCESS_TOKEN_EXPIRES_IN,
   JWT_REFRESH_TOKEN_EXPIRES_IN,
 } from "@/constants/constants";
-import { getHiveAccount } from "@/lib/hive/server-utils"; // Nuestra nueva utilidad
+import { getHiveAccount } from "@/lib/hive/server-utils";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { Signature } from "@hiveio/dhive";
 import crypto from "crypto";
@@ -25,13 +25,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = createSupabaseServiceRoleClient();
 
-    // 1. Verificar el challenge en Supabase
     const { data: challengeData, error: challengeError } = await supabase
       .from("auth_challenges")
       .select("id, challenge_string, expires_at")
       .eq("hive_username", username)
       .eq("challenge_string", challenge)
-      .single(); // Esperamos solo uno o ninguno
+      .single();
 
     if (challengeError || !challengeData) {
       console.error("Challenge verification error:", challengeError);
@@ -42,7 +41,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (new Date(challengeData.expires_at) < new Date()) {
-      // Opcional: Eliminar challenge expirado
       await supabase
         .from("auth_challenges")
         .delete()
@@ -53,7 +51,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Verificar la firma
     let signatureBuffer: Buffer;
     try {
       signatureBuffer = Buffer.from(signature, "hex");
@@ -70,7 +67,7 @@ export async function POST(request: NextRequest) {
     const dhiveSig = Signature.fromBuffer(signatureBuffer);
     const challengeHash = crypto
       .createHash("sha256")
-      .update(challenge) // Usamos el challenge original
+      .update(challenge)
       .digest();
 
     const recoveredPubKey = dhiveSig.recover(challengeHash);
@@ -94,20 +91,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Autenticación exitosa, eliminar challenge usado
     await supabase.from("auth_challenges").delete().eq("id", challengeData.id);
 
-    // 4. Buscar o crear perfil en Supabase
     let { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select(
         "id, hive_username, user_role, theme_preference, login_redirect_preference"
-      ) // Seleccionar nuevas preferencias
+      )
       .eq("hive_username", username)
       .single();
 
     if (profileError && profileError.code !== "PGRST116") {
-      // PGRST116: no rows returned
       throw profileError;
     }
 
@@ -148,7 +142,6 @@ export async function POST(request: NextRequest) {
 
     if (!profile) throw new Error("Failed to get or create user profile.");
 
-    // 5. Generar JWTs
     const tokenPayload: {
       sub: string;
       username: string;
@@ -165,9 +158,26 @@ export async function POST(request: NextRequest) {
       expiresIn: JWT_REFRESH_TOKEN_EXPIRES_IN,
     });
 
-    // 6. Almacenar hash del refresh token (Implementación pendiente si decides hacerlo en DB)
-    // Por ahora, solo devolvemos el refresh token para que el cliente lo guarde en IndexedDB.
-    // Si lo guardas en DB, aquí iría la lógica para hashearlo e insertarlo en `refresh_tokens`.
+    let profileImageUrl: string | undefined = undefined;
+    if (account && account.posting_json_metadata) {
+      try {
+        const metadata = JSON.parse(account.posting_json_metadata);
+        if (metadata.profile && metadata.profile.profile_image) {
+          const imageUrl = metadata.profile.profile_image;
+          if (
+            typeof imageUrl === "string" &&
+            (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"))
+          ) {
+            profileImageUrl = imageUrl;
+          }
+        }
+      } catch (e) {
+        console.warn(
+          `[LoginAPI] Error parsing json_metadata for ${username}:`,
+          e
+        );
+      }
+    }
 
     return NextResponse.json({
       accessToken,
@@ -178,6 +188,7 @@ export async function POST(request: NextRequest) {
         role: profile.user_role,
         theme_preference: profile.theme_preference,
         login_redirect_preference: profile.login_redirect_preference,
+        profile_image_url: profileImageUrl,
       },
     });
   } catch (error: any) {

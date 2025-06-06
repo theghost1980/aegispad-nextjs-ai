@@ -67,7 +67,8 @@
       "selectLanguagePlaceholder": "Selecione um idioma",
       "translateButton": "Traduzir Artigo",
       "translatingArticleMessage": "Traduzindo artigo...",
-      "translatingChunkMessage": "Traduzindo parte {current} de {total}..."
+      "translatingChunkMessage": "Traduzindo parte {current} de {total}...",
+      "translationResultTitle": "Tradução ({language})"
     },
     "translationResultCard": {
       "title": "Resultado da Tradução",
@@ -107,7 +108,9 @@
       "finalCombinedArticleLabel": "Artigo Combinado Final (Somente Leitura)",
       "noFinalCombinedArticleMessage": "Nenhum artigo combinado final foi gerado nesta sessão.",
       "copySummaryButton": "Copiar Resumo Completo e Saída",
-      "preparingSummaryMessage": "Preparando resumo para cópia..."
+      "preparingSummaryMessage": "Preparando resumo para cópia...",
+      "userLabel": "Nome de usuário:",
+      "dateTimeLabel": "Data/Hora:"
     },
     "toastMessages": {
       "errorTitle": "Erro",
@@ -117,6 +120,7 @@
       "articleEmptyError": "O conteúdo do artigo não pode estar vazio.",
       "targetLanguageEmptyError": "O idioma de destino não pode estar vazio.",
       "combineEmptyError": "Os artigos original e traduzido devem existir para combinar.",
+      "combineFailedError": "Falha ao combinar os formatos do artigo. Por favor, tente novamente.",
       "articleCreatedSuccess": "Artigo criado com sucesso!",
       "articleCreatedWithImageSuccess": "Artigo criado com sucesso! Imagem principal gerada.",
       "articleRevisedSuccess": "Artigo revisado com sucesso!",
@@ -213,6 +217,76 @@
       "applyAllVisibleButtonText": "Aplicar Tudo Visível e Fechar",
       "closeButtonText": "Fechar",
       "noLinesToReviewText": "Nenhuma linha para revisar ou todas as linhas foram removidas desta visualização."
+    },
+    "voicePrompts": {
+      "dictateNow": "Modo de ditado ativo. Fale seu texto.",
+      "dictatePrompt": "Dite o comando do artigo.",
+      "dictateHeading": "Dite o título do cabeçalho.",
+      "punctuationInserted": "Pontuação inserida."
+    },
+    "voiceHelpModal": {
+      "title": "Ajuda de Comandos de Voz",
+      "description": "Aqui estão os comandos de voz disponíveis que você pode usar:",
+      "commandListTitle": "Comandos Disponíveis:",
+      "orSeparator": " ou ",
+      "closeButton": "Fechar",
+      "CMD_HEADING_1_desc": "Insere um cabeçalho Markdown nível 1 (#) e aguarda você ditar o título.",
+      "CMD_CREATE_ARTICLE_desc": "Inicia o processo de criação de artigos. Você será solicitado a ditar o tópico.",
+      "CMD_HEADING_2_desc": "Insere um cabeçalho Markdown nível 2 (##) e aguarda você ditar o título.",
+      "CMD_HEADING_3_desc": "Insere um cabeçalho Markdown nível 3 (###) e aguarda você ditar o título.",
+      "CMD_NEW_LINE_desc": "Insere uma nova linha (como pressionar Enter).",
+      "CMD_PERIOD_desc": "Insere um ponto seguido de um espaço.",
+      "CMD_WRITE_DOWN_desc": "Ativa o modo de ditado direto. O que você disser em seguida será digitado no editor.",
+      "CMD_SHOW_VOICE_HELP_desc": "Mostra este diálogo de ajuda com todos os comandos de voz disponíveis.",
+      "punctuation_commands_title": "Comandos de Pontuação",
+      "punctuation_commands_desc": "Você pode dizer as seguintes palavras para inserir pontuação:",
+      "comma_desc": "Insere uma vírgula (,)",
+      "period_desc": "Insere um ponto final (.)",
+      "full_stop_desc": "Insere um ponto final (.)",
+      "question_mark_desc": "Insere um ponto de interrogação (?)",
+      "ellipsis_desc": "Insere reticências (...)",
+      "open_question_mark_desc": "Insere um ponto de interrogação de abertura (¿)",
+      "close_question_mark_desc": "Insere um ponto de interrogação de fechamento (?)",
+      "open_exclamation_mark_desc": "Insere um ponto de exclamação de abertura (¡)",
+      "close_exclamation_mark_desc": "Insere um ponto de exclamação de fechamento (!)",
+      "quote_desc": "Insere aspas (\")",
+      "open_quote_desc": "Insere aspas de abertura (\")",
+      "close_quote_desc": "Insere aspas de fechamento (\")",
+      "apostrophe_desc": "Insere um apóstrofo (')",
+      "dash_desc": "Insere um hífen (-)",
+      "low_dash_desc": "Insere um underline (_)",
+      "colon_desc": "Insere dois pontos (:)",
+      "semicolon_desc": "Insere um ponto e vírgula (;)",
+      "newline_desc": "Insere uma nova linha.",
+      "new_paragraph_desc": "Insere um novo parágrafo.",
+      "asterisk_desc": "Insere um asterisco (*)",
+      "hashtag_desc": "Insere um sinal de jogo da velha (#)",
+      "equals_desc": "Insere um sinal de igual (=)",
+      "plus_desc": "Insere um sinal de adição (+)",
+      "minus_desc": "Insere um sinal de subtração (-)",
+      "tilde_desc": "Insere um til (~)",
+      "bar_desc": "Insere uma barra (/)",
+      "backtick_desc": "Insere um acento grave (`)",
+      "backslash_desc": "Insere uma barra invertida (\\)",
+      "open_parenthesis_desc": "Insere um parêntese de abertura (()",
+      "close_parenthesis_desc": "Insere um parêntese de fechamento ())",
+      "open_bracket_desc": "Insere um colchete de abertura ([)",
+      "close_bracket_desc": "Insere um colchete de fechamento (])",
+      "open_brace_desc": "Insere uma chave de abertura ('{')",
+      "close_brace_desc": "Insere uma chave de fechamento ('}')",
+      "at_symbol_desc": "Insere um símbolo de arroba (@)",
+      "ampersand_desc": "Insere um e comercial (&)",
+      "dollar_sign_desc": "Insere um cifrão ($)",
+      "percent_sign_desc": "Insere um sinal de porcentagem (%)",
+      "caret_desc": "Insere um acento circunflexo (^)",
+      "pipe_desc": "Insere uma barra vertical (|)",
+      "less_than_desc": "Insere um sinal de menor que (<)",
+      "greater_than_desc": "Insere um sinal de maior que (>)"
+    },
+    "voiceHelpButtonTitle": "Ajuda de Comandos de Voz",
+    "voiceDictation": {
+      "startDictationTitle": "Iniciar ditado por voz",
+      "stopDictationTitle": "Parar ditado"
     }
   },
   "ArticleEditor": {
@@ -250,7 +324,9 @@
     "visionFeedbackLink": "Seu feedback é crucial para esta jornada. <link>Compartilhe suas ideias!</link>",
     "visionHiveReminder": "Publique facilmente suas obras-primas diretamente na blockchain da Hive e conecte-se com uma comunidade vibrante.",
     "secondaryCtaButton": "Experimentar o Editor Agora",
-    "featuresIntro": "O AegisPad foi projetado para economizar seu tempo e esforço, unificando tudo o que um blogueiro precisa em um só lugar, turbinado com assistência de IA."
+    "featuresIntro": "O AegisPad foi projetado para economizar seu tempo e esforço, unificando tudo o que um blogueiro precisa em um só lugar, turbinado com assistência de IA.",
+    "featureVoiceTitle": "Comandos de Voz",
+    "featureVoiceDescription": "Controle o editor e dite conteúdo usando sua voz para uma experiência de mãos livres."
   },
   "TestingsPage": {
     "title": "Página de Teste do Hive Keychain",
@@ -324,7 +400,9 @@
     "blogVsCommunityPostAnswer": "Quando você posta em seu blog pessoal, o conteúdo aparece principalmente em seu perfil. Ao postar em uma comunidade, sua postagem é associada a esse espaço temático, aumentando sua visibilidade entre os membros interessados nesse nicho. O AegisPad permite que você escolha facilmente onde publicar, usando a comunidade selecionada como a tag principal (categoria) de sua postagem.",
     "devlogsQuestion": "¿Onde posso ver o histórico de desenvolvimento ou changelog do projeto?",
     "devlogsAnswerWithLink": "Você pode encontrar todos os detalhes sobre atualizações, novos recursos e correções em nossa página de [devlogs_link].",
-    "devlogsLinkText": "Devlogs do Projeto"
+    "devlogsLinkText": "Devlogs do Projeto",
+    "voiceCommandsMultiLanguageQuestion": "Como uso os comandos de voz em diferentes idiomas?",
+    "voiceCommandsMultiLanguageAnswer": "AegisPad suporta comandos de voz em vários idiomas. Certifique-se de que o idioma do aplicativo (selecionado no seletor de idioma) corresponda ao idioma em que você deseja ditar. As palavras-chave específicas para cada comando podem variar de acordo com o idioma. Consulte nosso //TODO <link>guia detalhado de comandos de voz por idioma</link> para mais informações."
   },
   "OnboardingAssistant": {
     "loadingAssistant": "Carregando assistente...",
@@ -616,21 +694,41 @@
     "metaDescription": "Histórico de mudanças e desenvolvimento do projeto AegisPad."
   },
   "AIImageGeneratorPanel": {
-    "cooldownToastTitle": "Por favor, espere um momento",
+    "defaultTriggerButtonLabel": "Imagem IA",
+    "cooldownToastTitle": "Por favor, aguarde um momento",
     "cooldownToastDescription": "Você deve esperar mais {seconds} segundos para gerar outra imagem.",
     "cooldownMessage": "Você pode gerar outra imagem em {seconds} segundos.",
     "dialogTitle": "Gerador de Imagens com IA",
     "selectServicePrompt": "Selecione um serviço para gerar sua imagem:",
-    "geminiServiceButton": "Gemini AI",
+    "geminiServiceButton": "IA do Gemini",
     "changeServiceButton": "← Mudar Serviço",
-    "promptLabel": "Prompt para Gemini:",
-    "promptPlaceholder": "Ex: Um gato astronauta na lua",
+    "promptLabel": "Comando para o Gemini:",
+    "promptPlaceholder": "Ex.: Um gato astronauta na lua",
     "generatingMessage": "Gerando imagem... (isso pode levar um momento)",
     "altGeneratedImage": "Imagem gerada por IA",
     "closeButton": "Fechar",
-    "generateButton": "Gerar"
+    "generateButton": "Gerar",
+    "apiErrorFallback": "Ocorreu um erro inesperado."
   },
   "MarkdownToolbar": {
+    "placeholders": {
+      "bold": "texto em negrito",
+      "italic": "texto em itálico",
+      "strikethrough": "texto tachado",
+      "linkText": "texto do link",
+      "heading": "Título",
+      "listItem": "Item da lista",
+      "quote": "Texto da citação",
+      "code": "código"
+    },
+    "prompts": {
+      "linkUrl": "Insira o URL do link:",
+      "imageUrl": "Insira o URL da imagem:",
+      "imageAltText": "Insira o texto alt da imagem (opcional):"
+    },
+    "defaults": {
+      "aiImageAltText": "imagem"
+    },
     "styles": {
       "title": "Estilos de Texto",
       "buttonLabel": "Estilos",

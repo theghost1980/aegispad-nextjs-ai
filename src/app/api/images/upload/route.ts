@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from "next/server"; // Para App Router
+import { NextRequest, NextResponse } from "next/server";
 
-import { getProfileIdFromAuth } from "@/lib/auth/server.utils"; // Para obtener el ID del perfil del usuario autenticado
-import { createSupabaseServiceRoleClient } from "@/lib/supabase/server"; // Cliente de Supabase con rol de servicio
+import { getProfileIdFromAuth } from "@/lib/auth/server.utils";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { DeterminedStorageInfo } from "@/types/general.types";
 import { getDeterminedStorageService } from "@/utils/imageStorageService";
 import { PrivateKey } from "@hiveio/dhive";
 import { v2 as cloudinary } from "cloudinary";
-import crypto from "crypto"; // Asegurarse de que crypto está importado
+import crypto from "crypto";
 
 const HIVE_UPLOAD_ACCOUNT_NAME =
   process.env.NEXT_PUBLIC_HIVE_UPLOAD_ACCOUNT_NAME;
@@ -49,12 +49,10 @@ async function uploadToActualService(
       }
 
       try {
-        // 1. Crear el buffer concatenado: "ImageSigningChallenge" + imageBuffer
         const challengeString = "ImageSigningChallenge";
         const challengeBuffer = Buffer.from(challengeString);
         const combinedBuffer = Buffer.concat([challengeBuffer, imageBuffer]);
 
-        // 2. Calcular el hash SHA256 del buffer concatenado
         const messageHashToSign = crypto
           .createHash("sha256")
           .update(combinedBuffer)
@@ -186,7 +184,6 @@ export async function POST(request: NextRequest) {
     const sizeBytes = imageFile.size;
 
     let storageServiceInfo = await getDeterminedStorageService();
-    console.log({ storageServiceInfo }); //TODO REM
     let imageUrl: string;
     let serviceMetadata: any;
 

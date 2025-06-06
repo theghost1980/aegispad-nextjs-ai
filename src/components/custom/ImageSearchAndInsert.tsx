@@ -16,7 +16,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // Importar Select
+} from "@/components/ui/select";
 import {
   HIVELENS_API_ENDPOINT_DEV,
   HIVELENS_API_ENDPOINT_PROD,
@@ -29,12 +29,11 @@ import {
   Search,
   XCircle,
 } from "lucide-react";
-import NextImage from "next/image"; // Importar el componente Image de Next.js
+import NextImage from "next/image";
 import React, { FormEvent, useCallback, useState } from "react";
 
 type SearchType = "general" | "user" | "tags";
 
-// Definición del tipo para una imagen individual (ajustada para Hivelens API)
 interface HivelensImageType {
   id: string;
   imageUrl: string;
@@ -47,25 +46,21 @@ interface HivelensImageType {
   tags?: string[];
 }
 
-// Tipo interno que usará el componente
 interface ImageType {
   id: string;
   thumbnailUrl: string;
   fullUrl: string;
   alt?: string;
-  postUrl?: string; // Añadir postUrl
-  // Podrías añadir más campos de HivelensImageType si necesitas mostrarlos
+  postUrl?: string;
 }
 
-// Tipo para los datos de la imagen seleccionada que se pasarán al callback
 interface SelectedImageData {
   imageUrl: string;
   postUrl?: string;
   altText?: string;
 }
-// Props del componente
 interface ImageSearchAndInsertProps {
-  onInsertImages: (images: SelectedImageData[]) => void; // Actualizar tipo de prop
+  onInsertImages: (images: SelectedImageData[]) => void;
   mode?: "inline" | "modal";
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -192,16 +187,15 @@ export function ImageSearchAndInsert({
           images?: HivelensImageType[];
           currentPage?: number;
           totalPages?: number;
-          // totalCount?: number; // Si también lo necesitas
         } = await response.json();
 
         if (data.images && Array.isArray(data.images)) {
           const formattedResults: ImageType[] = data.images.map((img) => ({
             id: img.id,
-            thumbnailUrl: img.imageUrl, // Usamos imageUrl para la miniatura
-            fullUrl: img.imageUrl, // Usamos imageUrl para la imagen completa
-            alt: img.title || `Imagen de ${img.author || "Hivelens"}`, // Usamos el título como alt
-            postUrl: img.postUrl, // Añadir postUrl
+            thumbnailUrl: img.imageUrl,
+            fullUrl: img.imageUrl,
+            alt: img.title || `Imagen de ${img.author || "Hivelens"}`,
+            postUrl: img.postUrl,
           }));
           setSearchResults((prevResults) =>
             pageToFetch === 1
@@ -214,7 +208,6 @@ export function ImageSearchAndInsert({
             setTotalPages(data.totalPages);
             setHasMore(data.currentPage < data.totalPages);
           } else {
-            // Fallback si la API no devuelve info de paginación
             setHasMore(formattedResults.length === currentLimit);
           }
         } else {
@@ -265,14 +258,13 @@ export function ImageSearchAndInsert({
 
   const handleSearchTypeChange = (newSearchType: SearchType) => {
     setSearchType(newSearchType);
-    setCurrentPage(1); // Resetear a la página 1
+    setCurrentPage(1);
     setSearchResults([]);
     setHasMore(false);
-    if (searchTerm.trim()) performSearch(1); // Volver a buscar con el nuevo tipo
+    if (searchTerm.trim()) performSearch(1);
   };
 
   const toggleImageSelection = (image: ImageType) => {
-    // Recibir el objeto ImageType completo
     setSelectedImages((prevSelected) => {
       const isSelected = prevSelected.some(
         (selImg) => selImg.imageUrl === image.fullUrl
@@ -291,7 +283,7 @@ export function ImageSearchAndInsert({
           return [newSelectedImage];
         }
         if (maxSelectable > 0 && prevSelected.length >= maxSelectable) {
-          return prevSelected; // No permitir más si se alcanza el límite
+          return prevSelected;
         }
         return [...prevSelected, newSelectedImage];
       }
@@ -404,16 +396,15 @@ export function ImageSearchAndInsert({
                     ? "border-primary ring-2 ring-primary"
                     : "border-transparent hover:border-muted-foreground/50"
                 }`}
-              onClick={() => toggleImageSelection(image)} // Pasar el objeto imagen completo
-              title={image.alt} // Mostrar el alt text (título de la imagen) en el hover
+              onClick={() => toggleImageSelection(image)}
+              title={image.alt}
             >
               <NextImage
                 src={image.thumbnailUrl}
                 alt={image.alt || `Imagen ${image.id}`}
-                width={150} // Proporciona un ancho base para la miniatura
-                height={150} // Proporciona una altura base para la miniatura
-                className="w-full h-32 object-cover" // Tailwind para controlar el tamaño visual y object-fit
-                // loading="lazy" // Next/Image maneja esto automáticamente
+                width={150}
+                height={150}
+                className="w-full h-32 object-cover"
               />
               {selectedImages.some(
                 (selImg) => selImg.imageUrl === image.fullUrl

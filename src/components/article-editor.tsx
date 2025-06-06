@@ -11,7 +11,7 @@ import {
   Eye,
   PanelLeftClose,
   PanelRightOpen,
-} from "lucide-react"; // Importar nuevos iconos
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type FC, useState } from "react";
 
@@ -42,27 +42,17 @@ const ArticleEditor: FC<ArticleEditorProps> = ({
 
   const handleImagesForMarkdown = (urls: string[]) => {
     console.log("Imágenes de Hivelens a insertar:", urls);
-    // Lógica para agregar a tu editor de Markdown:
-    // urls.forEach(url => editor.insert(`!`));
   };
 
   return (
     <div className="relative">
       {" "}
-      {/* Contenedor relativo para el botón de toggle lateral */}
-      {/* Botón lateral para ocultar/mostrar el panel editor */}
       {allowEditorHide && !readOnly && (
         <Button
           variant="outline"
           size="icon"
           onClick={() => setIsEditorPanelForceHidden(!isEditorPanelForceHidden)}
           className="absolute top-1/2 transform -translate-y-1/2 z-20 p-1 h-12 w-8 rounded-md shadow-lg bg-background hover:bg-muted border-border"
-          // Ajuste de 'left':
-          // Si el editor está oculto, el botón se pega a la izquierda.
-          // Si el editor está visible, el botón se posiciona justo a la izquierda de la línea central del gap entre los dos paneles.
-          // Asumiendo gap-6 (1.5rem) y ancho del botón w-8 (2rem).
-          // Posición del borde derecho del botón = 50% (centro) - 0.75rem (mitad del gap).
-          // Posición del borde izquierdo del botón = 50% - 0.75rem - 2rem (ancho del botón).
           style={{
             left: isEditorPanelForceHidden
               ? "4px"
@@ -82,8 +72,8 @@ const ArticleEditor: FC<ArticleEditorProps> = ({
       <div
         className={`grid gap-6 ${
           allowEditorHide && !readOnly && isEditorPanelForceHidden
-            ? "grid-cols-1" // Solo una columna si el editor está forzado a ocultarse
-            : "grid-cols-1 md:grid-cols-2" // Dos columnas en otros casos
+            ? "grid-cols-1"
+            : "grid-cols-1 md:grid-cols-2"
         }`}
       >
         {!(allowEditorHide && !readOnly && isEditorPanelForceHidden) && (

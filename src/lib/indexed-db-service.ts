@@ -9,7 +9,8 @@ export type IndexedDBKey =
   | "refreshToken"
   | "accessToken"
   | "currentUserRole"
-  | "currentUserPreferences";
+  | "currentUserPreferences"
+  | "currentUserProfileImageUrl";
 
 interface StoredItem {
   key: IndexedDBKey;

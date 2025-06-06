@@ -13,25 +13,25 @@ import {
 import { MarkdownToolBarTranslations } from "@/types/translation-types";
 import {
   Bold,
-  Code, // Icono para subir imagen
+  Code,
   Heading,
   Heading1,
   Heading2,
   Heading3,
   Image as ImageIcon,
-  Italic, // Renombrado para evitar conflicto con el tipo Image
-  LayoutPanelLeft, // Icono para vista lado a lado
-  LayoutPanelTop, // Icono para vista apilada
+  Italic,
+  LayoutPanelLeft,
+  LayoutPanelTop,
   Link,
   List,
   ListOrdered,
-  Minus, // Icono genérico para encabezados
-  Pilcrow, // Icono para estilos de texto (o similar)
-  PlusCircle, // Icono para línea horizontal, también usado para HR
+  Minus,
+  Pilcrow,
+  PlusCircle,
   Quote,
-  Sparkles, // Import Sparkles icon
-  Strikethrough, // Añadido para tachado
-  UploadCloud, // Icono para subir imagen
+  Sparkles,
+  Strikethrough,
+  UploadCloud,
 } from "lucide-react";
 import React from "react";
 
@@ -46,10 +46,10 @@ export type MarkdownFormatType =
   | "ul"
   | "ol"
   | "quote"
-  | "codeblock" // Para bloques de código
+  | "codeblock"
   // | "inlinecode" // Para código en línea (comentado si no se usa)
-  | "image_url" // Nuevo tipo para insertar imagen por URL
-  | "hr"; // Para línea horizontal
+  | "image_url"
+  | "hr";
 
 interface MarkdownToolbarProps {
   /**
@@ -255,29 +255,15 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
             <DropdownMenuItem
               asChild
               onSelect={(e) => {
-                // Prevenir que el dropdown se cierre inmediatamente si el panel AI abre un popover
-                // Esto puede necesitar ajustes dependiendo de cómo AIImageGeneratorPanel maneje su apertura
                 e.preventDefault();
               }}
               disabled={disabled}
             >
               <AIImageGeneratorPanel
                 triggerComponent={
-                  // Este botón interno será estilizado por DropdownMenuItem gracias a `asChild`
-                  // y actuará como el trigger para el Popover de AIImageGeneratorPanel.
-                  // Necesitas asegurarte que AIImageGeneratorPanel pueda tomar un componente simple como trigger
-                  // y que este botón se estilice adecuadamente como un item de dropdown.
-                  // Una forma es que el triggerComponent de AIImageGeneratorPanel sea un botón simple
-                  // y aquí lo envolvemos.
-                  // Si AIImageGeneratorPanel ya es un Popover completo, podrías necesitar
-                  // controlar su estado de apertura desde aquí.
-                  // Por simplicidad, asumimos que AIImageGeneratorPanel puede ser invocado así.
-                  // Si AIImageGeneratorPanel es un Popover, su trigger debe ser un Button o similar.
-                  // El `asChild` en DropdownMenuItem pasará las props de item al Button.
                   <Button
-                    variant="ghost" // Para que se parezca a un item de dropdown
+                    variant="ghost"
                     className="w-full justify-start px-2 py-1.5 text-sm font-normal relative flex cursor-default select-none items-center rounded-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                    // Los estilos anteriores son para imitar un DropdownMenuItem
                   >
                     <Sparkles className="mr-2 h-4 w-4" />
                     {t("insert.generateAiImage")}
@@ -290,12 +276,8 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Botones que quedan fuera de los desplegables (si los hay) */}
-      {/* Separador visual (opcional) */}
       <div className="h-6 w-px bg-border mx-1"></div>
 
-      {/* Botón para cambiar el diseño de la vista previa */}
-      {/* Este botón se mantiene como estaba, ya que es una acción de UI general */}
       <Button
         {...commonButtonProps}
         onClick={onToggleLayout}
@@ -311,27 +293,6 @@ export const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
           <LayoutPanelLeft className="h-4 w-4" />
         )}
       </Button>
-
-      {/* Ejemplo de cómo podrías integrar AIImageGeneratorPanel si no usas `asChild`
-          y necesitas un botón que abra el panel. Este botón estaría fuera de los Dropdowns.
-          Si lo quieres DENTRO de un DropdownMenu, la aproximación con `asChild` es mejor.
-      */}
-      {/* {onAIImageGenerated && (
-        <Button
-          {...commonButtonProps}
-          // Este es un ejemplo si el AIImageGeneratorPanel fuera un botón directo en la barra
-          // y no dentro de un DropdownMenu.
-          // Para ponerlo en un DropdownMenu, la estrategia con `asChild` es la preferida.
-          title="Generate Image with AI (Direct Button Example)"
-          onClick={() => {
-            // Aquí necesitarías una forma de abrir el AIImageGeneratorPanel,
-            // por ejemplo, si AIImageGeneratorPanel tuviera un prop `isOpen` y `onOpenChange`.
-            console.log("Trigger AI Image Panel (direct button example)");
-          }}
-        >
-          <Sparkles className="h-4 w-4" />
-        </Button>
-      )} */}
     </div>
   );
 };

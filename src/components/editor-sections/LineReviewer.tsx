@@ -8,16 +8,16 @@ import {
   Dock,
   MinusCircle,
   PlusCircle,
-  SquareArrowOutUpRight, // Icono para desacoplar
+  SquareArrowOutUpRight,
   XSquare,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { Rnd } from "react-rnd"; // Importar Rnd
+import { Rnd } from "react-rnd";
 
 interface LineItem {
-  id: string; // For stable keys
+  id: string;
   text: string;
-  originalIndex: number; // Index in the initial revisedLines array
+  originalIndex: number;
 }
 
 interface LineReviewerProps {
@@ -64,21 +64,18 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
   const [isFloating, setIsFloating] = useState(false);
 
   useEffect(() => {
-    // Poblar líneas si el componente está visible (modal o flotante) y hay markdown revisado
     if ((isOpen || isFloating) && revisedMarkdown) {
       const revisedLinesArray = revisedMarkdown.split("\n");
       setDisplayLines(
         revisedLinesArray.map((text, index) => ({
-          id: `${index}-${Math.random().toString(36).substring(7)}`, // More unique ID
+          id: `${index}-${Math.random().toString(36).substring(7)}`,
           text,
-          originalIndex: index, // This is the index in the *revisedMarkdown*
+          originalIndex: index,
         }))
       );
     } else if (!isOpen && !isFloating) {
-      // Limpiar líneas solo si el modal está cerrado Y no está en modo flotante
       setDisplayLines([]);
     }
-    // Asegurarse de que el efecto se ejecute si cambia la visibilidad (isOpen o isFloating) o el contenido.
   }, [isOpen, isFloating, revisedMarkdown]);
 
   const handleRemoveLineFromView = (idToRemove: string) => {
@@ -88,8 +85,6 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
   };
 
   const handleApplySingleLine = (line: LineItem) => {
-    // The parent component will handle how to apply this.
-    // 'line.originalIndex' refers to its index in the initial 'revisedMarkdown'.
     onApplyLine(line.originalIndex, line.text);
     // Optional: remove the line from this view after applying, or mark as applied.
     // For now, we'll keep it, allowing multiple applications or further review.
@@ -99,12 +94,12 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
   const handleApplyAllAndClose = () => {
     const newFullMarkdown = displayLines.map((line) => line.text).join("\n");
     onApplyAllVisibleChanges(newFullMarkdown);
-    onOpenChange(false); // Close after applying all
+    onOpenChange(false);
   };
 
   const handleUndock = () => {
     setIsFloating(true);
-    onOpenChange(false); // Cierra la versión modal
+    onOpenChange(false);
   };
 
   const handleDockOrCloseFloating = () => {
@@ -227,21 +222,20 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
   );
 
   if (isFloating) {
-    // Placeholder para el panel flotante. Aquí es donde integrarías <Rnd>
     return (
       <Rnd
         default={{
-          x: window.innerWidth / 2 - 300, // Centrar horizontalmente inicialmente
-          y: window.innerHeight / 2 - 225, // Centrar verticalmente inicialmente
+          x: window.innerWidth / 2 - 300,
+          y: window.innerHeight / 2 - 225,
           width: 600,
           height: 450,
         }}
         minWidth={350}
         minHeight={300}
-        bounds="window" // Restringir el arrastre a la ventana del navegador
+        bounds="window"
         enableResizing
         className="bg-accent border border-border shadow-xl rounded-lg p-6 flex flex-col z-50 overflow-hidden"
-        dragHandleClassName="line-reviewer-drag-handle" // Clase para el área de arrastre (opcional, pero útil)
+        dragHandleClassName="line-reviewer-drag-handle"
       >
         {reviewerContent(true)}
       </Rnd>
@@ -252,7 +246,6 @@ export const LineReviewer: React.FC<LineReviewerProps> = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[70vw] md:max-w-[60vw] lg:max-w-[50vw] w-full flex flex-col max-h-[85vh] gap-4 bg-accent border-border overflow-hidden">
         {" "}
-        {/* El padding p-6 ya está aplicado por DialogContent */}
         {reviewerContent(false)}
       </DialogContent>
     </Dialog>

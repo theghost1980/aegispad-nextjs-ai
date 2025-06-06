@@ -49,3 +49,29 @@ export interface DeterminedStorageInfo {
   name: string;
   url?: string;
 }
+
+export type LanguageCode = "en" | "es" | "fr" | "pt-br";
+
+export type AuthenticatedFetch = (
+  url: string,
+  options?: RequestInit
+) => Promise<Response>;
+
+export interface KeychainLoginResponseData {
+  type: string;
+  username: string;
+  message: string;
+  method: string;
+  rpc?: string;
+  key: string;
+}
+
+export interface KeychainLoginResponse {
+  success: boolean;
+  error: string | null;
+  result: string | null;
+  data: KeychainLoginResponseData | null;
+  message: string;
+  request_id: number;
+  publicKey?: string;
+}

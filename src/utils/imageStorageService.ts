@@ -4,10 +4,8 @@ import {
   VerifiedServiceInfo,
 } from "@/types/general.types";
 
-// --- Cache para la configuración del almacenamiento ---
 let cachedStorageConfig: DeterminedStorageInfo | null = null;
 let lastCheckTime: number = 0;
-// Cachear por 10 minutos. Ajusta según necesidad.
 const CACHE_DURATION_MS = 10 * 60 * 1000;
 
 const SERVICES_TO_CHECK: { name: string; url: string }[] = [
@@ -27,19 +25,18 @@ async function verificarServicio(
 ): Promise<VerifiedServiceInfo | null> {
   console.log(`[ImageStorageService] Verificando ${serviceName} en ${url}...`);
   try {
-    // Usar AbortController para timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout de 5 segundos
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch(`${url}?timestamp=${new Date().getTime()}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
       },
-      signal: controller.signal, // Asociar el AbortController
+      signal: controller.signal,
     });
 
-    clearTimeout(timeoutId); // Limpiar el timeout si la petición se completa a tiempo
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.warn(

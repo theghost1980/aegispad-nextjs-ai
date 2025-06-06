@@ -1,4 +1,3 @@
-// src/components/markdown-preview.tsx
 "use client";
 
 import { ScrollArea } from "@/components/ui/scroll-area";

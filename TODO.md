@@ -1,5 +1,13 @@
 Importante: //TODO
 
+- voice control:
+
+  - crear el post con aegispad o theghost.test sobre como usar el control de voz antes de lanzar el feature.
+  - add info to homepage, as "help for who really need - people with special needs"
+  - agregar configuracion para control de voz en profile + mensaje si estan usando otro browser diferente de chrome.
+
+- integrate https://github.com/aioha-hive/aioha
+
 - investigar para usar apis de:
 
   - https://unsplash.com/
@@ -19,6 +27,8 @@ Importante: //TODO
   - add a new panel like revise/translate only with admins
   - admin dashboards, etc
 
+- add mobile support for aegis, fix styles, etc + test
+
 - Add assistance about:
 
   - tags:
@@ -29,6 +39,14 @@ Importante: //TODO
   - images to add when certain conditions are meet:
     - no imagen when reaching certain point or stage?
     - suggest images tags, categories depending on the content/titles
+  - Real TAG Assistance to the hiver:
+    - connect to be-hivesql and if available:
+      - allow to search:
+        - new tags
+        - recently used by user
+        - tags within a date range to:
+          - know avg votes values by tags
+          - most voted tags and so on....
 
 - Add a module to find & target dualinguals:
   - this module will use hivesql to perfom efefctive searches

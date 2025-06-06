@@ -1,8 +1,7 @@
 "use client";
 
 import CustomButton from "@/components/custom-button";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,11 +11,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useHiveAuth } from "@/hooks/use-hive-auth";
-import { LogIn, LogOut, User } from "lucide-react"; // Iconos
+import { LogIn, LogOut, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export function UserAvatarDropdown() {
-  const { isAuthenticated, hiveUsername, logout, isLoading } = useHiveAuth();
+  const { isAuthenticated, hiveUsername, logout, isLoading, profileImageUrl } =
+    useHiveAuth();
   const t = useTranslations("UserAvatarDropdown");
 
   const handleLogout = async () => {
@@ -38,7 +38,6 @@ export function UserAvatarDropdown() {
 
   if (!hiveUsername) return null;
 
-  // Obtener las iniciales para el AvatarFallback
   const getInitials = (name: string) => {
     if (!name) return "?";
     const words = name.split(" ");
@@ -56,8 +55,12 @@ export function UserAvatarDropdown() {
           className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full"
         >
           <Avatar>
-            {/* Podrías añadir una AvatarImage si tuvieras URLs de avatares */}
-            {/* <AvatarImage src="https://github.com/shadcn.png" alt={`@${hiveUsername}`} /> */}
+            {profileImageUrl && (
+              <AvatarImage
+                src={profileImageUrl}
+                alt={`@${hiveUsername} profile picture`}
+              />
+            )}
             <AvatarFallback>{getInitials(hiveUsername)}</AvatarFallback>
           </Avatar>
         </button>
@@ -74,7 +77,6 @@ export function UserAvatarDropdown() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <ThemeToggle />
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="cursor-pointer">
           <CustomButton href="/profile">

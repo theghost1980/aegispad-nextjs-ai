@@ -20,8 +20,6 @@ import NextImage from "next/image";
 import { useEffect, useState } from "react";
 
 interface AIImageGeneratorPanelProps {
-  // Si el panel se usa dentro de un DropdownMenu, este trigger es el DropdownMenuItem
-  // que a su vez puede tener un botón interno.
   triggerComponent?: React.ReactNode;
   onImageGenerated?: (imageUrl: string, altText?: string) => void;
 }
@@ -29,7 +27,7 @@ interface AIImageGeneratorPanelProps {
 type GenerationService = "gemini_image_generation";
 
 export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
-  const COOLDOWN_DURATION_SECONDS = 60; // 1 minuto
+  const COOLDOWN_DURATION_SECONDS = 60;
 
   const { triggerComponent, onImageGenerated } = props;
   const [isOpen, setIsOpen] = useState(false);
@@ -95,9 +93,6 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
       return;
     }
 
-    // Reiniciar el temporizador de cooldown inmediatamente al intentar generar
-    // para evitar múltiples clics rápidos si la API tarda.
-    // Se actualizará a Date.now() real si la generación es exitosa.
     setLastGenerationTimestamp(Date.now());
 
     setIsLoading(true);
@@ -105,7 +100,6 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
     setError(null);
 
     try {
-      // Actualmente solo tenemos un servicio, pero esto se puede expandir
       if (selectedService === "gemini_image_generation") {
         const response = await authenticatedFetch("/api/ai/generate-image", {
           method: "POST",
@@ -123,15 +117,14 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
           );
         }
         const result = await response.json();
-        console.log("Copy result:", result); //TODO REM
         setGeneratedImageUrl(result.imageUrl);
-        setLastGenerationTimestamp(Date.now()); // Actualiza el timestamp al éxito
+        setLastGenerationTimestamp(Date.now());
         if (onImageGenerated) {
           onImageGenerated(result.imageUrl, prompt);
         }
       }
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+      setError(err.message || t("apiErrorFallback"));
       console.error("Error generating AI image:", err);
     } finally {
       setIsLoading(false);
@@ -145,8 +138,6 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
     setGeneratedImageUrl(null);
     setError(null);
     setIsLoading(false);
-    // No reseteamos lastGenerationTimestamp aquí para mantener el cooldown
-    // setCooldownSecondsRemaining(0); // El useEffect se encargará de esto
   };
 
   return (
@@ -165,18 +156,19 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
           triggerComponent
         ) : (
           <Button variant="outline">
-            <Sparkles className="mr-2 h-4 w-4" /> IA IMG
+            <Sparkles className="mr-2 h-4 w-4" />{" "}
+            {t("defaultTriggerButtonLabel")}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Generador de Imágenes con IA</DialogTitle>
+          <DialogTitle>{t("dialogTitle")}</DialogTitle>
         </DialogHeader>
         {!selectedService ? (
           <div className="py-4 space-y-2">
             <p className="text-sm text-muted-foreground">
-              Selecciona un servicio para generar tu imagen:
+              {t("selectServicePrompt")}
             </p>
             <Button
               variant="outline"
@@ -184,7 +176,7 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
               onClick={() => handleServiceSelect("gemini_image_generation")}
             >
               <ImageIcon className="mr-2 h-4 w-4" />
-              Gemini AI
+              {t("geminiServiceButton")}
             </Button>
           </div>
         ) : (
@@ -196,16 +188,16 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
                 onClick={() => setSelectedService(null)}
                 className="mb-2"
               >
-                &larr; Cambiar Servicio
+                {t("changeServiceButton")}
               </Button>
               <Label htmlFor="ai-prompt" className="text-right">
-                Prompt para Gemini:
+                {t("promptLabel")}
               </Label>
               <Input
                 id="ai-prompt"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Ej: Un gato astronauta en la luna"
+                placeholder={t("promptPlaceholder")}
                 disabled={isLoading}
               />
             </div>
@@ -213,7 +205,7 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
             {isLoading && (
               <div className="flex items-center justify-center text-muted-foreground">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Generando imagen... (esto puede tardar un momento)
+                {t("generatingMessage")}
               </div>
             )}
             {cooldownSecondsRemaining > 0 && !isLoading && (
@@ -228,12 +220,11 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
               <div className="border rounded-md p-2">
                 <NextImage
                   src={generatedImageUrl}
-                  alt="Imagen generada por IA"
+                  alt={t("altGeneratedImage")}
                   width={400}
                   height={400}
                   className="rounded-md w-full h-auto"
                 />
-                {/* Aquí podríamos añadir un botón para "usar esta imagen" */}
               </div>
             )}
           </div>
@@ -241,7 +232,7 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
         <DialogFooter className="sm:justify-between">
           <DialogClose asChild>
             <Button type="button" variant="outline" onClick={resetAndClose}>
-              Cerrar
+              {t("closeButton")}
             </Button>
           </DialogClose>
           {selectedService && (
@@ -257,7 +248,7 @@ export function AIImageGeneratorPanel(props: AIImageGeneratorPanelProps) {
               ) : (
                 <Sparkles className="mr-2 h-4 w-4" />
               )}
-              Generar
+              {t("generateButton")}
             </Button>
           )}
         </DialogFooter>

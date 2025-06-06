@@ -77,7 +77,6 @@ export default function FinalReviewPage() {
 
   const pathname = usePathname();
 
-  // --- Funciones para sugerencias de Tags ---
   const handleFetchPopularTags = async (): Promise<string[] | undefined> => {
     // TODO: Implementar llamada real al API endpoint /api/hive/popular-tags
     console.log("Fetching popular tags from Hive...");
@@ -151,7 +150,6 @@ export default function FinalReviewPage() {
           setInitialTitleFromStorage(storedData.title || "");
           setInitialContentFromStorage(storedData.content || null);
 
-          // Cargar tags sugeridos si existen y el array de tags actual solo tiene el default
           if (storedData.suggestedTags && storedData.suggestedTags.length > 0) {
             setTags((currentTags) => {
               if (
@@ -159,7 +157,6 @@ export default function FinalReviewPage() {
                 currentTags[0].toLowerCase() ===
                   AEGISPAD_DEFAULT_TAG.toLowerCase()
               ) {
-                // Mantener el tag por defecto y añadir los sugeridos, respetando el límite
                 const uniqueNewTags = storedData.suggestedTags!.filter(
                   (tag) =>
                     tag.toLowerCase() !== AEGISPAD_DEFAULT_TAG.toLowerCase()
@@ -173,19 +170,16 @@ export default function FinalReviewPage() {
                   ...uniqueNewTags.slice(0, MAX_HIVE_TAGS - 1),
                 ];
               }
-              return currentTags; // No modificar si ya hay otros tags
+              return currentTags;
             });
           }
         } catch (error) {
           console.error("Error parsing stored article data:", error);
-          // Si hay un error al parsear, podría ser una cadena antigua sin estructura JSON
-          // En este caso, podríamos tratarla como solo contenido o limpiarla.
-          // Por ahora, la trataremos como contenido si es una cadena.
           if (typeof storedDataString === "string") {
             setArticleContent(storedDataString);
             setInitialContentFromStorage(storedDataString);
           }
-          setArticleTitle(""); // Resetear título si el parseo falla
+          setArticleTitle("");
           setInitialTitleFromStorage("");
         }
       }
@@ -210,7 +204,6 @@ export default function FinalReviewPage() {
           }
           const data: SubscribedCommunity[] = await response.json();
           setSubscribedCommunities(data);
-          console.log({ data }); //TODO REM
         } catch (error: any) {
           setCommunitiesError(error.message);
           console.error("Error fetching subscribed communities:", error);
@@ -330,7 +323,7 @@ export default function FinalReviewPage() {
       author: hiveUsername,
       permlink: permlink,
       max_accepted_payout: "1000000.000 HBD",
-      percent_hbd: 10000, // 100% HBD (50/50 HBD/HP) - esto es 10000 para 100%
+      percent_hbd: 10000,
       allow_votes: true,
       allow_curation_rewards: true,
       extensions: [
@@ -359,40 +352,37 @@ export default function FinalReviewPage() {
       });
 
       KeychainHelper.requestPost(
-        hiveUsername, // author
-        articleTitle, // title
-        articleContent, // body
-        parentPermlink, // parent_permlink (categoría principal)
-        "", // parent_author (vacío para post principal)
-        JSON.stringify(jsonMetadata), // json_metadata
-        permlink, // permlink
-        commentOptions, // comment_options
+        hiveUsername,
+        articleTitle,
+        articleContent,
+        parentPermlink,
+        "",
+        JSON.stringify(jsonMetadata),
+        permlink,
+        commentOptions,
         (response) => {
           if (response.success) {
-            // Evento de publicación exitosa en PostHog
             posthog.capture("publish_success", {
               username: hiveUsername,
               permlink: permlink,
               parent_permlink: parentPermlink,
-              transaction_id: response.result?.id, // Asumiendo que Keychain devuelve el ID de la tx
+              transaction_id: response.result?.id,
             });
 
             toast({
               title: t("publishSuccessTitle"),
               description: t("publishSuccessDescription"),
             });
-            // Opcional: limpiar el artículo guardado y redirigir
             localStorage.removeItem(FINAL_REVIEW_ARTICLE_STORAGE_KEY);
-            router.push(`/profile`); // Redirigir al perfil general o a una página de posts
+            router.push(`/profile`);
           } else {
-            // Evento de publicación fallida en PostHog
             posthog.capture("publish_failed", {
               username: hiveUsername,
               permlink: permlink,
               error_message: response.message || "Keychain operation failed",
-              error_details: response.error, // Si Keychain proporciona más detalles del error
+              error_details: response.error,
             });
-            throw new Error(response.message || "Keychain operation failed"); // Esto será capturado por el catch
+            throw new Error(response.message || "Keychain operation failed");
           }
         }
       );

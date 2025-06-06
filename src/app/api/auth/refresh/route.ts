@@ -4,11 +4,11 @@ import {
   JWT_REFRESH_TOKEN_EXPIRES_IN,
 } from "@/constants/constants";
 import jwt from "jsonwebtoken";
-import ms from "ms"; // Importar la librería ms
+import ms from "ms";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RefreshTokenPayload {
-  sub: string; // profile.id
+  sub: string;
   username: string;
   iat: number;
   exp: number;
@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Verificar el refresh token
     let decodedPayload: string | jwt.JwtPayload;
     try {
       decodedPayload = jwt.verify(refreshToken, JWT_SECRET!);
@@ -38,7 +37,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar que el payload decodificado sea un objeto y tenga las propiedades esperadas
     if (
       typeof decodedPayload === "string" ||
       !decodedPayload ||
@@ -53,7 +51,6 @@ export async function POST(request: NextRequest) {
 
     const payload = decodedPayload as RefreshTokenPayload;
 
-    // 2. Generar un nuevo accessToken
     const newAccessTokenPayload: {
       sub: string;
       username: string;
@@ -66,7 +63,6 @@ export async function POST(request: NextRequest) {
       newAccessTokenPayload.role = payload.role;
     }
 
-    // Convertir el string de expiración del access token a segundos
     const accessTokenExpiresInMs = ms(JWT_ACCESS_TOKEN_EXPIRES_IN);
     if (typeof accessTokenExpiresInMs !== "number") {
       console.error(
@@ -85,7 +81,6 @@ export async function POST(request: NextRequest) {
       accessTokenOptions
     );
 
-    // 3. Generar un nuevo refreshToken (rotación)
     const newRefreshTokenPayload: {
       sub: string;
       username: string;
@@ -98,7 +93,6 @@ export async function POST(request: NextRequest) {
       newRefreshTokenPayload.role = payload.role;
     }
 
-    // Convertir el string de expiración del refresh token a segundos
     const refreshTokenExpiresInMs = ms(JWT_REFRESH_TOKEN_EXPIRES_IN as any);
     if (typeof refreshTokenExpiresInMs !== "number") {
       console.error(

@@ -21,7 +21,7 @@ import {
 } from "@/lib/indexed-db-service";
 import { UserPreferences } from "@/types/general.types";
 import { Shield } from "lucide-react";
-import { useTranslations } from "next-intl"; // Correct import
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -67,7 +67,6 @@ export default function ProfilePage() {
   const [totalTextTokensUsed, setTotalTextTokensUsed] = useState<number>(0);
   const [totalImageUnitsUsed, setTotalImageUnitsUsed] = useState<number>(0);
 
-  // Ref to track if initial preferences have been applied to local state
   const initialPrefsApplied = useRef(false);
 
   useEffect(() => {
@@ -76,7 +75,6 @@ export default function ProfilePage() {
     }
   }, [isAuthLoading, isAuthenticated, router]);
 
-  // Effect to initialize local UI state from useHiveAuth.preferences and apply initial theme
   useEffect(() => {
     if (preferences && !initialPrefsApplied.current) {
       const initialTheme = preferences.theme_preference || "system";
@@ -88,13 +86,10 @@ export default function ProfilePage() {
       if (initialTheme && initialTheme !== currentNextTheme) {
         setTheme(initialTheme);
       }
-      initialPrefsApplied.current = true; // Mark as initialized
+      initialPrefsApplied.current = true;
     }
-    // This effect should run when `preferences` from useHiveAuth becomes available,
-    // and also react to `currentNextTheme` changes if the preference is "system".
   }, [preferences, setTheme, currentNextTheme]);
 
-  // Efecto para cargar el historial de tokens
   useEffect(() => {
     if (isAuthenticated && authenticatedFetch) {
       const fetchHistory = async () => {
@@ -132,7 +127,7 @@ export default function ProfilePage() {
       };
       fetchHistory();
     }
-  }, [isAuthenticated, authenticatedFetch, t]); // Dependencias para fetchHistory
+  }, [isAuthenticated, authenticatedFetch, t]);
 
   const handleSavePreferences = async () => {
     if (!authenticatedFetch || !preferences) return;
@@ -164,17 +159,14 @@ export default function ProfilePage() {
       const updatedPrefsData = await response.json();
       const savedPreferences = updatedPrefsData.preferences as UserPreferences;
 
-      // 1. Aplicar el tema visualmente
       if (savedPreferences?.theme_preference) {
         setTheme(savedPreferences.theme_preference);
-        // 2. Actualizar el estado local para que la UI del RadioGroup refleje el cambio
         setSelectedTheme(savedPreferences.theme_preference);
       }
       if (savedPreferences?.login_redirect_preference) {
         setSelectedLoginRedirect(savedPreferences.login_redirect_preference);
       }
 
-      // 3. Actualizar IndexedDB para que useHiveAuth lo recoja en la próxima carga/actualización
       const currentStoredPrefs =
         (await getIndexedDbItem<UserPreferences>("currentUserPreferences")) ||
         {};
@@ -186,7 +178,7 @@ export default function ProfilePage() {
       toast({ title: t("preferences.saveSuccess") });
     } catch (error: any) {
       toast({
-        title: t("errors.error"), // Asegúrate que esta clave exista en ProfilePage o usa una global
+        title: t("errors.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -240,7 +232,6 @@ export default function ProfilePage() {
       <div>
         <h2 className="text-xl font-semibold mb-4">{t("preferences.title")}</h2>
         <div className="space-y-6 mb-8 p-4 border rounded-lg">
-          {/* Theme Preference */}
           <div>
             <Label className="text-md font-medium">
               {t("preferences.theme.label")}
