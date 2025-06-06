@@ -3,10 +3,9 @@ import { useCallback, useState } from "react";
 
 interface UseArticleRevisionProps {
   authenticatedFetch: AuthenticatedFetch;
-  articleMarkdown: string; // El contenido actual del editor
-  setArticleMarkdown: (markdown: string) => void; // Para actualizar el editor principal
-  setCurrentOperationMessage: (message: string | null) => void; // Para mensajes de operación globales
-  // Textos traducidos necesarios para los mensajes y toasts del hook
+  articleMarkdown: string;
+  setArticleMarkdown: (markdown: string) => void;
+  setCurrentOperationMessage: (message: string | null) => void;
   revisingArticleMessage: string;
   reviseFailedError: string;
   articleRevisedSuccess: string;
@@ -40,9 +39,6 @@ export const useArticleRevision = ({
 
   const handleReviseArticle = useCallback(async () => {
     if (!articleMarkdown.trim()) {
-      // La validación de artículo vacío se puede hacer en el componente padre
-      // antes de llamar a este hook, o aquí si el hook es el único punto de entrada.
-      // Por ahora, la mantenemos aquí para encapsular la lógica.
       setRevisionError(new Error(articleEmptyError));
       return { success: false, error: new Error(articleEmptyError) };
     }
@@ -50,10 +46,10 @@ export const useArticleRevision = ({
     setIsRevising(true);
     setRevisionError(null);
     setCurrentOperationMessage(revisingArticleMessage);
-    setAiGeneratedTags([]); // Limpiar tags anteriores
+    setAiGeneratedTags([]);
 
     const originalContentBeforeAI = articleMarkdown;
-    setArticleBeforeRevision(originalContentBeforeAI); // Guardar antes de la revisión
+    setArticleBeforeRevision(originalContentBeforeAI);
 
     try {
       const response = await authenticatedFetch(
@@ -81,7 +77,7 @@ export const useArticleRevision = ({
       }
 
       const result = await response.json();
-      setArticleMarkdown(result.revisedText); // Actualizar el editor principal
+      setArticleMarkdown(result.revisedText);
       if (result.suggestedTags && result.suggestedTags.length > 0) {
         setAiGeneratedTags(result.suggestedTags);
       }
@@ -93,7 +89,7 @@ export const useArticleRevision = ({
     } catch (e: any) {
       console.error("Error revising article:", e);
       setRevisionError(e);
-      setArticleBeforeRevision(""); // Limpiar si falla
+      setArticleBeforeRevision("");
       return { success: false, error: e };
     } finally {
       setIsRevising(false);
@@ -112,17 +108,11 @@ export const useArticleRevision = ({
   const handleUndoRevision = useCallback(() => {
     if (articleBeforeRevision) {
       setArticleMarkdown(articleBeforeRevision);
-      setArticleBeforeRevision(""); // Limpiar el estado de "antes de la revisión"
+      setArticleBeforeRevision("");
       return { success: true, message: revisionUndoneSuccess };
     }
-    return { success: false, message: "No revision to undo" }; // O un mensaje de error traducido
+    return { success: false, message: "No revision to undo" };
   }, [articleBeforeRevision, setArticleMarkdown, revisionUndoneSuccess]);
-
-  // La lógica para iniciar la revisión selectiva (abrir el LineReviewer)
-  // puede permanecer en page.tsx o ser parte de este hook si se desea.
-  // Si se mueve aquí, necesitaría manejar el estado isLineReviewerOpen y revisedContentForReview.
-  // Por ahora, solo movemos la lógica de la llamada API de revisión completa.
-  // handleInitiateSelectiveRevisionForPanel necesitará ser adaptada para usar este hook.
 
   return {
     articleBeforeRevision,

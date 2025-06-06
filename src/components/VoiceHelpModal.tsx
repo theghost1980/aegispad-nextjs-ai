@@ -56,7 +56,6 @@ const VoiceHelpModal: React.FC<VoiceHelpModalProps> = ({
           <ul className="space-y-3">
             {VOICE_COMMANDS.map((cmd) =>
               (() => {
-                // IIFE para manejar la lógica de keywords
                 const langKeywords =
                   cmd.keywords[locale] || // ej. "es-ES"
                   cmd.keywords[baseLanguage] || // ej. "es"

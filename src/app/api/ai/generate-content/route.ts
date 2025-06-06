@@ -2,7 +2,7 @@ import { MASTER_GEMINI_API_KEY } from "@/config/server-config";
 import { GEMINI_AI_MODEL_NAME } from "@/constants/constants";
 import { getProfileIdFromAuth } from "@/lib/auth/server.utils";
 import { recordApiUsage } from "@/lib/supabase/api-usage";
-import { createSupabaseServiceRoleClient } from "@/lib/supabase/server"; // Importar el cliente de Supabase
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -76,27 +76,23 @@ export async function POST(request: NextRequest) {
     const response = result.response;
     const text = response.text();
 
-    // Extract token usage from the response metadata
     const usageMetadata = response.usageMetadata;
     const promptTokens = usageMetadata?.promptTokenCount;
     const completionTokens = usageMetadata?.candidatesTokenCount;
     const totalTokens = usageMetadata?.totalTokenCount;
 
-    // Record the usage in the database
     if (profileId) {
-      // Ensure profileId is available
       await recordApiUsage({
         profileId: profileId,
-        operationType: "ai_generate_content", // Specific identifier for this operation
+        operationType: "ai_generate_content",
         modelUsed: GEMINI_AI_MODEL_NAME,
-        textTokensUsed: totalTokens, // Using totalTokens for text_tokens_used
-        detailsJson: usageMetadata, // Store the full metadata for details
+        textTokensUsed: totalTokens,
+        detailsJson: usageMetadata,
       });
     }
 
     return NextResponse.json({
       generatedText: text,
-      // Optionally include token usage in the response to the client
       tokenUsage: usageMetadata,
     });
   } catch (e: any) {

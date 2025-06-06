@@ -39,7 +39,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     prompt = body.prompt;
-    // La variable uploadToCloudinary ya no se usa, se elimina la lógica asociada.
   } catch (e) {
     return NextResponse.json({ message: "Invalid JSON body" }, { status: 400 });
   }
@@ -103,7 +102,6 @@ export async function POST(request: NextRequest) {
         apiResponseObject
       );
       return NextResponse.json(
-        // Ensure this is returned before trying to use imageBase64
         {
           message:
             "Failed to retrieve a valid image from the generation service.",
@@ -112,7 +110,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Record API usage now that we have a valid imageBase64
     const usageMetadata = apiResponseObject.usageMetadata;
     try {
       if (profileId) {
@@ -134,9 +131,8 @@ export async function POST(request: NextRequest) {
       console.error("Failed to record image generation usage:", usageError);
     }
 
-    // Convertir base64 a Buffer
     const buffer = Buffer.from(imageBase64, "base64");
-    let extension = ".png"; // Default extension
+    let extension = ".png";
     if (mimeType === "image/jpeg") {
       extension = ".jpg";
     } else if (mimeType === "image/gif") {
@@ -148,12 +144,10 @@ export async function POST(request: NextRequest) {
       .randomBytes(16)
       .toString("hex")}${extension}`;
 
-    // Determinar el servicio de almacenamiento
     let storageServiceInfo = await getDeterminedStorageService();
     let uploadedImageUrl: string;
     let uploadedServiceMetadata: any;
 
-    // Función adaptada para subir el buffer al servicio determinado
     async function uploadBufferToStorageService(
       imgBuffer: Buffer,
       fileName: string,
@@ -273,7 +267,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Guardar en la base de datos
     const supabase = createSupabaseServiceRoleClient();
     const { data: dbEntry, error: dbError } = await supabase
       .from("user_images")
@@ -291,8 +284,6 @@ export async function POST(request: NextRequest) {
 
     if (dbError) {
       console.error("[GenImgAPI] Error al guardar en BD:", dbError);
-      // Considerar: si la subida al servicio fue exitosa pero falla la BD,
-      // la imagen podría quedar huérfana.
       return NextResponse.json(
         {
           error: "Imagen subida, pero falló el registro en la base de datos.",
@@ -307,12 +298,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: `Imagen generada y subida a ${storageServiceInfo.name}.`,
       imageUrl: uploadedImageUrl,
-      uploadStatus: storageServiceInfo.name, // Indica dónde se subió
+      uploadStatus: storageServiceInfo.name,
       usageMetadata: usageMetadata,
       dbData: dbEntry,
     });
   } catch (e: any) {
-    // Este catch ahora es el principal para toda la lógica después de obtener el prompt.
     console.error(
       "Error en el proceso de generación o subida de imagen AI:",
       e

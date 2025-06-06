@@ -1,16 +1,14 @@
 "use client";
 
 import AegisPadLogoIcon from "@/components/aegis-pad-logo-icon";
-import CustomButton from "@/components/custom-button"; // Importar CustomButton
+import CustomButton from "@/components/custom-button";
 import LanguageSwitcher from "@/components/language-switcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserAvatarDropdown } from "@/components/user-avatar-dropdown";
-import { Link, usePathname } from "@/i18n/routing"; // Usar Link y usePathname de tu configuración de routing
-import { cn } from "@/lib/utils"; // Para combinar clases opcionales
+import { Link, usePathname } from "@/i18n/routing";
+import { cn } from "@/lib/utils";
 import { MessageSquarePlus } from "lucide-react";
-import { useTranslations } from "next-intl"; // useTranslations también es de next-intl (sin /client)
-// import { Menu as MenuIcon } from "lucide-react"; // Para el menú móvil
-// import { Button } from "@/components/ui/button"; // Para el menú móvil
-// import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"; // Para el menú móvil
+import { useTranslations } from "next-intl";
 
 interface NavItem {
   labelKey: keyof IntlMessages["Header"];
@@ -79,11 +77,11 @@ export default function Header() {
             <MessageSquarePlus className="h-5 w-5" />
           </CustomButton>
         </nav>
-
+        <ThemeToggle />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <LanguageSwitcher />
         </div>
-        <div className="ml-auto flex items-center space-x-4">
+        <div className="ml-auto flex items-center space-x-4 pr-2">
           <UserAvatarDropdown />
         </div>
       </div>

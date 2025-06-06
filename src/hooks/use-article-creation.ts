@@ -3,14 +3,10 @@ import { useCallback, useState } from "react";
 
 interface CreateArticleParams {
   prompt: string;
-  // Aquí podrías añadir más parámetros si la API los necesitara,
-  // como sourceLanguage, generateImage, etc.
 }
 
 export interface ArticleCreationResult {
   generatedText: string;
-  // Aquí podrías añadir más campos si la API los devolviera,
-  // como detectedLanguage, tokensUsed, etc.
 }
 
 interface UseArticleCreationProps {

@@ -282,7 +282,11 @@
       "less_than_desc": "Insère un signe inférieur à (<).",
       "greater_than_desc": "Insère un signe supérieur à (>)."
     },
-    "voiceHelpButtonTitle": "Aide Commandes Vocales"
+    "voiceHelpButtonTitle": "Aide Commandes Vocales",
+    "voiceDictation": {
+      "startDictationTitle": "Démarrer la dictée vocale",
+      "stopDictationTitle": "Arrêter la dictée"
+    }
   },
   "ArticleEditor": {
     "markdownEditorTitle": "Éditeur Markdown",
@@ -319,7 +323,9 @@
     "visionFeedbackLink": "Vos retours sont cruciaux pour cette aventure. <link>Partagez vos réflexions !</link>",
     "visionHiveReminder": "Publiez facilement vos chefs-d'œuvre directement sur la blockchain Hive et connectez-vous avec une communauté dynamique.",
     "secondaryCtaButton": "Essayer l'Éditeur Maintenant",
-    "featuresIntro": "AegisPad est conçu pour vous faire gagner du temps et des efforts en unifiant tout ce dont un blogueur a besoin en un seul endroit, suralimenté par une assistance IA."
+    "featuresIntro": "AegisPad est conçu pour vous faire gagner du temps et des efforts en unifiant tout ce dont un blogueur a besoin en un seul endroit, suralimenté par une assistance IA.",
+    "featureVoiceTitle": "Commandes Vocales",
+    "featureVoiceDescription": "Contrôlez l'éditeur et dictez du contenu en utilisant votre voix pour une expérience mains libres."
   },
   "TestingsPage": {
     "title": "Page de Test du Trousseau Hive",

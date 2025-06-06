@@ -1,3 +1,37 @@
+## 2025-06-06
+
+### ✨ Mejoras en la Experiencia de Usuario y Funcionalidad
+
+- **Avatar de Usuario desde Perfil de Hive:**
+  - **API de Login (`login/route.ts`):** Se actualizó para extraer la URL de la imagen de perfil (`profile_image`) del `posting_json_metadata` de la cuenta de Hive del usuario. Si se encuentra una URL válida, se incluye como `profile_image_url` en la respuesta de la API.
+  - **Hook `useHiveAuth.ts`:**
+    - Se añadió un nuevo estado `profileImageUrl` para almacenar la URL de la imagen de perfil del usuario.
+    - Se implementó la carga y guardado de `profileImageUrl` en IndexedDB (bajo la clave `currentUserProfileImageUrl`) para persistencia entre sesiones.
+    - Se asegura la limpieza de `profileImageUrl` (estado e IndexedDB) al cerrar sesión.
+    - El hook ahora devuelve `profileImageUrl` para su uso en componentes.
+  - **Componente `UserAvatarDropdown.tsx`:**
+    - Ahora utiliza `profileImageUrl` del hook `useHiveAuth`.
+    - Si `profileImageUrl` está disponible, se renderiza un componente `<AvatarImage>` con la imagen del perfil del usuario.
+    - El `<AvatarFallback>` (con las iniciales del usuario) se mantiene como respaldo si no hay imagen o esta no carga.
+  - **Componente `Avatar.tsx` (UI):** Se añadió la clase `object-cover` al componente `AvatarImage` para asegurar que la imagen de perfil se muestre con una relación de aspecto 1:1, cubriendo el área designada sin distorsionarse.
+- **Ajustes de Interfaz de Usuario (UI):**
+  - **Header (`header.tsx`):** Se añadió un pequeño padding (`pr-2`) al contenedor del `UserAvatarDropdown` para evitar que quede pegado al borde derecho de la cabecera.
+- **Control de Voz (`use-voice-actions-handler.ts` y `editor/page.tsx`):**
+  - Se pasó el `userRole` al hook `useVoiceActionsHandler`.
+  - Se modificó la lógica del comando de voz `CMD_CREATE_ARTICLE`: si el usuario no tiene el rol "admin", en lugar de iniciar el panel de creación de artículo, se insertará un emoticono `:)` en el área de texto del editor.
+
+### 🧹 Limpieza y Refactorización
+
+- **Eliminación de Comentarios:**
+  - Se eliminaron comentarios innecesarios del archivo `HomePage` (`app/[locale]/page.tsx`).
+  - Se discutieron y proporcionaron expresiones regulares para facilitar la búsqueda y eliminación de comentarios en todo el proyecto, con la excepción de los comentarios `//TODO`.
+
+### 🛠️ Mejoras
+
+- **Consistencia en la Obtención de Metadatos:** Se especificó el uso de `posting_json_metadata` para la imagen de perfil, que es comúnmente donde los usuarios de Hive almacenan esta información a través de interfaces como PeakD o Ecency.
+
+---
+
 ## 2025-06-05
 
 ### 🌍 Internacionalización y Mejoras en Comandos de Voz

@@ -96,14 +96,12 @@ export default function FeedbackPage() {
         title: t("feedbackSubmittedTitle"),
         description: t("feedbackSubmittedDescription"),
       });
-      // Reset form or redirect
       setFormData({
         overallRating: "",
         mostUsefulFeature: "",
         newFeatureSuggestion: "",
         generalComments: "",
       });
-      // Optionally redirect: router.push('/');
     } catch (error: any) {
       console.error("Feedback submission error:", error);
       toast({

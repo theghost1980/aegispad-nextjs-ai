@@ -7,26 +7,22 @@ import { ActiveEditorAction } from "@/types/general.types";
 import { RefObject, useEffect, useState } from "react";
 import { useVoiceControl } from "./use-voice-control";
 
-// Tipos para el estado interno del manejador de voz
 type VoiceActionState =
   | "idle"
   | "awaiting_prompt"
   | "awaiting_heading_title"
   | "awaiting_direct_dictation";
 
-// Props que el hook necesitará desde el componente que lo usa (page.tsx)
 export interface UseVoiceActionsHandlerProps {
   articleMarkdown: string;
   setArticleMarkdown: (markdown: string | ((prev: string) => string)) => void;
   mainTextareaRef: RefObject<HTMLTextAreaElement>;
   handleStartArticleFromPanel: (promptText: string) => void;
-  setActiveAction: (action: ActiveEditorAction) => void; // Add setActiveAction here
+  setActiveAction: (action: ActiveEditorAction) => void;
   initialSpeechLanguage: string;
-  onToggleHelp: () => void; // Callback to toggle help display
-  locale: string; // Pass the locale directly from useLocale
-  // Podríamos necesitar 't' para mensajes si el hook genera alguno,
-  // pero idealmente los toasts los manejan las funciones de acción.
-  // t: (key: string) => string;
+  onToggleHelp: () => void;
+  locale: string;
+  userRole: string | null;
 }
 
 export function useVoiceActionsHandler({
@@ -34,10 +30,11 @@ export function useVoiceActionsHandler({
   setArticleMarkdown,
   mainTextareaRef,
   handleStartArticleFromPanel,
-  setActiveAction, // Destructure setActiveAction
+  setActiveAction,
   initialSpeechLanguage,
   onToggleHelp,
-  locale, // Destructure locale
+  locale,
+  userRole,
 }: UseVoiceActionsHandlerProps) {
   const [voiceActionState, setVoiceActionState] =
     useState<VoiceActionState>("idle");
@@ -45,7 +42,6 @@ export function useVoiceActionsHandler({
     null
   );
 
-  // Helper function to insert text into the textarea
   const insertTextAtCursorOrSelection = (
     text: string,
     addSpaceAfter: boolean = true
@@ -72,7 +68,6 @@ export function useVoiceActionsHandler({
       textarea.selectionEnd = newCursorPos;
     }, 0);
   };
-  // Lógica para manejar comandos y transcripciones irá aquí
 
   useEffect(() => {
     console.log(
@@ -86,26 +81,25 @@ export function useVoiceActionsHandler({
     error: voiceError,
     toggleListening,
     setLanguage: setVoiceLanguage,
-    currentLanguage: currentVoiceLanguage, // Get current language from useVoiceControl
-    interimTranscript, // Obtener de useVoiceControl
-    finalTranscript, // Obtener de useVoiceControl
+    currentLanguage: currentVoiceLanguage,
+    interimTranscript,
+    finalTranscript,
   } = useVoiceControl({
     onTranscript: (text, isFinal) => {
       // TODO: Implementar lógica basada en voiceActionState
       if (isFinal) {
         const normalizedFinalTranscript = text.toLowerCase().trim();
 
-        // 1. Comprobar si es un signo de puntuación
         const baseLang = currentVoiceLanguage.split("-")[0];
         const punctuationRules: PunctuationRule[] =
           VOICE_PUNCTUATION_MAP[
             currentVoiceLanguage as keyof typeof VOICE_PUNCTUATION_MAP
-          ] || // Intenta con el locale completo ej: "es-ES"
+          ] ||
           VOICE_PUNCTUATION_MAP[
             baseLang as keyof typeof VOICE_PUNCTUATION_MAP
-          ] || // Fallback al idioma base ej: "es"
-          VOICE_PUNCTUATION_MAP["en-US"] || // Fallback a "en-US"
-          VOICE_PUNCTUATION_MAP["en"] || // Fallback a "en"
+          ] ||
+          VOICE_PUNCTUATION_MAP["en-US"] ||
+          VOICE_PUNCTUATION_MAP["en"] ||
           [];
 
         let punctuationHandled = false;
@@ -118,13 +112,13 @@ export function useVoiceActionsHandler({
             const addSpace = !noSpaceAfterChars.includes(rule.char_sign);
             insertTextAtCursorOrSelection(rule.char_sign, addSpace);
             setUserInstructionKey("voicePrompts.punctuationInserted");
-            setVoiceActionState("idle"); // Volver a idle después de la puntuación
+            setVoiceActionState("idle");
             punctuationHandled = true;
             break;
           }
         }
 
-        if (punctuationHandled) return; // Si se manejó puntuación, no hacer más.
+        if (punctuationHandled) return;
 
         if (voiceActionState === "awaiting_prompt") {
           console.log("Prompt dictado (final):", text);
@@ -136,25 +130,25 @@ export function useVoiceActionsHandler({
           setVoiceActionState("idle");
         } else if (voiceActionState === "awaiting_direct_dictation") {
           console.log("Direct dictation (final):", text);
-          insertTextAtCursorOrSelection(text, true); // Añadir espacio después del texto dictado
-          setVoiceActionState("idle"); // Volver a idle después de la inserción
+          insertTextAtCursorOrSelection(text, true);
+          setVoiceActionState("idle");
         } else {
           console.log("Idle dictation (final):", text);
-          insertTextAtCursorOrSelection(text, true); // Añadir espacio después del texto dictado
+          insertTextAtCursorOrSelection(text, true);
         }
       }
     },
     initialLanguage: initialSpeechLanguage,
-    commands: VOICE_COMMANDS, // Usaremos los comandos definidos
+    commands: VOICE_COMMANDS,
     onCommand: (commandAction) => {
       console.log(
         "[useVoiceActionsHandler] Received commandAction:",
         commandAction
-      ); // <-- LOG AQUÍ
+      );
       // TODO: Implementar lógica de manejo de comandos
       const textarea = mainTextareaRef.current;
       let textToInsertAtCursor: string | null = null;
-      let newVoiceState: VoiceActionState = "idle"; // Por defecto vuelve a idle
+      let newVoiceState: VoiceActionState = "idle";
       let executeImmediately = false;
 
       let finalMarkdown = articleMarkdown;
@@ -164,10 +158,14 @@ export function useVoiceActionsHandler({
       let needsTextareaFocus = false;
 
       switch (commandAction) {
-        case "CMD_CREATE_ARTICLE": // Asumiendo que "create" mapea a esto
-          newVoiceState = "awaiting_prompt";
-          setActiveAction("create"); // Set activeAction immediately
-          // Podríamos añadir un toast o mensaje "Please dictate your prompt"
+        case "CMD_CREATE_ARTICLE":
+          if (userRole === "admin" && userRole !== null) {
+            newVoiceState = "awaiting_prompt";
+            setActiveAction("create");
+          } else {
+            textToInsertAtCursor = ":) ";
+            newVoiceState = "idle";
+          }
           break;
         case "CMD_HEADING_1":
           textToInsertAtCursor = "# ";
@@ -185,24 +183,21 @@ export function useVoiceActionsHandler({
           textToInsertAtCursor = "\n";
           break;
         case "CMD_PERIOD":
-          // Eliminar espacio al final si existe, luego añadir punto y espacio
           finalMarkdown = articleMarkdown.trimEnd() + ". ";
           finalSelectionStart = finalMarkdown.length;
           finalSelectionEnd = finalMarkdown.length;
-          executeImmediately = true; // Actualiza el markdown inmediatamente
+          executeImmediately = true;
           break;
-        case "CMD_WRITE_DOWN": // Nuevo comando para dictado directo
+        case "CMD_WRITE_DOWN":
           newVoiceState = "awaiting_direct_dictation";
           console.log(
             "[useVoiceActionsHandler] Modo de dictado directo activado. Di tu texto."
           );
-          // No se inserta texto aquí, solo se cambia el estado para el próximo transcript.
           break;
         case "CMD_SHOW_VOICE_HELP":
-          onToggleHelp(); // Llama a la función para mostrar/ocultar la ayuda
-          newVoiceState = "idle"; // Vuelve a idle, la página manejará el modal
+          onToggleHelp();
+          newVoiceState = "idle";
           break;
-        // Añadir más comandos aquí
       }
 
       setVoiceActionState(newVoiceState);
@@ -239,8 +234,6 @@ export function useVoiceActionsHandler({
   });
 
   useEffect(() => {
-    // Si se deja de escuchar por cualquier motivo (ej. toggle, error, etc.),
-    // forzar el estado a idle para limpiar instrucciones.
     if (!isListening) {
       setVoiceActionState("idle");
     }

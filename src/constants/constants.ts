@@ -174,7 +174,6 @@ export const WAVESPEED_API_URL =
 export const WAVESPEED_RESULT_API_URL_BASE =
   "https://api.wavespeed.ai/api/v3/predictions/";
 export const MAX_WORDS_PER_CHUNK = 330;
-//voice control feature
 export const CMD_CREATE_ARTICLE = "CMD_CREATE_ARTICLE";
 export const CMD_HEADING_1 = "CMD_HEADING_1";
 export const CMD_HEADING_2 = "CMD_HEADING_2";
@@ -185,7 +184,7 @@ export const CMD_WRITE_DOWN = "CMD_WRITE_DOWN";
 export const CMD_SHOW_VOICE_HELP = "CMD_SHOW_VOICE_HELP";
 export interface VoiceCommand {
   action: string;
-  keywords: Record<string, string[]>; // Palabras clave por locale
+  keywords: Record<string, string[]>;
 }
 export const VOICE_COMMANDS: VoiceCommand[] = [
   {
@@ -277,13 +276,12 @@ export const VOICE_COMMANDS: VoiceCommand[] = [
       "pt-BR": ["mostrar ajuda", "ajuda por voz", "comandos de voz"],
     },
   },
-  // ... puedes añadir más comandos aquí
 ];
 
 export interface PunctuationRule {
-  key: string; // Stable identifier, e.g., "comma", "question_mark"
-  char_sign: string; // The actual punctuation character, e.g., ",", "?"
-  word_detection: string; // The spoken word(s) to detect, e.g., "comma", "question mark"
+  key: string;
+  char_sign: string;
+  word_detection: string;
 }
 
 export const VOICE_PUNCTUATION_MAP: Record<string, PunctuationRule[]> = {

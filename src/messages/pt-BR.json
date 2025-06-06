@@ -283,7 +283,11 @@
       "less_than_desc": "Insere um sinal de menor que (<)",
       "greater_than_desc": "Insere um sinal de maior que (>)"
     },
-    "voiceHelpButtonTitle": "Ajuda de Comandos de Voz"
+    "voiceHelpButtonTitle": "Ajuda de Comandos de Voz",
+    "voiceDictation": {
+      "startDictationTitle": "Iniciar ditado por voz",
+      "stopDictationTitle": "Parar ditado"
+    }
   },
   "ArticleEditor": {
     "markdownEditorTitle": "Editor Markdown",
@@ -320,7 +324,9 @@
     "visionFeedbackLink": "Seu feedback é crucial para esta jornada. <link>Compartilhe suas ideias!</link>",
     "visionHiveReminder": "Publique facilmente suas obras-primas diretamente na blockchain da Hive e conecte-se com uma comunidade vibrante.",
     "secondaryCtaButton": "Experimentar o Editor Agora",
-    "featuresIntro": "O AegisPad foi projetado para economizar seu tempo e esforço, unificando tudo o que um blogueiro precisa em um só lugar, turbinado com assistência de IA."
+    "featuresIntro": "O AegisPad foi projetado para economizar seu tempo e esforço, unificando tudo o que um blogueiro precisa em um só lugar, turbinado com assistência de IA.",
+    "featureVoiceTitle": "Comandos de Voz",
+    "featureVoiceDescription": "Controle o editor e dite conteúdo usando sua voz para uma experiência de mãos livres."
   },
   "TestingsPage": {
     "title": "Página de Teste do Hive Keychain",

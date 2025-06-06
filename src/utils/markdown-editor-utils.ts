@@ -243,7 +243,6 @@ export const applyHorizontalRuleFormat = (
     prefix = "\n";
   }
   const hrText = `${prefix}---\n`;
-  // HR is always inserted, does not replace selection.
   const updatedMarkdown =
     markdown.substring(0, selectionStart) +
     hrText +

@@ -81,28 +81,23 @@ Original Markdown Article Text:
     const response = result.response;
     const translatedText = response.text();
 
-    // Extract token usage from the response metadata
     const usageMetadata = response.usageMetadata;
     const promptTokens = usageMetadata?.promptTokenCount;
     const completionTokens = usageMetadata?.candidatesTokenCount;
     const totalTokens = usageMetadata?.totalTokenCount;
 
-    // Record the usage in the database
     if (profileId) {
-      // Ensure profileId is available
       await recordApiUsage({
         profileId: profileId,
-        operationType: "ai_translate_article", // Specific identifier for this operation
+        operationType: "ai_translate_article",
         modelUsed: GEMINI_AI_MODEL_NAME,
-        textTokensUsed: totalTokens, // Using totalTokens for text_tokens_used
-        detailsJson: usageMetadata, // Store the full metadata for details
+        textTokensUsed: totalTokens,
+        detailsJson: usageMetadata,
       });
     }
 
-    // Devolvemos el texto traducido
     return NextResponse.json({
       translatedText: translatedText,
-      // Optionally include token usage in the response to the client
       tokenUsage: usageMetadata,
     });
   } catch (e: any) {

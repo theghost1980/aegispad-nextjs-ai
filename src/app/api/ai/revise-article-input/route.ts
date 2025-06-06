@@ -68,7 +68,6 @@ Provide only the revised text and the "Suggested Tags:" section in your response
     const response = result.response;
     const fullResponseText = response.text();
 
-    // Extract token usage from the response metadata
     const usageMetadata = response.usageMetadata;
     const promptTokens = usageMetadata?.promptTokenCount;
     const completionTokens = usageMetadata?.candidatesTokenCount;
@@ -88,12 +87,11 @@ Provide only the revised text and the "Suggested Tags:" section in your response
         );
         suggestedTags = tagsString
           .split("\n")
-          .map((tag) => tag.replace(/^- /, "").trim()) // Remove hyphen and trim
+          .map((tag) => tag.replace(/^- /, "").trim())
           .filter(
             (tag) => tag.length > 0 && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(tag)
-          ); // Basic validation
+          );
       }
-      // If marker not found, revisedText remains fullResponseText, and suggestedTags remains empty
     }
 
     if (profileId) {

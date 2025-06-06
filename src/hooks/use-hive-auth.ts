@@ -5,6 +5,7 @@ import { useRouter } from "@/i18n/routing";
 import {
   clearUserSessionData,
   getItem,
+  removeItem,
   setItem,
 } from "@/lib/indexed-db-service";
 import type {
@@ -24,6 +25,7 @@ export function useHiveAuth() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [preferences, setPreferences] = useState<UserPreferences | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -43,6 +45,9 @@ export function useHiveAuth() {
         const storedPreferences = await getItem<UserPreferences>(
           "currentUserPreferences"
         );
+        const storedProfileImageUrl = await getItem<string>(
+          "currentUserProfileImageUrl"
+        );
 
         if (
           storedUsernameFromDB &&
@@ -55,6 +60,7 @@ export function useHiveAuth() {
           setAuthToken(storedAccessToken);
           setUserRole(storedUserRole);
           setPreferences(storedPreferences);
+          setProfileImageUrl(storedProfileImageUrl || null);
         } else {
           await clearUserSessionData();
           setHiveUsername(null);
@@ -62,6 +68,7 @@ export function useHiveAuth() {
           setAuthToken(null);
           setUserRole(null);
           setPreferences(null);
+          setProfileImageUrl(null);
         }
       } catch (e) {
         console.error("Error loading auth status from IndexedDB", e);
@@ -70,6 +77,7 @@ export function useHiveAuth() {
         setAuthToken(null);
         setUserRole(null);
         setPreferences(null);
+        setProfileImageUrl(null);
       } finally {
         setIsLoading(false);
       }
@@ -93,6 +101,7 @@ export function useHiveAuth() {
       setAuthToken(null);
       setUserRole(null);
       setPreferences(null);
+      setProfileImageUrl(null);
       if (refreshPromise) {
         setRefreshPromise(null);
       }
@@ -112,11 +121,10 @@ export function useHiveAuth() {
     setIsAuthenticated,
     setAuthToken,
     setUserRole,
+    setProfileImageUrl,
   ]);
 
-  // Función para refrescar el token de acceso usando el refresh token
   const refreshAccessToken = useCallback(async (): Promise<string | null> => {
-    // Si ya hay un refresco en progreso, reutilizar la promesa existente
     if (isRefreshingToken && refreshPromise) {
       console.log("Refresh already in progress, waiting for existing promise.");
       return refreshPromise;
@@ -147,18 +155,15 @@ export function useHiveAuth() {
         if (!response.ok) {
           const errorData = await response.json();
           console.error("Token refresh failed:", errorData.message);
-          await logout(); // Forzar logout y redirigir
+          await logout();
           return null;
         }
 
-        const {
-          accessToken: newAccessToken,
-          refreshToken: newRefreshToken,
-          // No esperamos 'user' o 'preferences' del endpoint de refresh
-        } = await response.json();
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+          await response.json();
 
         if (!newAccessToken || !newRefreshToken) {
-          await logout(); // Forzar logout y redirigir
+          await logout();
           return null;
         }
 
@@ -168,7 +173,6 @@ export function useHiveAuth() {
         await setItem("accessToken", newAccessToken);
         await setItem("refreshToken", newRefreshToken);
         setAuthToken(newAccessToken);
-        // Las preferencias no se actualizan aquí, se mantienen las cargadas desde IndexedDB
         return newAccessToken;
       } catch (e: any) {
         console.error("An unexpected error occurred during token refresh:", e);
@@ -284,7 +288,6 @@ export function useHiveAuth() {
       }
 
       try {
-        // 1. Get challenge from our backend
         const challengeApiResponse = await fetch("/api/auth/challenge", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -304,16 +307,15 @@ export function useHiveAuth() {
           throw new Error("Challenge not received from server.");
         }
 
-        // 2. Use KeychainHelper.requestLogin to sign the backendChallenge
         const keychainResponse: KeychainLoginResponse = await new Promise(
           (resolveKeychain) => {
             KeychainHelper.requestLogin(
               usernameToLogin,
-              backendChallenge, // Usamos el challenge de nuestro backend aquí
+              backendChallenge,
               (response: KeychainLoginResponse) => {
                 resolveKeychain(response);
               },
-              "AegisPad Login Verification" // Título para la ventana de Keychain
+              "AegisPad Login Verification" //TODO add locales
             );
           }
         );
@@ -332,7 +334,6 @@ export function useHiveAuth() {
 
         const signature = keychainResponse.result;
 
-        // 3. Send username, backendChallenge, and signature to our /api/auth/login
         const loginApiResponse = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -360,12 +361,19 @@ export function useHiveAuth() {
           );
         }
 
-        // 4. Store tokens and user info
         await setItem("accessToken", accessToken);
         await setItem("refreshToken", newRefreshToken);
         await setItem("currentUserHiveUsername", user.username);
         await setItem("currentUserRole", user.role);
         await setItem("lastLoginTimestamp", Date.now());
+
+        if (user.profile_image_url) {
+          await setItem("currentUserProfileImageUrl", user.profile_image_url);
+          setProfileImageUrl(user.profile_image_url);
+        } else {
+          await removeItem("currentUserProfileImageUrl");
+          setProfileImageUrl(null);
+        }
 
         const userPreferences: UserPreferences = {
           theme_preference: user.theme_preference,
@@ -394,6 +402,7 @@ export function useHiveAuth() {
       setIsAuthenticated,
       setPreferences,
       setUserRole,
+      setProfileImageUrl,
     ]
   );
 
@@ -411,5 +420,6 @@ export function useHiveAuth() {
     setError,
     preferences,
     authenticatedFetch,
+    profileImageUrl,
   };
 }

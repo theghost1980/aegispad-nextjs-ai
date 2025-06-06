@@ -11,14 +11,11 @@ import React, {
 interface AppContextType {
   hiveUsername: string | null;
   setHiveUsername: Dispatch<SetStateAction<string | null>>;
-  // Aquí podrías añadir más estados globales si los necesitas en el futuro
-  // por ejemplo: theme, setSettings, etc.
 }
 
-// Valor por defecto para el contexto
 const defaultContextValue: AppContextType = {
   hiveUsername: null,
-  setHiveUsername: () => {}, // Función vacía como placeholder
+  setHiveUsername: () => {},
 };
 
 export const AppContext = createContext<AppContextType>(defaultContextValue);

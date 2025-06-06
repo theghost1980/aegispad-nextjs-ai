@@ -12,7 +12,6 @@ const iconComponentsMap: Record<
   React.FC<React.SVGProps<SVGSVGElement>>
 > = {
   hivelens: HivelensIcon,
-  // Añade más iconos aquí
 };
 
 const GeneralIcon: React.FC<GeneralIconProps> = ({ iconName, ...props }) => {

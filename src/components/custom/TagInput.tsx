@@ -175,11 +175,10 @@ const TagInput: React.FC<TagInputProps> = ({
       }
 
       if (fetched && fetched.length > 0) {
-        // Filter out already existing tags and invalid ones before showing
         const validNewSuggestions = fetched.filter(
           (tag) => !tags.includes(tag.toLowerCase()) && isValidHiveTag(tag)
         );
-        setSuggestedTags(validNewSuggestions.slice(0, 10)); // Show max 10 suggestions
+        setSuggestedTags(validNewSuggestions.slice(0, 10));
       } else {
         setSuggestedTags([]);
         toast({

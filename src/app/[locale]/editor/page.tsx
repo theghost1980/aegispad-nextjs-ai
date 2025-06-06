@@ -155,14 +155,7 @@ export default function ArticleForgePage() {
     setClientLoaded(true);
   }, []);
 
-  // currentLocale from useLocale() already provides the correct format (e.g., "es-ES", "en-US")
   const speechLanguage = currentLocale;
-
-  useEffect(() => {
-    console.log(
-      `[ArticleForgePage] Locale/SpeechLang Update: currentLocale: ${currentLocale}, speechLanguage: ${speechLanguage}`
-    );
-  }, [currentLocale, speechLanguage]);
 
   useEffect(() => {
     if (clientLoaded && !isLoadingHiveAuth) {
@@ -491,7 +484,8 @@ export default function ArticleForgePage() {
     setActiveAction,
     initialSpeechLanguage: speechLanguage,
     onToggleHelp: toggleVoiceHelpModal,
-    locale: currentLocale, // Pass the currentLocale to the locale prop
+    userRole,
+    locale: currentLocale,
   });
 
   const handleProceedToReview = () => {
@@ -1010,7 +1004,7 @@ export default function ArticleForgePage() {
       {canUseEditor && isVoiceSupported && isChromeBrowser && (
         <>
           <div
-            className="fixed flex items-start space-x-2" // Cambiado a space-x-2 para alinear horizontalmente
+            className="fixed flex items-start space-x-2"
             style={{
               top: "calc(1rem + 20px)",
               left: "20px",
@@ -1022,7 +1016,9 @@ export default function ArticleForgePage() {
               size="icon"
               onClick={toggleVoiceListening}
               title={
-                isVoiceListening ? "Detener dictado" : "Iniciar dictado por voz"
+                isVoiceListening
+                  ? t("voiceDictation.stopDictationTitle")
+                  : t("voiceDictation.startDictationTitle")
               }
               className={`rounded-full shadow-lg ${
                 isVoiceListening

@@ -1,4 +1,4 @@
-import { createSupabaseServiceRoleClient } from "@/lib/supabase/server"; // Usaremos el cliente de servicio para escribir en la DB
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,15 +17,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = createSupabaseServiceRoleClient();
 
-    // Generar un challenge aleatorio
     const challengeString = randomBytes(32).toString("hex");
 
-    // Calcular tiempo de expiración
     const expiresAt = new Date(
       Date.now() + CHALLENGE_EXPIRATION_MINUTES * 60 * 1000
     ).toISOString();
 
-    // Guardar en Supabase
     const { error: insertError } = await supabase
       .from("auth_challenges")
       .insert({
