@@ -1,102 +1,187 @@
-Importante: //TODO
+# 🧠 AegisPad – Roadmap de Producto y Técnico
 
-- voice control:
+> Este documento define el roadmap de AegisPad, separando claramente prioridades de MVP/Beta, mejoras de UX, integraciones Web3, arquitectura técnica y futuras líneas de crecimiento.
 
-  - crear el post con aegispad o theghost.test sobre como usar el control de voz antes de lanzar el feature.
-  - add info to homepage, as "help for who really need - people with special needs"
-  - agregar configuracion para control de voz en profile + mensaje si estan usando otro browser diferente de chrome.
+---
 
-- integrate https://github.com/aioha-hive/aioha
+## 1️⃣ Prioridades MVP & Beta
 
-- investigar para usar apis de:
+* [ ] Preparar lanzamiento beta:
 
-  - https://unsplash.com/
-  - https://www.pexels.com/
+  * [ ] Implementar formulario de captura de datos para usuarios beta.
+  * [ ] Mostrar mensajes claros de estado beta en la UI.
+  * [ ] Deshabilitar la publicación directa en HIVE durante beta (feature premium post-beta).
 
-- podemos incluir videos desde youtube y una funcion para buscar?
+* [ ] Módulo de publicación programada:
 
-- agregar funciones de compartir con:
+  * Investigar opciones sin costo (backend propio + cron jobs).
+  * Evaluar Supabase + Edge Functions vs VPS tradicional.
 
-  - fb, instagram, telegram, twitter, linkedin
-  - discord en canales preconfigurados
-  - en este punto debemos mirar en que usamos la IA para modificar los contenidos, formatos etc.
+* [ ] Notificaciones de la aplicación:
 
-- //TODO admins:
+  * Definir canal inicial (email).
+  * Evaluar notificaciones in-app en fases futuras.
 
-  - can create: C:\Users\saturno\Downloads\HIVE-Projects\hive-markdown\TODO-ADD-AEGISPAD
-  - add a new panel like revise/translate only with admins
-  - admin dashboards, etc
+---
 
-- add mobile support for aegis, fix styles, etc + test
+## 2️⃣ Accesibilidad & Experiencia de Usuario (UX)
 
-- Add assistance about:
+### Control por Voz
 
-  - tags:
-    - TagInput part: IP
-    - When revising article:
-      - should be an option to be included in the revision before doing it so the prompt will change + add this data into localstorage so it can be retrieved on final review.
-  - title
-  - images to add when certain conditions are meet:
-    - no imagen when reaching certain point or stage?
-    - suggest images tags, categories depending on the content/titles
-  - Real TAG Assistance to the hiver:
-    - connect to be-hivesql and if available:
-      - allow to search:
-        - new tags
-        - recently used by user
-        - tags within a date range to:
-          - know avg votes values by tags
-          - most voted tags and so on....
+* [ ] Crear post guía (aegispad o theghost.test) explicando cómo usar el control de voz antes de lanzar el feature.
+* [ ] Agregar información en la homepage destacando accesibilidad (ayuda a personas con necesidades especiales).
+* [ ] Agregar configuración de control de voz en el perfil del usuario.
+* [ ] Detectar navegador:
 
-- Add a module to find & target dualinguals:
-  - this module will use hivesql to perfom efefctive searches
-    - locate people who posts in 2 languages and leave an invitation to the app.
-    - sharing info:
-      -a detailed guide
-      -in the future giving an upvote as well
-  - it can be a module that only works if a hivesql search was made.
+  * Mostrar mensaje si el usuario no está usando Chrome.
 
-## Clean this up MAN!! too many comments we must be "professionals YO"
+### UX General
 
-# AegisPad Project TODOs
+* [ ] Mejorar estilos responsive.
+* [ ] Soporte mobile completo.
+* [ ] Agregar tests para flujos mobile.
 
-- [ ] **Migrar al nuevo Google Gen AI SDK:** Investigar y migrar todas las interacciones con la API de Gemini desde el SDK `@google/generative-ai` (actualmente depreciado) al nuevo SDK unificado recomendado por Google. Esto incluye las rutas de validación de API key y la integración con Genkit.
+---
 
-  - Referencia: README de `@google/generative-ai` que indica la depreciación y la existencia de un nuevo SDK.
-  - Fecha límite de soporte del SDK antiguo: 31 de agosto de 2025.
+## 3️⃣ Creación de Contenido & Mejoras con IA
 
-- [ ] **Implementar Generación de Imágenes con Vertex AI:** Migrar la ruta `/api/ai/generate-image` para usar el SDK de Vertex AI (`@google-cloud/aiplatform`) y la autenticación de cuenta de servicio de Google Cloud. Esto incluye configurar las credenciales (`GOOGLE_APPLICATION_CREDENTIALS`, `GCP_PROJECT_ID`) y ajustar la lógica de llamada al modelo "Imagen" específico.
-- add pexels? https://www.pexels.com/api/documentation/#client_libraries
-- manejo de estado de la app? zustand?
-- https://posthog.com/ para Product Analytics? https://plausible.io/#pricing
-- implementar formulario de datos para el lanzamiento beta.
-- implementar la opcion de publicar en HIVE (se habilitará luego del beta como plan premium).
-- implementar el modulo de publicacion programada (estudiar opciones sin gastos: backend, cron-job).
-- implementar las notificaciones de la app al usuario (¿email?).
-- crear un modulo de sugerencias para estilos de escritura.
-- colocar el estilo de escritura opcional como parte del prompt de creacion de contenido.
+* [ ] Módulo de sugerencias de estilos de escritura.
+* [ ] Permitir seleccionar estilo de escritura e incluirlo como parte del prompt de creación de contenido.
+* [ ] Asistencia para títulos mediante IA.
+* [ ] Asistencia para imágenes:
 
-## Integración con Pexels API
+  * Sugerir imágenes según contenido, título y etapa del artículo.
+  * Definir reglas claras (ej. no sugerir imágenes en ciertas fases).
 
-- **Objetivo:** Permitir a los usuarios buscar e insertar imágenes desde Pexels.com.
-- **Consideraciones Clave:** Gestión estricta de los límites de la API de Pexels (200 reqs/hora, 20k reqs/mes).
+### Asistencia Avanzada de Tags
 
-- **Estrategias de Gestión de Límites:**
-  - **Caching Agresivo en el Servidor (Supabase):**
-    - Crear tabla `pexels_api_cache` (columnas: `search_query_hash`, `pexels_response` (JSONB), `cached_at`, `expires_at`).
-    - Revisar caché antes de llamar a Pexels.
-    - Definir política de expiración (ej. 1-6 horas).
-  - **Rate Limiting en Backend Propio (Supabase):**
-    - Crear tabla `api_usage_tracking` (columnas: `api_name`, `period_start_hour`, `hourly_requests`, `period_start_month`, `monthly_requests`).
-    - Consultar y actualizar contadores antes y después de cada llamada a Pexels.
-    - Devolver error 429 si se superan los umbrales (con margen de seguridad).
-  - **Debounce en el Frontend:**
-    - Esperar a que el usuario deje de escribir (300-500ms) antes de enviar la solicitud de búsqueda.
-  - **Optimización de Solicitudes:**
-    - Usar paginación (`per_page`).
-    - Evitar búsquedas vacías.
-  - **Interfaz de Usuario Informativa:**
-    - Mostrar mensajes amigables si se alcanzan los límites.
-- **Próximos Pasos (Diseño):**
-  - Definir esquemas detallados para las tablas `pexels_api_cache` y `api_usage_tracking` en Supabase.
-  - Diseñar la lógica del endpoint del servidor para interactuar con estas tablas y la API de Pexels.
+* [ ] Mejorar componente `TagInput`.
+* [ ] Durante la revisión de artículos:
+
+  * Opción para incluir tags en el prompt antes de ejecutar la revisión.
+  * Persistir esta información en `localStorage` para el paso de revisión final.
+
+---
+
+## 4️⃣ Medios & Integraciones Externas
+
+### Proveedores de Imágenes
+
+* [ ] Integrar API de Pexels.
+* [ ] Investigar API de Unsplash (licencias y límites).
+
+### Video
+
+* [ ] Permitir incrustar videos de YouTube.
+* [ ] Investigar funcionalidad de búsqueda de videos.
+
+### Compartir Contenido
+
+* [ ] Integraciones de compartir en:
+
+  * Facebook, Instagram, Twitter/X, LinkedIn, Telegram.
+  * Discord (canales preconfigurados).
+* [ ] Evaluar uso de IA para adaptar contenido y formatos según plataforma.
+
+---
+
+## 5️⃣ Integraciones Web3 & Ecosistema Hive
+
+* [ ] Integrar aioha:
+
+  * [https://github.com/aioha-hive/aioha](https://github.com/aioha-hive/aioha)
+
+### Inteligencia Avanzada de Tags (HiveSQL)
+
+* [ ] Conectar con HiveSQL para:
+
+  * Buscar nuevos tags.
+  * Tags usados recientemente por el usuario.
+  * Análisis de rendimiento de tags:
+
+    * Promedio de votos.
+    * Tags más votados por rango de fechas.
+
+---
+
+## 6️⃣ Herramientas de Administración
+
+* [ ] Paneles exclusivos para admins:
+
+  * Revisión y traducción de contenidos.
+  * Dashboards administrativos.
+
+* [ ] Herramientas de creación de contenido solo para admins.
+
+---
+
+## 7️⃣ Soporte Mobile & Cross-Platform
+
+* [ ] Mejorar UI/UX en mobile.
+* [ ] Corregir estilos específicos.
+* [ ] Agregar cobertura de tests en dispositivos móviles.
+
+---
+
+## 8️⃣ Growth, Analítica & Monetización
+
+* [ ] Analítica de producto:
+
+  * Evaluar PostHog.
+  * Evaluar Plausible.
+
+* [ ] Módulo de identificación de usuarios bilingües:
+
+  * Usar HiveSQL para localizar usuarios que publican en dos idiomas.
+  * Enviar invitaciones a AegisPad con:
+
+    * Guía detallada.
+    * Incentivos futuros (ej. upvotes).
+
+---
+
+## 9️⃣ Arquitectura Técnica & Backend
+
+* [ ] Migrar al nuevo Google Gen AI SDK:
+
+  * Reemplazar `@google/generative-ai` (deprecado).
+  * Integrar Genkit.
+  * Fecha límite SDK antiguo: **31 de agosto de 2025**.
+
+* [ ] Migrar generación de imágenes a Vertex AI:
+
+  * Usar `@google-cloud/aiplatform`.
+  * Configurar credenciales de cuenta de servicio (`GOOGLE_APPLICATION_CREDENTIALS`).
+
+* [ ] Evaluar manejo de estado global:
+
+  * Zustand vs solución actual.
+
+---
+
+## 🔟 Integración con API de Pexels
+
+### Objetivo
+
+Permitir a los usuarios buscar e insertar imágenes desde Pexels.com.
+
+### Límites de la API
+
+* 200 requests por hora.
+* 20.000 requests por mes.
+
+### Estrategia de Gestión
+
+* Caching agresivo en backend (Supabase).
+* Rate limiting a nivel backend.
+* Debounce en frontend (300–500ms).
+* Paginación y validación de búsquedas vacías.
+* Mensajes claros en UI al alcanzar límites.
+
+### Próximos Pasos
+
+* Definir esquemas de tablas:
+
+  * `pexels_api_cache`
+  * `api_usage_tracking`
+
