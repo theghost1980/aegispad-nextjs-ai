@@ -5,6 +5,130 @@ It leverages Artificial Intelligence, primarily through Google's Gemini API, to 
 
 ---
 
+<details>
+  <summary>Click to expand Architecture Information</summary>
+
+## 🧭 Arquitectura del Proyecto – Walkthrough Técnico
+
+Esta sección describe la arquitectura general de AegisPad y las decisiones técnicas clave tomadas durante su diseño y desarrollo.
+
+### 🎯 Objetivo Arquitectónico
+
+AegisPad fue diseñado como una **aplicación frontend-heavy**, con lógica distribuida entre cliente y backend ligero, priorizando:
+
+* Escalabilidad del frontend.
+* Buen DX (Developer Experience).
+* Integración segura con Web3 (Hive Keychain).
+* Facilidad de evolución del producto sin reescrituras costosas.
+
+La arquitectura evita acoplamientos innecesarios y permite que nuevas funcionalidades (IA, media, analytics, Web3) se integren de forma incremental.
+
+---
+
+### 🧩 Stack Principal
+
+* **Framework:** Next.js (App Router)
+* **Lenguaje:** TypeScript
+* **UI:** React + componentes reutilizables
+* **Estado:** Estado local + persistencia ligera (localStorage) para flujos multi-step
+* **IA:** Google Gemini (en proceso de migración al nuevo SDK unificado)
+* **Web3:** Hive Keychain
+* **Backend:** APIs serverless (Next.js API routes / Supabase)
+* **Infra:** Enfoque serverless-first para reducir costos y complejidad
+
+---
+
+### 🏗️ Separación de Responsabilidades
+
+La aplicación se estructura siguiendo una separación clara de responsabilidades:
+
+#### 1. **Capa de UI / Experiencia de Usuario**
+
+* Componentes desacoplados y reutilizables.
+* Editor Markdown con preview en tiempo real.
+* Flujos guiados (crear → revisar → publicar).
+* Diseño pensado para accesibilidad y extensibilidad (ej. control por voz).
+
+#### 2. **Capa de Lógica de Negocio**
+
+* Orquestación de flujos de creación, revisión y traducción.
+* Control explícito de cuándo y cómo se invoca la IA.
+* Persistencia temporal del estado del artículo para evitar pérdida de información entre pasos.
+
+#### 3. **Capa de Integración IA**
+
+* Las llamadas a IA **no se hacen directamente desde la UI**, sino a través de endpoints controlados.
+* Esto permite:
+
+  * Manejo centralizado de tokens y límites.
+  * Evolución de prompts sin tocar la UI.
+  * Migración futura entre proveedores de IA sin impacto directo en el frontend.
+
+#### 4. **Capa Web3 (Hive)**
+
+* Autenticación y firma de operaciones delegadas a Hive Keychain.
+* La app **no gestiona claves privadas**, reduciendo superficie de ataque.
+* Integración diseñada para ser explícita y trazable (firmas, custom JSONs, publicaciones).
+
+---
+
+### 🧠 Decisiones Técnicas Importantes (y Porqués)
+
+#### ❓ ¿Por qué Next.js?
+
+* Permite combinar frontend avanzado con backend ligero.
+* Facilita SSR/CSR según necesidad.
+* Ideal para un producto que puede crecer hacia dashboards, admin panels y analytics.
+
+#### ❓ ¿Por qué un backend mínimo?
+
+* Reduce costos operativos.
+* Minimiza puntos de falla.
+* Delegación de lógica pesada solo cuando es estrictamente necesario (IA, rate limiting, APIs externas).
+
+#### ❓ ¿Por qué no centralizar todo el estado global?
+
+* Muchos flujos son **contextuales y temporales** (artículo en edición).
+* Se priorizó claridad y aislamiento de estados frente a un store global complejo.
+* Se evalúa Zustand para futuros módulos compartidos.
+
+#### ❓ ¿Cómo se controla el uso de IA?
+
+* Tracking explícito de tokens por sesión.
+* Diseño preparado para:
+
+  * caching,
+  * rate limiting,
+  * políticas de uso por usuario (free vs premium).
+
+---
+
+### 🔐 Seguridad y Confiabilidad
+
+* Uso de `suppressHydrationWarning` **solo en puntos específicos** donde Hive Keychain inyecta clases dinámicamente.
+* Decisión consciente para evitar falsos positivos sin comprometer estabilidad.
+* Invitación abierta a reportar bugs relacionados con hidratación o integraciones Web3.
+
+---
+
+### 🚀 Arquitectura Pensada para Evolucionar
+
+AegisPad está diseñado para crecer en múltiples direcciones sin romper su base:
+
+* Nuevos proveedores de IA.
+* Integración con APIs externas (Pexels, Unsplash).
+* Módulos admin y analítica.
+* Soporte mobile-first.
+* Features premium sin afectar usuarios existentes.
+
+  ### 🧭 Fin de la arquitectura del Proyecto – Walkthrough Técnico
+
+---
+
+</details>
+
+---
+
 1.  **AI-Powered Article Forge (Editor):**
 
     - **Advanced Markdown Editing:** A rich Markdown editor with a live preview panel. Features a comprehensive toolbar for text styling (bold, italic, strikethrough), headings, block elements (lists, quotes, code blocks, horizontal rules), and insertions.
